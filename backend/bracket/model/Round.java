@@ -1,9 +1,9 @@
-package Bracket.model;
-
-import Match.model.Match;
+package bracket.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import match.model.Match;
 
 public class Round {
 
