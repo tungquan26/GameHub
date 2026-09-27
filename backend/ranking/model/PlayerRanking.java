@@ -1,6 +1,6 @@
-package Ranking.model;
+package ranking.model;
 
-import User.model.Player;
+import user.model.Player;
 
 public class PlayerRanking implements Comparable<PlayerRanking> {
 
@@ -23,7 +23,6 @@ public class PlayerRanking implements Comparable<PlayerRanking> {
         this.currentRank = currentRank;
     }
 
-    // Lấy trực tiếp Elo từ thuộc tính stats của Player
     public double getRankingScore() {
         if (player != null && player.getStats() != null) {
             return player.getStats().getEloScore();
@@ -31,7 +30,6 @@ public class PlayerRanking implements Comparable<PlayerRanking> {
         return 0.0;
     }
 
-    // Sắp xếp người chơi theo thứ tự Elo giảm dần
     @Override
     public int compareTo(PlayerRanking other) {
         return Double.compare(other.getRankingScore(), this.getRankingScore());
