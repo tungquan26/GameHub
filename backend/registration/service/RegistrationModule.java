@@ -1,4 +1,4 @@
-package services;
+package registration.service;
 
 import registration.model.Registration; // Cập nhật lại import cho đúng với package chứa Registration của bạn
 import enums.CheckInStatus;
@@ -13,7 +13,6 @@ public class RegistrationModule {
     public RegistrationModule() {}
 
     /**
-     * Xử lý logic đăng ký của một đội vào giải đấu.
      * @param isPrivateMode
      */
     public Registration registerTeamForTournament(Team team, Tournament tournament, boolean isPrivateMode) {

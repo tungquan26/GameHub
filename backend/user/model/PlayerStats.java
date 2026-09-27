@@ -1,4 +1,4 @@
-package User.model;
+package user.model;
 
 public class PlayerStats {
 

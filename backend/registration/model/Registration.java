@@ -1,9 +1,9 @@
-package Registration.model;
+package registration.model;
 
 import enums.CheckInStatus;
 import enums.RegistrationStatus;
-import Team.model.Team;
-import Tournament.model.Tournament;
+import team.model.Team;
+import tournament.model.Tournament;
 
 import java.time.LocalDateTime;
 

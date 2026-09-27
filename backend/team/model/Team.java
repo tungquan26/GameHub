@@ -1,10 +1,9 @@
-package Team.model;
+package team.model;
 
 import enums.TeamStatus;
+import user.model.Player;
 import java.util.ArrayList;
 import java.util.List;
-
-import User.model.Player;
 
 public class Team {
     private long teamId;

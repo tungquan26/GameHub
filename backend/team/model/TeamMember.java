@@ -1,11 +1,7 @@
-package Team.model;
+package team.model;
 
 import enums.TeamMemberRole;
-<<<<<<< HEAD
 import user.model.Player;
-=======
-import User.model.Player;
->>>>>>> 5fc94f3f5a87bf18ea41c3698a8e94588953f2a7
 import java.time.LocalDateTime;
 
 public class TeamMember {
