@@ -2,89 +2,37 @@ package btpoop.team.model;
 
 import btpoop.enums.TeamStatus;
 import btpoop.user.model.Player;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "teams")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Team {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long teamId;
+
+    @Column(nullable = false, unique = true)
     private String teamName;
+
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "captain_id", nullable = false)
     private Player captain;
-    private List<TeamMember> members;
-    private TeamStatus status;
 
-    public Team() {
-        this.members = new ArrayList<>();
-        this.status = TeamStatus.ACTIVE;
-    }
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TeamMember> members = new ArrayList<>();
 
-    public Team(long teamId, String teamName, String description,
-                Player captain, List<TeamMember> members, TeamStatus status) {
-        this.teamId = teamId;
-        this.teamName = teamName;
-        this.description = description;
-        this.captain = captain;
-        this.members = members != null ? members : new ArrayList<>();
-        this.status = status;
-    }
-
-    public long getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(long teamId) {
-        this.teamId = teamId;
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Player getCaptain() {
-        return captain;
-    }
-
-    public void setCaptain(Player captain) {
-        this.captain = captain;
-    }
-
-    public List<TeamMember> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<TeamMember> members) {
-        this.members = members != null ? members : new ArrayList<>();
-    }
-
-    public TeamStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TeamStatus status) {
-        this.status = status;
-    }
-
-    @Override
-    public String toString() {
-        return "Team{" +
-                "teamId=" + teamId +
-                ", teamName='" + teamName + '\'' +
-                ", description='" + description + '\'' +
-                ", captain=" + (captain != null ? captain.getUsername() : null) +
-                ", members=" + members.size() +
-                ", status=" + status +
-                '}';
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TeamStatus status = TeamStatus.ACTIVE;
 }

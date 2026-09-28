@@ -4,91 +4,40 @@ import btpoop.enums.CheckInStatus;
 import btpoop.enums.RegistrationStatus;
 import btpoop.team.model.Team;
 import btpoop.tournament.model.Tournament;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "registrations")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Registration {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long registrationId;
+    
+    @ManyToOne
+    @JoinColumn(name = "team_id", nullable = false)
     private Team team;
+    
+    @ManyToOne
+    @JoinColumn(name = "tournament_id", nullable = false)
     private Tournament tournament;
-    private LocalDateTime registrationDate;
-    private RegistrationStatus status;
-    private CheckInStatus checkInStatus;
-
-    public Registration() {
-        this.status = RegistrationStatus.PENDING;
-        this.checkInStatus = CheckInStatus.NOT_CHECKED_IN;
-    }
-
-    public Registration(long registrationId, Team team, Tournament tournament,
-                        LocalDateTime registrationDate,
-                        RegistrationStatus status,
-                        CheckInStatus checkInStatus) {
-        this.registrationId = registrationId;
-        this.team = team;
-        this.tournament = tournament;
-        this.registrationDate = registrationDate;
-        this.status = status;
-        this.checkInStatus = checkInStatus;
-    }
-
-    public long getRegistrationId() {
-        return registrationId;
-    }
-
-    public void setRegistrationId(long registrationId) {
-        this.registrationId = registrationId;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
-    }
-
-    public Tournament getTournament() {
-        return tournament;
-    }
-
-    public void setTournament(Tournament tournament) {
-        this.tournament = tournament;
-    }
-
-    public LocalDateTime getRegistrationDate() {
-        return registrationDate;
-    }
-
-    public void setRegistrationDate(LocalDateTime registrationDate) {
-        this.registrationDate = registrationDate;
-    }
-
-    public RegistrationStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RegistrationStatus status) {
-        this.status = status;
-    }
-
-    public CheckInStatus getCheckInStatus() {
-        return checkInStatus;
-    }
-
-    public void setCheckInStatus(CheckInStatus checkInStatus) {
-        this.checkInStatus = checkInStatus;
-    }
-
-    @Override
-    public String toString() {
-        return "Registration{" +
-                "registrationId=" + registrationId +
-                ", team=" + (team != null ? team.getTeamName() : null) +
-                ", tournament=" + (tournament != null ? tournament.getName() : null) +
-                ", registrationDate=" + registrationDate +
-                ", status=" + status +
-                ", checkInStatus=" + checkInStatus +
-                '}';
-    }
+    
+    @Column(nullable = false)
+    private LocalDateTime registrationDate = LocalDateTime.now();
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RegistrationStatus status = RegistrationStatus.PENDING;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CheckInStatus checkInStatus = CheckInStatus.NOT_CHECKED_IN;
 }

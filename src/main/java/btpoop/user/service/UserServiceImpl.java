@@ -2,35 +2,31 @@ package btpoop.user.service;
 
 import btpoop.user.model.User;
 import btpoop.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
     @Override
     public User register(User user) {
-        // Kiểm tra xem username đã tồn tại chưa
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new IllegalArgumentException("Username đã tồn tại!");
         }
-        
-        // Kiểm tra xem email đã tồn tại chưa
         if (userRepository.findByEmail(user.getEmail()) != null) {
             throw new IllegalArgumentException("Email đã được sử dụng!");
         }
 
-        // Mã hóa mật khẩu bằng SHA-256 trước khi lưu
         if (user.getPassword() != null) {
             user.setPassword(hashPassword(user.getPassword()));
         }
 
-        // Lưu user vào database
         return userRepository.save(user);
     }
 
@@ -38,7 +34,6 @@ public class UserServiceImpl implements UserService {
     public User login(String username, String password) {
         User user = userRepository.findByUsername(username);
         
-        // Kiểm tra user có tồn tại và password đã băm có khớp không
         if (user != null && password != null) {
             String hashedInput = hashPassword(password);
             if (user.getPassword().equals(hashedInput)) {
@@ -46,28 +41,25 @@ public class UserServiceImpl implements UserService {
             }
         }
         
-        return null; // Đăng nhập thất bại
+        return null;
     }
 
     @Override
     public User getUserById(long userId) {
-        return userRepository.findById(userId);
+        return userRepository.findById(userId).orElse(null);
     }
 
     @Override
     public boolean updateProfile(User user) {
-        // Kiểm tra user có tồn tại không trước khi update
-        User existingUser = userRepository.findById(user.getUserId());
-        if (existingUser != null) {
-            return userRepository.update(user);
+        if (userRepository.existsById(user.getUserId())) {
+            userRepository.save(user);
+            return true;
         }
         return false;
     }
 
     private String hashPassword(String password) {
-        if (password == null) {
-            return null;
-        }
+        if (password == null) return null;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = md.digest(password.getBytes());

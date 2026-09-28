@@ -2,52 +2,36 @@ package btpoop.team.model;
 
 import btpoop.enums.TeamMemberRole;
 import btpoop.user.model.Player;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "team_members")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TeamMember {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id", nullable = false)
     private Player player;
-    private LocalDateTime joinedAt;
+
+    @Column(nullable = false)
+    private LocalDateTime joinedAt = LocalDateTime.now();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TeamMemberRole role;
-
-    public TeamMember() {
-    }
-
-    public TeamMember(Player player, LocalDateTime joinedAt, TeamMemberRole role) {
-        this.player = player;
-        this.joinedAt = joinedAt;
-        this.role = role;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
-    public LocalDateTime getJoinedAt() {
-        return joinedAt;
-    }
-
-    public void setJoinedAt(LocalDateTime joinedAt) {
-        this.joinedAt = joinedAt;
-    }
-
-    public TeamMemberRole getRole() {
-        return role;
-    }
-
-    public void setRole(TeamMemberRole role) {
-        this.role = role;
-    }
-
-    @Override
-    public String toString() {
-        return "TeamMember{" +
-                "player=" + (player != null ? player.getUsername() : null) +
-                ", joinedAt=" + joinedAt +
-                ", role=" + role +
-                '}';
-    }
 }

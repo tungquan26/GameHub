@@ -2,156 +2,58 @@ package btpoop.tournament.model;
 
 import btpoop.enums.TournamentFormat;
 import btpoop.enums.TournamentStatus;
-
 import btpoop.match.model.Match;
 import btpoop.user.model.Organizer;
 import btpoop.registration.model.Registration;
-
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
+@Entity
+@Table(name = "tournaments")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Tournament {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long tournamentId;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String game;
+
+    @ManyToOne
+    @JoinColumn(name = "organizer_id", nullable = false)
     private Organizer organizer;
+
+    @Column(nullable = false)
     private LocalDateTime startDate;
+
+    @Column(nullable = false)
     private LocalDateTime endDate;
+
+    @Column(nullable = false)
     private int maxTeams;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TournamentFormat format;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TournamentStatus status;
-    private List<Registration> registrations;
-    private List<Match> matches;
 
-    public Tournament() {
-        this.registrations = new ArrayList<>();
-        this.matches = new ArrayList<>();
-    }
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Registration> registrations = new ArrayList<>();
 
-    public Tournament(long tournamentId, String name, String game,
-                      Organizer organizer, LocalDateTime startDate,
-                      LocalDateTime endDate, int maxTeams,
-                      TournamentFormat format, TournamentStatus status) {
-        this.tournamentId = tournamentId;
-        this.name = name;
-        this.game = game;
-        this.organizer = organizer;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.maxTeams = maxTeams;
-        this.format = format;
-        this.status = status;
-
-        this.registrations = new ArrayList<>();
-        this.matches = new ArrayList<>();
-    }
-
-    public long getTournamentId() {
-        return tournamentId;
-    }
-
-    public void setTournamentId(long tournamentId) {
-        this.tournamentId = tournamentId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGame() {
-        return game;
-    }
-
-    public void setGame(String game) {
-        this.game = game;
-    }
-
-    public Organizer getOrganizer() {
-        return organizer;
-    }
-
-    public void setOrganizer(Organizer organizer) {
-        this.organizer = organizer;
-    }
-
-    public LocalDateTime getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDateTime startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
-    }
-
-    public int getMaxTeams() {
-        return maxTeams;
-    }
-
-    public void setMaxTeams(int maxTeams) {
-        this.maxTeams = maxTeams;
-    }
-
-    public TournamentFormat getFormat() {
-        return format;
-    }
-
-    public void setFormat(TournamentFormat format) {
-        this.format = format;
-    }
-
-    public TournamentStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TournamentStatus status) {
-        this.status = status;
-    }
-
-    public List<Registration> getRegistrations() {
-        return registrations;
-    }
-
-    public List<Match> getMatches() {
-        return matches;
-    }
-
-    public void addRegistration(Registration registration) {
-        if (registration != null) {
-            this.registrations.add(registration);
-        }
-    }
-
-    public void addMatch(Match match) {
-        if (match != null) {
-            this.matches.add(match);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "Tournament{" +
-                "tournamentId=" + tournamentId +
-                ", name='" + name + '\'' +
-                ", game='" + game + '\'' +
-                ", organizer=" + (organizer != null ? organizer.getUsername() : null) +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", maxTeams=" + maxTeams +
-                ", format=" + format +
-                ", status=" + status +
-                '}';
-    }
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Match> matches = new ArrayList<>();
 }

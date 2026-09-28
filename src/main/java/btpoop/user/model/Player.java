@@ -1,26 +1,21 @@
 package btpoop.user.model;
 
 import btpoop.enums.UserRole;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@Entity
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class Player extends User {
 
+    @Embedded
     private PlayerStats stats = new PlayerStats();
 
     public Player() {
         super();
-        setRole(UserRole.PLAYER);
-    }
-
-    public Player(long userId, String username, String password, String email,
-                  String fullName) {
-        super(userId, username, password, email, fullName, UserRole.PLAYER);
-    }
-
-    public PlayerStats getStats() {
-        return stats;
-    }
-
-    public void setStats(PlayerStats stats) {
-        this.stats = stats;
+        this.setRole(UserRole.PLAYER);
     }
 }

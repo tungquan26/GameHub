@@ -1,58 +1,35 @@
 package btpoop.bracket.model;
 
+import btpoop.match.model.Match;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import btpoop.match.model.Match;
-
+@Entity
+@Table(name = "rounds")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Round {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long roundId;
+
+    @ManyToOne
+    @JoinColumn(name = "bracket_id", nullable = false)
+    private Bracket bracket;
+
+    @Column(nullable = false)
     private int roundNumber;
 
+    @Column(nullable = false)
     private String name;
 
-    private List<Match> matches;
-
-    public Round() {
-        this.matches = new ArrayList<>();
-    }
-
-    public Round(int roundNumber, String name, List<Match> matches) {
-        this.roundNumber = roundNumber;
-        this.name = name;
-        this.matches = matches != null ? matches : new ArrayList<>();
-    }
-
-    public int getRoundNumber() {
-        return roundNumber;
-    }
-
-    public void setRoundNumber(int roundNumber) {
-        this.roundNumber = roundNumber;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Match> getMatches() {
-        return matches;
-    }
-
-    public void setMatches(List<Match> matches) {
-        this.matches = matches != null ? matches : new ArrayList<>();
-    }
-
-    @Override
-    public String toString() {
-        return "Round{" +
-                "roundNumber=" + roundNumber +
-                ", name='" + name + '\'' +
-                ", matches=" + matches.size() +
-                '}';
-    }
+    @OneToMany(mappedBy = "round", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Match> matches = new ArrayList<>();
 }
