@@ -16,8 +16,7 @@ public class Bracket {
         this.rounds = new ArrayList<>();
     }
 
-    public Bracket(long bracketId, Tournament tournament,
-                   TournamentFormat format, List<Round> rounds) {
+    public Bracket(long bracketId, Tournament tournament,TournamentFormat format, List<Round> rounds) {
         this.bracketId = bracketId;
         this.tournament = tournament;
         this.format = format;
