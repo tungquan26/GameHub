@@ -1,7 +1,7 @@
 package btpoop.team.controller;
 
 import btpoop.team.model.Team;
-import btpoop.team.repository.TeamRepository;
+import btpoop.team.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +13,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeamController {
 
-    private final TeamRepository teamRepository;
+    private final TeamService teamService;
 
     @GetMapping
     public ResponseEntity<List<Team>> getAllTeams() {
-        return ResponseEntity.ok(teamRepository.findAll());
+        return ResponseEntity.ok(teamService.getAllTeams());
     }
 
     @PostMapping
-    public ResponseEntity<Team> createTeam(@RequestBody Team team) {
-        return ResponseEntity.ok(teamRepository.save(team));
+    public ResponseEntity<Team> createTeam(@RequestBody Team team, @RequestParam Long captainId) {
+        return ResponseEntity.ok(teamService.createTeam(team, captainId));
     }
 }

@@ -1,5 +1,6 @@
 package btpoop.team.model;
 
+import btpoop.game.model.Game;
 import btpoop.enums.TeamStatus;
 import btpoop.user.model.Player;
 import jakarta.persistence.*;
@@ -22,6 +23,10 @@ public class Team {
 
     @Column(nullable = false, unique = true)
     private String teamName;
+
+    @ManyToOne
+    @JoinColumn(name = "game_id", nullable = false)
+    private Game game;
 
     private String description;
 

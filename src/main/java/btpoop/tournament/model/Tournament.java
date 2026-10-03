@@ -1,5 +1,6 @@
 package btpoop.tournament.model;
 
+import btpoop.game.model.Game;
 import btpoop.enums.TournamentFormat;
 import btpoop.enums.TournamentStatus;
 import btpoop.match.model.Match;
@@ -27,8 +28,9 @@ public class Tournament {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String game;
+    @ManyToOne
+    @JoinColumn(name = "game_id", nullable = false)
+    private Game game;
 
     @ManyToOne
     @JoinColumn(name = "organizer_id", nullable = false)

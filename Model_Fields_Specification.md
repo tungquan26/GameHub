@@ -51,6 +51,7 @@
 |---|---|---|
 | `teamId` | `long` | Mã định danh duy nhất của đội. |
 | `teamName` | `String` | Tên của đội. |
+| `game` | `Game` | Loại trò chơi mà đội thi đấu (chứa luật min/max thành viên). |
 | `description` | `String` | Mô tả về đội. |
 | `captain` | `Player` | Người chơi giữ vai trò đội trưởng của đội. |
 | `members` | `List<TeamMember>` | Danh sách thành viên của đội thông qua model `TeamMember`. |
@@ -80,7 +81,7 @@
 |---|---|---|
 | `tournamentId` | `long` | Mã định danh duy nhất của giải đấu. |
 | `name` | `String` | Tên giải đấu. |
-| `game` | `String` | Tên trò chơi được tổ chức trong giải đấu. |
+| `game` | `Game` | Trò chơi được tổ chức trong giải đấu. |
 | `organizer` | `Organizer` | Người tổ chức giải đấu. |
 | `startDate` | `LocalDateTime` | Thời gian bắt đầu giải đấu. |
 | `endDate` | `LocalDateTime` | Thời gian kết thúc giải đấu. |
@@ -169,7 +170,8 @@
 | `Player` | Kế thừa từ `User`, không có field riêng |
 | `Organizer` | Kế thừa từ `User`, không có field riêng |
 | `Admin` | Kế thừa từ `User`, không có field riêng |
-| `Team` | `teamId`, `teamName`, `description`, `captain`, `members`, `status` |
+| `Team` | `teamId`, `teamName`, `game`, `description`, `captain`, `members`, `status` |
+| `Game` | `gameId`, `name`, `minPlayers`, `maxPlayers`, `description` |
 | `TeamMember` | `player`, `joinedAt`, `role` |
 | `Tournament` | `tournamentId`, `name`, `game`, `organizer`, `startDate`, `endDate`, `maxTeams`, `format`, `status` |
 | `Registration` | `registrationId`, `team`, `tournament`, `registrationDate`, `status`, `checkInStatus` |
