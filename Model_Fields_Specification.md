@@ -162,7 +162,23 @@
 | `scoreB` | `int` | Điểm của đội B. |
 | `winner` | `Team` | Đội chiến thắng trong trận đấu. |
 
-## 13. Tổng hợp toàn bộ model
+## 13. Game
+
+### Công dụng
+`Game` đại diện cho một trò chơi được hỗ trợ trong hệ thống. Model lưu thông tin về tên trò chơi, thể loại và quy định số lượng người chơi.
+
+### Fields
+
+| Field | Type | Ý nghĩa |
+|---|---|---|
+| `gameId` | `long` | Mã định danh duy nhất của trò chơi. |
+| `name` | `String` | Tên trò chơi. |
+| `type` | `GameType` | Thể loại trò chơi. |
+| `minPlayers` | `int` | Số lượng người chơi tối thiểu yêu cầu cho một đội. |
+| `maxPlayers` | `int` | Số lượng người chơi tối đa cho phép trong một đội. |
+| `description` | `String` | Mô tả về trò chơi. |
+
+## 14. Tổng hợp toàn bộ model
 
 | Model | Fields |
 |---|---|
@@ -171,7 +187,7 @@
 | `Organizer` | Kế thừa từ `User`, không có field riêng |
 | `Admin` | Kế thừa từ `User`, không có field riêng |
 | `Team` | `teamId`, `teamName`, `game`, `description`, `captain`, `members`, `status` |
-| `Game` | `gameId`, `name`, `minPlayers`, `maxPlayers`, `description` |
+| `Game` | `gameId`, `name`, `type`, `minPlayers`, `maxPlayers`, `description` |
 | `TeamMember` | `player`, `joinedAt`, `role` |
 | `Tournament` | `tournamentId`, `name`, `game`, `organizer`, `startDate`, `endDate`, `maxTeams`, `format`, `status` |
 | `Registration` | `registrationId`, `team`, `tournament`, `registrationDate`, `status`, `checkInStatus` |
@@ -201,3 +217,4 @@ classDiagram
 | `RegistrationStatus` | `PENDING`, `APPROVED`, `REJECTED`, `CANCELLED` |
 | `CheckInStatus` | `NOT_CHECKED_IN`, `CHECKED_IN` |
 | `MatchStatus` | `SCHEDULED`, `ONGOING`, `COMPLETED`, `CANCELLED` |
+| `GameType` | `MOBA`, `FPS`, `BATTLE_ROYALE`, `SPORTS`, `RTS`, `CARD_GAME` |

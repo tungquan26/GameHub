@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import btpoop.enums.GameType;
 
 @Entity
 @Table(name = "games")
@@ -17,6 +18,10 @@ public class Game {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GameType type;
 
     @Column(nullable = false)
     private int minPlayers;
