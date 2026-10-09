@@ -5,14 +5,16 @@ import btpoop.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import btpoop.verification.service.VerificationService;
+import btpoop.verification.model.VerificationType;
+import btpoop.verification.util.PasswordUtil;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final VerificationService verificationService;
 
     @Override
     public User register(User user) {
@@ -24,10 +26,16 @@ public class UserServiceImpl implements UserService {
         }
 
         if (user.getPassword() != null) {
-            user.setPassword(hashPassword(user.getPassword()));
+            user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
         }
 
-        return userRepository.save(user);
+        user.setVerified(false);
+        User savedUser = userRepository.save(user);
+
+        // Sinh mã và gửi email xác nhận
+        verificationService.generateAndSendToken(savedUser.getEmail(), VerificationType.EMAIL_ACTIVATION);
+
+        return savedUser;
     }
 
     @Override
@@ -35,8 +43,11 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username);
 
         if (user != null && password != null) {
-            String hashedInput = hashPassword(password);
+            String hashedInput = PasswordUtil.hashPassword(password);
             if (user.getPassword().equals(hashedInput)) {
+                if (!user.isVerified()) {
+                    throw new RuntimeException("Tài khoản chưa được xác thực email!");
+                }
                 return user;
             }
         }
@@ -58,19 +69,4 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-    private String hashPassword(String password) {
-        if (password == null)
-            return null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Lỗi thuật toán mã hóa mật khẩu", e);
-        }
-    }
 }

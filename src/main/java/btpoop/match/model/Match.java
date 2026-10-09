@@ -44,6 +44,18 @@ public class Match {
     @Column(nullable = false)
     private MatchStatus status = MatchStatus.SCHEDULED;
 
+    @Column
+    private String location;
+
+    @Column(nullable = false)
+    private boolean notified1Week = false;
+
+    @Column(nullable = false)
+    private boolean notified1Day = false;
+
+    @Column(nullable = false)
+    private boolean notified1Hour = false;
+
     @Embedded
     private MatchResult result;
 }
