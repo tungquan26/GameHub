@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTP-OOP Application</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <a href="#" class="logo-link">
+                <img th:src="@{/images/logo.png}" alt="Logo" class="logo">
+            </a>
+        </div>
+        <div class="nav-right">
+            <button class="nav-btn search-btn">Tìm kiếm</button>
+            <a th:href="@{/login}" class="nav-btn login-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">Đăng nhập</a>
+        </div>
+    </nav>
+
+    <!-- Hero / Khu vực đầu trang -->
+    <header class="hero">
+        <img th:src="@{/images/hero.png}" alt="Hero Banner" class="hero-image">
+    </header>
+
+    <!-- Trò chơi của chúng tôi -->
+    <section class="our-games">
+        <div class="container">
+            <h2 class="section-title">TRÒ CHƠI CỦA CHÚNG TÔI</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <img th:src="@{/images/game1.png}" alt="Game 1" class="game-image">
+                </div>
+                <div class="game-card">
+                    <img th:src="@{/images/game2.png}" alt="Game 2" class="game-image">
+                </div>
+                <div class="game-card">
+                    <img th:src="@{/images/game3.png}" alt="Game 3" class="game-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <img th:src="@{/images/logo.png}" alt="Logo" class="footer-logo">
+            <a href="#" class="back-to-top" id="backToTop">TỚI ĐẦU TRANG</a>
+        </div>
+    </footer>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+/* Layout Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+/* Top Navigation */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-5);
+    background-color: var(--color-surface-nav);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #333;
+}
+
+.logo-link {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-right {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.nav-btn {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.login-btn {
+    background-color: var(--color-brand-primary);
+}
+
+.login-btn:hover {
+    background-color: var(--color-brand-hover);
+}
+
+/* Hero Section */
+.hero {
+    width: 100%;
+    background-color: #0a0a0a;
+}
+
+.hero-image {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    object-fit: cover;
+    background-color: #222; /* For placeholder visibility */
+}
+
+/* Our Games Section */
+.our-games {
+    padding: var(--space-8) 0;
+    background-image: url('../images/nen_tc.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.section-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-black);
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: var(--space-6);
+    letter-spacing: 1px;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+}
+
+.game-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    aspect-ratio: 9/16;
+    background-color: var(--color-surface-card);
+    transition: transform var(--transition-normal);
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+}
+
+.game-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: #333; /* For placeholder visibility */
+}
+
+/* Footer */
+.site-footer {
+    background-color: var(--color-surface-footer);
+    padding: var(--space-6) var(--space-5);
+    border-top: 1px solid #333;
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.footer-logo {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+}
+
+.back-to-top {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    transition: color var(--transition-fast);
+}
+
+.back-to-top:hover {
+    color: var(--color-text-primary);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .games-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .top-nav {
+        padding: var(--space-3);
+    }
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+    .section-title {
+        font-size: var(--font-size-lg);
+    }
+    .footer-container {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+}
