@@ -6,6 +6,8 @@ import btpoop.enums.RegistrationStatus;
 import btpoop.team.model.Team;
 import btpoop.tournament.model.Tournament;
 import btpoop.registration.repository.RegistrationRepository;
+import btpoop.tournament.repository.TournamentRepository;
+import btpoop.enums.TournamentStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +18,17 @@ import java.time.LocalDateTime;
 public class RegistrationModule {
 
     private final RegistrationRepository registrationRepository;
+    private final TournamentRepository tournamentRepository;
 
     public Registration registerTeamForTournament(Team team, Tournament tournament, boolean isPrivateMode) {
+        long currentTeams = registrationRepository.countByTournament(tournament);
+
+        if (currentTeams >= 16) {
+            tournament.setStatus(TournamentStatus.REGISTRATION_CLOSED);
+            tournamentRepository.save(tournament);
+            throw new RuntimeException("Giải đấu đã đủ 16 đội, hệ thống đã khóa đăng ký.");
+        }
+
         Registration newRegistration = new Registration();
         newRegistration.setTeam(team);
         newRegistration.setTournament(tournament);

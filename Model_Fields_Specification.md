@@ -15,6 +15,7 @@
 | `email` | `String` | Địa chỉ email của người dùng. |
 | `fullName` | `String` | Họ và tên của người dùng. |
 | `role` | `UserRole` | Vai trò của người dùng trong hệ thống: `PLAYER`, `ORGANIZER` hoặc `ADMIN`. |
+| `isVerified` | `boolean` | Trạng thái xác thực email (chặn đăng nhập nếu false). |
 
 ## 2. Player
 
@@ -145,9 +146,13 @@
 | `teamA` | `Team` | Đội ở vị trí A của trận đấu. Có thể chưa có giá trị trước khi bracket xác định đội. |
 | `teamB` | `Team` | Đội ở vị trí B của trận đấu. Có thể chưa có giá trị trước khi bracket xác định đội. |
 | `scheduledTime` | `LocalDateTime` | Thời gian dự kiến diễn ra trận đấu. |
+| `location` | `String` | Địa điểm tổ chức trận đấu (nếu online thì giá trị là "Online"). |
 | `round` | `Round` | Vòng đấu mà trận đấu thuộc về. |
 | `status` | `MatchStatus` | Trạng thái trận đấu: `SCHEDULED`, `ONGOING`, `COMPLETED` hoặc `CANCELLED`. |
 | `result` | `MatchResult` | Kết quả của trận đấu; có thể chưa có khi trận chưa hoàn thành. |
+| `notified1Week` | `boolean` | Đã gửi thông báo trước 1 tuần. |
+| `notified1Day` | `boolean` | Đã gửi thông báo trước 1 ngày. |
+| `notified1Hour` | `boolean` | Đã gửi thông báo trước 1 giờ. |
 
 ## 12. MatchResult
 
@@ -178,14 +183,31 @@
 | `maxPlayers` | `int` | Số lượng người chơi tối đa cho phép trong một đội. |
 | `description` | `String` | Mô tả về trò chơi. |
 
-## 14. Tổng hợp toàn bộ model
+## 14. Notification
+
+### Công dụng
+`Notification` lưu trữ các thông báo gửi đến người dùng (như lời nhắc trận đấu), bao gồm nội dung nhắc nhở và trạng thái đọc. Hệ thống cũng sử dụng thông tin từ model này để gửi email song song.
+
+### Fields
+
+| Field | Type | Ý nghĩa |
+|---|---|---|
+| `notificationId` | `long` | Mã định danh duy nhất của thông báo. |
+| `user` | `User` | Người dùng nhận thông báo. |
+| `title` | `String` | Tiêu đề thông báo. |
+| `message` | `String` | Nội dung chi tiết của thông báo. |
+| `isRead` | `boolean` | Trạng thái đã đọc hay chưa. |
+| `createdAt` | `LocalDateTime` | Thời gian tạo thông báo. |
+
+## 15. Tổng hợp toàn bộ model
 
 | Model | Fields |
 |---|---|
-| `User` | `userId`, `username`, `password`, `email`, `fullName`, `role` |
+| `User` | `userId`, `username`, `password`, `email`, `fullName`, `role`, `isVerified` |
 | `Player` | Kế thừa từ `User`, không có field riêng |
 | `Organizer` | Kế thừa từ `User`, không có field riêng |
 | `Admin` | Kế thừa từ `User`, không có field riêng |
+| `VerificationToken` | `id`, `email`, `type`, `token`, `createdAt`, `expiresAt`, `dailyRequestCount`, `lastRequestDate` |
 | `Team` | `teamId`, `teamName`, `game`, `description`, `captain`, `members`, `status` |
 | `Game` | `gameId`, `name`, `type`, `minPlayers`, `maxPlayers`, `description` |
 | `TeamMember` | `player`, `joinedAt`, `role` |
@@ -193,8 +215,9 @@
 | `Registration` | `registrationId`, `team`, `tournament`, `registrationDate`, `status`, `checkInStatus` |
 | `Bracket` | `bracketId`, `tournament`, `format`, `rounds` |
 | `Round` | `roundNumber`, `name`, `matches` |
-| `Match` | `matchId`, `teamA`, `teamB`, `scheduledTime`, `round`, `status`, `result` |
+| `Match` | `matchId`, `teamA`, `teamB`, `scheduledTime`, `location`, `round`, `status`, `result`, `notified1Week`, `notified1Day`, `notified1Hour` |
 | `MatchResult` | `scoreA`, `scoreB`, `winner` |
+| `Notification` | `notificationId`, `user`, `title`, `message`, `isRead`, `createdAt` |
 
 ### Quan hệ kế thừa
 
@@ -218,3 +241,4 @@ classDiagram
 | `CheckInStatus` | `NOT_CHECKED_IN`, `CHECKED_IN` |
 | `MatchStatus` | `SCHEDULED`, `ONGOING`, `COMPLETED`, `CANCELLED` |
 | `GameType` | `MOBA`, `FPS`, `BATTLE_ROYALE`, `SPORTS`, `RTS`, `CARD_GAME` |
+| `VerificationType` | `EMAIL_ACTIVATION`, `PASSWORD_RESET` |
