@@ -5,6 +5,9 @@ import btpoop.ranking.model.TeamRanking;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class RankingServiceImpl implements RankingService {
 
     @Override
