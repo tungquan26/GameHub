@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
         }
 
-        user.setVerified(false);
+        user.setIsVerified(false);
         User savedUser = userRepository.save(user);
 
         // Sinh mã và gửi email xác nhận
@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         if (user != null && password != null) {
             String hashedInput = PasswordUtil.hashPassword(password);
             if (user.getPassword().equals(hashedInput)) {
-                if (!user.isVerified()) {
+                if (!user.getIsVerified()) {
                     throw new RuntimeException("Tài khoản chưa được xác thực email!");
                 }
                 return user;

@@ -15,7 +15,7 @@ public class User {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long userId;
+    private Long userId;
     
     @Column(nullable = false, unique = true)
     private String username;
@@ -25,13 +25,10 @@ public class User {
     
     @Column(nullable = false, unique = true)
     private String email;
-    
-    @Column(nullable = false)
-    private String fullName;
-    
+            
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
     @Column(nullable = false)
-    private boolean isVerified = false;
+    private Boolean isVerified = false;
 }
