@@ -71,7 +71,7 @@ public class VerificationService {
 
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            user.setVerified(true);
+            user.setIsVerified(true);
             userRepository.save(user);
         }
 
