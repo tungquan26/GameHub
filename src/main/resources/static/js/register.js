@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registerForm');
     const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const submitBtn = document.getElementById('submitBtn');
@@ -9,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Kiểm tra dữ liệu hợp lệ để kích hoạt nút
     function checkFormValidity() {
         const isUsernameValid = usernameInput.value.trim() !== '';
+        const isEmailValid = emailInput.value.trim() !== '';
         const isPasswordValid = passwordInput.value.trim() !== '';
         const isConfirmPasswordValid = confirmPasswordInput.value.trim() !== '';
         const isPasswordMatch = passwordInput.value === confirmPasswordInput.value;
@@ -21,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errorMessage.style.display = 'none';
         }
 
-        if (isUsernameValid && isPasswordValid && isConfirmPasswordValid && isPasswordMatch) {
+        if (isUsernameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid && isPasswordMatch) {
             form.classList.add('valid');
             submitBtn.disabled = false;
         } else {
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     usernameInput.addEventListener('input', checkFormValidity);
+    emailInput.addEventListener('input', checkFormValidity);
     passwordInput.addEventListener('input', checkFormValidity);
     confirmPasswordInput.addEventListener('input', checkFormValidity);
     checkFormValidity();
@@ -40,10 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
         const password = passwordInput.value.trim();
         const confirmPassword = confirmPasswordInput.value.trim();
         
-        if (!username || !password || !confirmPassword || password !== confirmPassword) return;
+        if (!username || !email || !password || !confirmPassword || password !== confirmPassword) return;
         
         // Trạng thái đang tải
         submitBtn.style.opacity = '0.5';
@@ -51,24 +55,25 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessage.style.display = 'none';
         
         try {
-            const formData = new URLSearchParams();
-            formData.append('username', username);
-            formData.append('password', password);
-
             // Gửi dữ liệu đăng ký đến API (Tạm dùng /api/users/register)
             const response = await fetch('/api/users/register', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
-                body: formData.toString()
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: password
+                })
             });
 
             if (response.ok) {
                 // Đăng ký thành công, chuyển hướng về trang đăng nhập
                 window.location.href = '/login'; 
             } else {
-                errorMessage.textContent = 'Đăng ký thất bại. Tên người dùng có thể đã tồn tại.';
+                const errorMsg = await response.text();
+                errorMessage.textContent = errorMsg || 'Đăng ký thất bại.';
                 errorMessage.style.display = 'block';
             }
         } catch (error) {
