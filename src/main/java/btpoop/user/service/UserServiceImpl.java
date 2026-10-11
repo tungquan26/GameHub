@@ -30,6 +30,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setIsVerified(false);
+        // user.setIsVerified(true);
         User savedUser = userRepository.save(user);
 
         // Sinh mã và gửi email xác nhận
