@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 // Đăng nhập thành công, chuyển hướng
-                window.location.href = '/'; 
+                window.location.href = '/dashboard'; 
             } else {
                 errorMessage.textContent = 'Tên người dùng hoặc mật khẩu không chính xác.';
                 errorMessage.style.display = 'block';
