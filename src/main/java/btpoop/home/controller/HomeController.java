@@ -25,4 +25,9 @@ public class HomeController {
     public String dashboard() {
         return "dashboard";
     }
+
+    @GetMapping("/verify")
+    public String verify() {
+        return "verify";
+    }
 }

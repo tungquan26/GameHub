@@ -69,8 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                // Đăng ký thành công, chuyển hướng về trang đăng nhập
-                window.location.href = '/login'; 
+                // Đăng ký thành công, chuyển hướng sang trang xác thực mã
+                window.location.href = '/verify?email=' + encodeURIComponent(email);
             } else {
                 const errorMsg = await response.text();
                 errorMessage.textContent = errorMsg || 'Đăng ký thất bại.';
