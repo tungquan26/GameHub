@@ -4,7 +4,6 @@ import btpoop.game.model.Game;
 import btpoop.enums.TeamStatus;
 import btpoop.user.model.Player;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,6 @@ import java.util.List;
 @Table(name = "teams")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

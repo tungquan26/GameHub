@@ -5,7 +5,6 @@ import btpoop.team.model.Team;
 import btpoop.tournament.model.Tournament;
 import btpoop.bracket.model.Round;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,6 @@ import java.time.LocalDateTime;
 @Table(name = "matches")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Match {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

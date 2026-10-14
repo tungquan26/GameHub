@@ -3,7 +3,6 @@ package btpoop.team.model;
 import btpoop.enums.TeamMemberRole;
 import btpoop.user.model.Player;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 @Table(name = "team_members")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class TeamMember {
     
     @Id

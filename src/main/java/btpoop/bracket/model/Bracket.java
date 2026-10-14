@@ -3,7 +3,6 @@ package btpoop.bracket.model;
 import btpoop.enums.TournamentFormat;
 import btpoop.tournament.model.Tournament;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +13,6 @@ import java.util.List;
 @Table(name = "brackets")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Bracket {
     
     @Id
