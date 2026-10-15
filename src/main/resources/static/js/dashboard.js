@@ -144,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const logoutBtn = document.getElementById('logoutBtn');
+    const createEventBtn = document.getElementById('createEventBtn');
 
     // ===== Render Card =====
     function createCardHTML(tournament) {
@@ -286,8 +287,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Chuyển sang trang tạo giải đấu
+    if (createEventBtn) {
+        createEventBtn.addEventListener('click', () => {
+            window.location.href = '/create';
+        });
+    }
+
     // ===== Khởi tạo =====
     renderTournaments(true);
 
     console.log('Dashboard loaded');
 });
+

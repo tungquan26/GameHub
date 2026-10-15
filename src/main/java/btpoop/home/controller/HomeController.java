@@ -30,4 +30,9 @@ public class HomeController {
     public String verify() {
         return "verify";
     }
+
+    @GetMapping("/create")
+    public String create() {
+        return "create";
+    }
 }
