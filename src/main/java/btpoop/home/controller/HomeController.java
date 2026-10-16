@@ -35,4 +35,9 @@ public class HomeController {
     public String create() {
         return "create";
     }
+
+    @GetMapping("/settings")
+    public String settings() {
+        return "settings";
+    }
 }

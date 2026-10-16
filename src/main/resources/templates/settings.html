@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Settings - BTP Tournament</title>
+    <!-- Kế thừa CSS biến và Sidebar từ Dashboard giống hệt create.html -->
+    <link rel="stylesheet" th:href="@{/css/tokens.css}" href="/css/tokens.css">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="/css/dashboard.css">
+    <link rel="stylesheet" th:href="@{/css/settings.css}" href="settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ===== 1. SIDEBAR CHÍNH (Giữ nguyên 100% từ create.html / dashboard.html) ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-inner">
+            <div class="sidebar-logo">
+                <a th:href="@{/dashboard}" href="/dashboard" class="sidebar-logo-link">
+                    <img th:src="@{/images/logo.png}" src="/images/logo.png" alt="Logo" class="sidebar-logo-img">
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-group">
+                    <a th:href="@{/dashboard}" href="/dashboard" class="sidebar-item" data-tooltip="Trang chủ">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </a>
+                    <a href="#" class="sidebar-item" data-tooltip="Tìm kiếm">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </a>
+                    <a href="#" class="sidebar-item active" data-tooltip="Giải đấu">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 19.24 7 20v2"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 19.24 17 20v2"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>
+                    </a>
+                </div>
+
+                <div class="sidebar-group">
+                    <a href="#" class="sidebar-item" data-tooltip="Cộng đồng">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    </a>
+                    <a href="#" class="sidebar-item" data-tooltip="Tin nhắn">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                    </a>
+                    <a href="#" class="sidebar-item" data-tooltip="Thông báo">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                    </a>
+                </div>
+
+                <div class="sidebar-group sidebar-group-bottom">
+                    <a href="#" class="sidebar-item" data-tooltip="Hồ sơ">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </a>
+                    <a th:href="@{/login}" href="/login" class="sidebar-item" id="logoutBtn" data-tooltip="Đăng xuất">
+                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- ===== 2. TOURNAMENT SETTINGS SUB-SIDEBAR (Chuẩn Start.gg) ===== -->
+    <aside class="tournament-sidebar" id="tournamentSidebar">
+        <!-- Phần đầu: Ảnh đại diện, tên giải đấu, nhãn TOURNAMENT, nút Public & Settings -->
+        <div class="ts-header" id="tsHeaderBanner">
+            <div class="ts-header-overlay">
+                <div class="ts-identity">
+                    <div class="ts-avatar-box">
+                        <img id="sidebarAvatarImg" src="" alt="Avatar" class="ts-avatar-img" style="display: none;">
+                        <div id="sidebarAvatarFallback" class="ts-avatar-fallback">T</div>
+                    </div>
+                    <div class="ts-title-group">
+                        <h2 class="ts-tourney-name" id="sidebarTourneyName">Nguyễn Quân</h2>
+                        <span class="ts-tourney-label">TOURNAMENT</span>
+                    </div>
+                </div>
+
+                <div class="ts-mode-tabs">
+                    <a th:href="@{/tournament/public}" href="#public" class="ts-mode-btn" id="tsPublicBtn">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Public</span>
+                    </a>
+                    <a th:href="@{/tournament/settings}" href="#settings" class="ts-mode-btn active" id="tsSettingsBtn">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách điều hướng cuộn dọc -->
+        <nav class="ts-nav">
+            <!-- DASHBOARD -->
+            <div class="ts-dashboard-wrap">
+                <a th:href="@{/dashboard}" href="/dashboard" class="ts-nav-item ts-dashboard-link" data-nav="dashboard">
+                    <svg class="ts-item-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 4a9 9 0 0 0-9 9c0 2.65 1.15 5.03 2.97 6.68.32.29.74.32 1.09.12.35-.21.52-.62.41-1.01A7.46 7.46 0 0 1 6.5 13c0-.41.34-.75.75-.75s.75.34.75.75c0 .34-.23.62-.54.71-.15.42-.26.87-.31 1.34h1.59a.75.75 0 0 1 0 1.5H6.9c.23.69.61 1.32 1.1 1.85a.75.75 0 0 0 1.06 0 .75.75 0 0 0 0-1.06 5.98 5.98 0 0 1-1.69-3.29h.88a.75.75 0 0 0 0-1.5h-.98c.09-.86.37-1.66.8-2.36l.69.69a.75.75 0 1 0 1.06-1.06l-.69-.69c.7-.43 1.5-.71 2.36-.8v.98a.75.75 0 0 0 1.5 0v-.98c.86.09 1.66.37 2.36.8l-.69.69a.75.75 0 0 0 1.06 1.06l.69-.69c.43.7.71 1.5.8 2.36h-.98a.75.75 0 0 0 0 1.5h.88a5.98 5.98 0 0 1-1.69 3.29.75.75 0 0 0 0 1.06.75.75 0 0 0 1.06 0c.49-.53.87-1.16 1.1-1.85h-1.84a.75.75 0 0 1 0-1.5h1.59c-.05-.47-.16-.92-.31-1.34-.31-.09-.54-.37-.54-.71 0-.41.34-.75.75-.75s.75.34.75.75c0 2.19-.94 4.16-2.44 5.53-.3.28-.35.73-.12 1.08.23.35.69.47 1.06.22A8.98 8.98 0 0 0 21 13a9 9 0 0 0-9-9zm1.72 5.22-2.47 2.47a1.5 1.5 0 1 0 1.06 1.06l2.47-2.47a.75.75 0 0 0-1.06-1.06z"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <div class="ts-divider"></div>
+
+            <!-- SETTINGS -->
+            <div class="ts-section">
+                <div class="ts-section-header">SETTINGS</div>
+                <a href="#detailsCard" class="ts-nav-item active" data-nav="details" data-title="Details">Details</a>
+                <a href="#admin-permissions" class="ts-nav-item" data-nav="admin-permissions" data-title="Admin Permissions">Admin Permissions</a>
+            </div>
+
+            <!-- REGISTRATION -->
+            <div class="ts-section">
+                <div class="ts-section-header">REGISTRATION</div>
+                <a href="#registration-settings" class="ts-nav-item" data-nav="registration-settings" data-title="Registration Settings">Registration Settings</a>
+                <a href="#attendees" class="ts-nav-item" data-nav="attendees" data-title="Attendees">Attendees</a>
+                <a href="#teams" class="ts-nav-item" data-nav="teams" data-title="Teams">Teams</a>
+            </div>
+
+            <!-- EVENTS -->
+            <div class="ts-section">
+                <div class="ts-section-header">EVENTS</div>
+                <a href="#events" class="ts-nav-item" data-nav="events" data-title="Events">Events</a>
+                <a href="#bracket-setup" class="ts-nav-item" data-nav="bracket-setup" data-title="Bracket Setup">Bracket Setup</a>
+                <a href="#seed-generator" class="ts-nav-item" data-nav="seed-generator" data-title="Seed Generator">Seed Generator</a>
+                <a href="#pools-seeding" class="ts-nav-item" data-nav="pools-seeding" data-title="Pools & Seeding">Pools &amp; Seeding</a>
+                <a href="#scheduling" class="ts-nav-item" data-nav="scheduling" data-title="Scheduling">Scheduling</a>
+                <a href="#conflicts" class="ts-nav-item" data-nav="conflicts" data-title="Conflicts">Conflicts</a>
+                <a href="#stations-streams" class="ts-nav-item" data-nav="stations-streams" data-title="Stations & Streams">Stations &amp; Streams</a>
+            </div>
+
+            <!-- REPORTING -->
+            <div class="ts-section">
+                <div class="ts-section-header">REPORTING</div>
+                <a href="#brackets" class="ts-nav-item" data-nav="brackets" data-title="Brackets">Brackets</a>
+                <a href="#match-dashboard" class="ts-nav-item" data-nav="match-dashboard" data-title="Match Dashboard">Match Dashboard</a>
+                <a href="#export-results" class="ts-nav-item" data-nav="export-results" data-title="Export Results">Export Results</a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- ===== MOBILE TOPBAR (Giữ nguyên 100% từ create.html) ===== -->
+    <div class="mobile-topbar" id="mobileTopbar">
+        <a th:href="@{/dashboard}" href="/dashboard" class="mobile-logo-link">
+            <img th:src="@{/images/logo.png}" src="/images/logo.png" alt="Logo" class="mobile-logo-img">
+        </a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+    </div>
+
+    <!-- ===== MAIN CONTENT (Bố cục Start.gg - Giữ nguyên 100% các Card đã hoàn thiện) ===== -->
+    <main class="main-content" id="mainContent">
+        
+        <!-- Tiêu đề trang Details -->
+        <header class="settings-topbar">
+            <h1 class="page-title" id="pageHeaderTitle">Details</h1>
+        </header>
+
+        <!-- Khu vực các khối Card xếp dọc -->
+        <section class="settings-container">
+
+            <!-- ==================== 3.1. PHẦN DETAILS ==================== -->
+            <div class="settings-card" id="detailsCard">
+                <div class="card-header">
+                    <h2 class="card-title">Tournament Details</h2>
+                    <p class="card-subtitle">Name, date, and other basic info</p>
+                </div>
+
+                <form id="detailsForm" novalidate>
+                    <div class="card-body">
+                        <!-- 1. Tournament Name -->
+                        <div class="field-group">
+                            <div class="field-box">
+                                <label class="field-label" for="tournamentName">Tournament Name <span class="req">*</span></label>
+                                <input type="text" id="tournamentName" class="field-input" placeholder="Enter tournament name" required>
+                            </div>
+                        </div>
+
+                        <!-- 2 & 3. Start Date & End Date -->
+                        <div class="field-row">
+                            <div class="field-group">
+                                <div class="field-box has-helper">
+                                    <label class="field-label" for="startDate">Start Date <span class="req">*</span></label>
+                                    <input type="datetime-local" id="startDate" class="field-input" required>
+                                </div>
+                                <span class="timezone-text">ICT (+07:00 GMT)</span>
+                            </div>
+
+                            <div class="field-group">
+                                <div class="field-box has-helper">
+                                    <label class="field-label" for="endDate">End Date <span class="req">*</span></label>
+                                    <input type="datetime-local" id="endDate" class="field-input" required>
+                                </div>
+                                <span class="timezone-text">ICT (+07:00 GMT)</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. Venue Address -->
+                        <div class="field-group">
+                            <div class="field-box">
+                                <label class="field-label" for="venueAddress">Venue Address</label>
+                                <input type="text" id="venueAddress" class="field-input" placeholder="">
+                            </div>
+                        </div>
+
+                        <!-- 5 & 6. Contact type & Contact -->
+                        <div class="field-row last-row">
+                            <div class="field-group">
+                                <div class="field-box mb-0">
+                                    <label class="field-label" for="contactType">Contact type <span class="req">*</span></label>
+                                    <div class="input-with-icon select-wrapper">
+                                        <span class="left-icon" id="contactTypeIcon"></span>
+                                        <select id="contactType" class="field-input has-icon" required>
+                                            <option value="EMAIL">Email</option>
+                                            <option value="DISCORD">Discord</option>
+                                        </select>
+                                        <svg class="select-chevron" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field-group">
+                                <div class="field-box mb-0">
+                                    <label class="field-label" for="contactValue">Contact <span class="req">*</span></label>
+                                    <div class="input-with-icon">
+                                        <span class="left-icon" id="contactValueIcon"></span>
+                                        <input type="text" id="contactValue" class="field-input has-icon" placeholder="hello@start.gg" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p id="detailsErrorMsg" class="error-text" style="display: none;"></p>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="submit" id="saveDetailsBtn" class="btn-save" disabled>Save changes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ==================== 3.2. PHẦN IMAGES ==================== -->
+            <div class="settings-card" id="imagesCard">
+                <div class="card-header">
+                    <h2 class="card-title">Images</h2>
+                    <p class="card-subtitle">Upload a profile and banner image.</p>
+                </div>
+
+                <div class="card-body">
+                    <div class="images-row">
+                        <!-- Cột 1: Profile Image -->
+                        <div class="image-col">
+                            <h3 class="image-label">Profile Image</h3>
+                            <div class="image-upload-box" id="profileBox">
+                                <input type="file" id="profileInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden>
+                                
+                                <!-- Khi chưa chọn ảnh -->
+                                <div class="upload-empty" id="profileEmpty">
+                                    <button type="button" class="btn-select-image" id="selectProfileBtn">
+                                        Upload Image
+                                    </button>
+                                </div>
+
+                                <!-- Khi đã chọn ảnh (Xem trước + Remove File) -->
+                                <div class="upload-preview" id="profilePreview" style="display: none;">
+                                    <img id="profileImgTag" src="" alt="Profile preview" class="preview-img-square">
+                                    <button type="button" class="btn-remove-file" id="removeProfileBtn">
+                                        <svg viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Remove File</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="image-guideline">
+                                Must be a square image at least 280x280 and no larger than 4800x4800. Max file size: 4MB.
+                            </p>
+                            <p id="profileErrorMsg" class="error-text" style="display: none;"></p>
+                        </div>
+
+                        <!-- Cột 2: Banner Image -->
+                        <div class="image-col">
+                            <h3 class="image-label">Banner Image</h3>
+                            <div class="image-upload-box" id="bannerBox">
+                                <input type="file" id="bannerInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden>
+                                
+                                <!-- Khi chưa chọn ảnh -->
+                                <div class="upload-empty" id="bannerEmpty">
+                                    <button type="button" class="btn-select-image" id="selectBannerBtn">
+                                        Upload Image
+                                    </button>
+                                </div>
+
+                                <!-- Khi đã chọn ảnh (Xem trước + Remove File) -->
+                                <div class="upload-preview" id="bannerPreview" style="display: none;">
+                                    <img id="bannerImgTag" src="" alt="Banner preview" class="preview-img-banner">
+                                    <button type="button" class="btn-remove-file" id="removeBannerBtn">
+                                        <svg viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Remove File</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="image-guideline">
+                                Must be at least 1600x800 and no larger than 4800x2400. Max file size: 4MB.
+                            </p>
+                            <p id="bannerErrorMsg" class="error-text" style="display: none;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="button" id="saveImagesBtn" class="btn-save" disabled>Save changes</button>
+                </div>
+            </div>
+
+            <!-- ==================== 3.3. PHẦN RULES ==================== -->
+            <div class="settings-card" id="rulesCard">
+                <div class="card-header">
+                    <h2 class="card-title">Rules</h2>
+                    <p class="card-subtitle">List general tournament rules here</p>
+                </div>
+
+                <div class="card-body">
+                    <!-- Vùng nhập Markdown -->
+                    <div id="rulesEditorWrap">
+                        <textarea id="rulesInput" class="rules-textarea" rows="5" placeholder="Enter tournament rules using Markdown..."></textarea>
+                    </div>
+
+                    <!-- Vùng xem trước Markdown -->
+                    <div id="rulesPreviewWrap" class="rules-preview-box" style="display: none;"></div>
+
+                    <!-- Thanh công cụ Preview Markdown & Help Formatting -->
+                    <div class="rules-links-bar">
+                        <button type="button" id="previewMarkdownBtn" class="text-link-btn">Preview Markdown</button>
+                        <button type="button" id="helpFormattingBtn" class="text-link-btn">Help Formatting</button>
+                    </div>
+
+                    <!-- Bảng hướng dẫn cú pháp Markdown -->
+                    <div id="helpFormattingBox" class="help-formatting-box" style="display: none;">
+                        <div class="help-formatting-header">
+                            <span>Markdown Formatting Guide</span>
+                            <button type="button" id="closeHelpBtn" class="close-help-btn">&times;</button>
+                        </div>
+                        <table class="help-table">
+                            <thead>
+                                <tr>
+                                    <th>Kiểu hiển thị</th>
+                                    <th>Cú pháp Markdown</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Tiêu đề (Headings)</td>
+                                    <td><code># H1</code>, <code>## H2</code>, <code>### H3</code></td>
+                                </tr>
+                                <tr>
+                                    <td>In đậm / In nghiêng</td>
+                                    <td><code>**In đậm**</code>, <code>*In nghiêng*</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Mã (Inline code)</td>
+                                    <td><code>`code`</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Danh sách</td>
+                                    <td><code>- Mục 1</code> hoặc <code>* Mục 1</code></td>
+                                </tr>
+                                <tr>
+                                    <td>Bảng (Table)</td>
+                                    <td><code>| Cột 1 | Cột 2 |</code><br><code>|---|---|</code><br><code>| Giá trị 1 | Giá trị 2 |</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="button" id="saveRulesBtn" class="btn-save" disabled>Save changes</button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Overlay cho Mobile Sidebar & Toast thông báo -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script th:src="@{/js/settings.js}" src="settings.js"></script>
+</body>
+</html>

@@ -69,6 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         console.log('Thông tin giải đấu khởi tạo:', payload);
         // Tạm thời quay về dashboard (sau này có trang chi tiết sẽ chuyển hướng sang đó)
-        window.location.href = '/dashboard';
+        window.location.href = '/settings';
     });
 });
