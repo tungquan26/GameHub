@@ -18,6 +18,8 @@
     <properties>
         <!-- Sử dụng chuẩn Java 25 -->
         <java.version>25</java.version>
+        <!-- Ghim phiên bản Lombok (hỗ trợ JDK 25), dùng chung cho Maven và IDE -->
+        <lombok.version>1.18.46</lombok.version>
     </properties>
 
     <dependencies>
@@ -111,4 +113,21 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Chỉ kích hoạt khi project được IDE (m2e / VS Code Java) import:
+             IDE build vào target-ide, Maven CLI vẫn build vào target -> không ghi đè lẫn nhau -->
+        <profile>
+            <id>ide</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <directory>target-ide</directory>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
