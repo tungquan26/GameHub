@@ -1,0 +1,983 @@
+/* ============================================================
+   COMMUNITY & TEAMS PAGE — BTP TOURNAMENT (Font: Inter)
+   ============================================================ */
+
+.cm-page-wrapper {
+    font-family: var(--font-family-primary, 'Inter', sans-serif);
+    background-color: #f0f1f4;
+    color: #1a1a2e;
+    min-height: 100vh;
+    padding-bottom: 72px;
+}
+
+/* ---------- 1. HERO HEADER ---------- */
+.cm-hero-banner {
+    position: relative;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 45%, #1e2a5a 80%, #1a1a2e 100%);
+    padding: 48px 36px;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cm-hero-pattern {
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(ellipse at 18% 50%, rgba(79, 120, 255, 0.16) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 30%, rgba(139, 92, 246, 0.12) 0%, transparent 55%);
+    pointer-events: none;
+}
+
+.cm-hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1320px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.cm-hero-left {
+    max-width: 620px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cm-hero-eyebrow {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #60a5fa;
+    text-transform: uppercase;
+}
+
+.cm-hero-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.cm-hero-desc {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.76);
+    line-height: 1.55;
+    margin: 0;
+}
+
+.cm-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.cm-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 10px;
+    background-color: #4f78ff;
+    color: #ffffff;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.cm-btn-primary:hover {
+    background-color: #3b63eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(79, 120, 255, 0.36);
+}
+
+.cm-btn-primary svg {
+    width: 18px;
+    height: 18px;
+}
+
+.cm-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.cm-btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.cm-btn-secondary svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* Thẻ Hồ sơ Tuyển thủ & Đội đang tham gia bên phải Hero */
+.cm-profile-status-card {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    padding: 20px 24px;
+    min-width: 340px;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cm-status-user-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cm-user-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4f78ff, #8b5cf6);
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cm-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cm-user-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #93c5fd;
+}
+
+.cm-user-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.cm-status-stats {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: rgba(15, 23, 42, 0.45);
+    padding: 12px 16px;
+    border-radius: 10px;
+}
+
+.cm-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.cm-stat-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+.cm-stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.cm-stat-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.cm-status-Current-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cm-mini-team-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(79, 120, 255, 0.22);
+    border: 1px solid rgba(147, 197, 253, 0.35);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cm-mini-team-chip .role-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #facc15;
+}
+
+/* ---------- 2. SECTIONS CHUNG ---------- */
+.cm-section {
+    max-width: 1320px;
+    margin: 32px auto 0;
+    padding: 0 36px;
+}
+
+.cm-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.cm-section-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cm-section-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.cm-count-pill {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.cm-section-subtitle {
+    font-size: 13.5px;
+    color: #64748b;
+    margin: 4px 0 0;
+}
+
+.cm-btn-outline-blue {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    background: #ffffff;
+    border: 1px solid #93c5fd;
+    border-radius: 8px;
+    color: #2563eb;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.cm-btn-outline-blue:hover {
+    background: #eff6ff;
+    border-color: #2563eb;
+}
+
+.cm-btn-outline-blue svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* ---------- 3. THẺ TEAM CỦA TÔI (MY TEAMS GRID) ---------- */
+.cm-my-teams-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.cm-my-team-card {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.cm-my-team-card.is-captain {
+    border-color: #93c5fd;
+}
+
+.cm-my-team-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(26, 26, 46, 0.09);
+}
+
+.cm-team-top-strip {
+    height: 6px;
+    width: 100%;
+}
+
+.cm-team-card-body {
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+.cm-team-identity-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.cm-team-id-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.cm-team-avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.14);
+}
+
+.cm-team-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cm-team-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.cm-team-name-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cm-team-tag {
+    font-size: 12px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.cm-team-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.cm-team-game-badge {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4f78ff;
+}
+
+/* Huy hiệu vai trò của người dùng trong Team */
+.cm-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.cm-role-badge.captain {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.cm-role-badge.member {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.cm-team-desc {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Danh sách thành viên (Roster) */
+.cm-roster-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cm-roster-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.cm-roster-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cm-member-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.cm-member-chip.is-me {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+}
+
+.cm-member-chip .cap-crown {
+    color: #f59e0b;
+    font-size: 13px;
+}
+
+.cm-team-card-footer {
+    padding: 13px 22px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cm-recruiting-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #059669;
+}
+
+.cm-recruiting-tag.closed {
+    color: #64748b;
+}
+
+.cm-recruiting-tag .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.cm-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cm-btn-sm {
+    padding: 7px 13px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    transition: all 0.15s;
+}
+
+.cm-btn-sm:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.cm-btn-sm.primary {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+.cm-btn-sm.primary:hover {
+    background: #1d4ed8;
+}
+
+.cm-btn-sm.danger {
+    color: #e11d48;
+    border-color: #fecdd3;
+}
+
+.cm-btn-sm.danger:hover {
+    background: #fff1f2;
+    border-color: #e11d48;
+}
+
+/* ---------- 4. KHÁM PHÁ CỘNG ĐỒNG (DISCOVER FILTER & GRID) ---------- */
+.cm-filter-bar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.cm-filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cm-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cm-search-icon {
+    position: absolute;
+    left: 12px;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.cm-search-input {
+    width: 270px;
+    height: 40px;
+    padding: 0 12px 0 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: #0f172a;
+    background: #f8fafc;
+    outline: none;
+}
+
+.cm-search-input:focus {
+    background: #ffffff;
+    border-color: #4f78ff;
+    box-shadow: 0 0 0 3px rgba(79, 120, 255, 0.12);
+}
+
+.cm-select {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: #0f172a;
+    background: #f8fafc;
+    cursor: pointer;
+    outline: none;
+}
+
+.cm-select:focus {
+    border-color: #4f78ff;
+    background: #ffffff;
+}
+
+.cm-community-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.cm-community-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cm-community-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+/* ---------- 5. EMPTY STATE ---------- */
+.cm-empty-box {
+    background: #ffffff;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 44px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.cm-empty-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cm-empty-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.cm-empty-box h3 {
+    margin: 4px 0 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.cm-empty-box p {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #64748b;
+    max-width: 480px;
+}
+
+/* ---------- 6. MODAL TẠO / SỬA TEAM ---------- */
+.cm-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.58);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.cm-modal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 20px 44px rgba(15, 23, 42, 0.24);
+    overflow: hidden;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.cm-modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.cm-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.cm-modal-subtitle {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.cm-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.cm-modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cm-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.cm-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cm-form-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.req {
+    color: #e11d48;
+}
+
+.cm-input,
+.cm-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #0f172a;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.cm-input:focus,
+.cm-textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.14);
+}
+
+.cm-field-hint {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.cm-logo-upload-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cm-logo-preview {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: #4f78ff;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.cm-logo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cm-logo-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.cm-btn-xs {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    cursor: pointer;
+}
+
+.cm-btn-xs:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+.cm-btn-xs.danger {
+    color: #e11d48;
+    border-color: #fecdd3;
+}
+
+.cm-logo-hint {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.cm-color-swatches {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 6px;
+}
+
+.cm-color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.cm-color-swatch.active {
+    border-color: #0f172a;
+    transform: scale(1.12);
+}
+
+.cm-error-msg {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #dc2626;
+}
+
+.cm-modal-footer {
+    padding: 14px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.cm-btn-cancel {
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cm-btn-save {
+    padding: 9px 20px;
+    border-radius: 8px;
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cm-btn-save:hover {
+    background: #1d4ed8;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+    .cm-my-teams-grid {
+        grid-template-columns: 1fr;
+    }
+    .cm-community-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .cm-hero-banner,
+    .cm-section {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    .cm-profile-status-card {
+        min-width: 100%;
+    }
+    .cm-community-grid,
+    .cm-form-row {
+        grid-template-columns: 1fr;
+    }
+    .cm-search-input {
+        width: 100%;
+    }
+}

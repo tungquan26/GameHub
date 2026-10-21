@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <aside class="tournament-sidebar" id="tournamentSidebar" th:fragment="tournamentSidebar(activeSection)">
+        <!-- Phần ảnh đại diện, tên giải đấu, nhãn TOURNAMENT, nút Public & Settings -->
+        <div th:replace="~{fragments/tournament-header :: tournamentHeader}"></div>
+
+        <!-- Danh sách điều hướng các mục chính -->
+        <nav class="ts-nav">
+            <div class="ts-section">
+                <a th:href="@{/tournament/home}" class="ts-nav-item"
+                   th:classappend="${activeSection == 'home'} ? ' active' : ''"
+                   data-nav="home" data-title="Home">Home</a>
+                <a th:href="@{/tournament/details}" class="ts-nav-item"
+                   th:classappend="${activeSection == 'details' or activeSection == null} ? ' active' : ''"
+                   data-nav="details" data-title="Details">Details</a>
+                <a th:href="@{/tournament/registration-settings}" class="ts-nav-item"
+                   th:classappend="${activeSection == 'registration-settings'} ? ' active' : ''"
+                   data-nav="registration-settings" data-title="Registration Settings">Registration Settings</a>
+                <a th:href="@{/tournament/teams}" class="ts-nav-item"
+                   th:classappend="${activeSection == 'teams'} ? ' active' : ''"
+                   data-nav="teams" data-title="Teams">Teams</a>
+                <a th:href="@{/tournament/game-info}" class="ts-nav-item"
+                   th:classappend="${activeSection == 'game-info'} ? ' active' : ''"
+                   data-nav="game-info" data-title="Game Info">Game Info</a>
+            </div>
+        </nav>
+    </aside>
+</body>
+</html>

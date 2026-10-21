@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, extraLinks, content, footer, scripts)">
+<head>
+    <th:block th:replace="~{layouts/base :: commonHead(${title})}" />
+    <link rel="stylesheet" th:href="@{/css/layouts/auth.css}">
+    <th:block th:replace="${extraLinks} ?: ~{}" />
+</head>
+<body>
+    <!-- Hình nền cố định -->
+    <div class="background-container">
+        <img th:src="@{/images/nen_login.png}" alt="Background" class="bg-image">
+    </div>
+
+    <!-- Logo ở góc trên trái -->
+    <div class="logo-container">
+        <a th:href="@{/}">
+            <img th:src="@{/images/logo.png}" alt="Logo" class="logo">
+        </a>
+    </div>
+
+    <!-- Khung trung tâm -->
+    <div class="login-wrapper">
+        <th:block th:replace="${content}" />
+    </div>
+
+    <!-- Footer tùy chọn (dùng cho trang verify) -->
+    <th:block th:replace="${footer} ?: ~{}" />
+
+    <!-- Scripts riêng của trang -->
+    <th:block th:replace="${scripts} ?: ~{}" />
+</body>
+</html>

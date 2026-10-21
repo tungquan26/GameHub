@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app-layout :: layout('Search Tournaments - BTP Tournament', 'search', ~{::link}, ~{::pageContent}, ~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/pages/home/search.css}">
+</head>
+<body>
+    <th:block th:fragment="pageContent">
+        <div class="search-page">
+            <!-- ==================== HEADER BANNER ==================== -->
+            <section class="search-hero">
+                <div class="search-hero-pattern"></div>
+                <div class="search-container">
+                    <!-- Chỉ hiển thị 1 chữ Tournaments tĩnh, bỏ Leagues và Hubs, không có tính năng -->
+                    <div class="search-type-bar">
+                        <span class="search-type-text">Tournaments</span>
+                    </div>
+
+                    <!-- Thanh tìm kiếm đôi (Split Search Bar) -->
+                    <div class="split-search-bar">
+                        <!-- Ô tìm kiếm tên giải đấu -->
+                        <div class="split-search-field split-search-main">
+                            <svg class="split-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text"
+                                   id="tournamentSearchInput"
+                                   class="split-input"
+                                   placeholder="Search any tournament"
+                                   autocomplete="off">
+                            <button type="button" class="split-clear-btn" id="clearKeywordBtn" style="display: none;" aria-label="Clear search">&times;</button>
+                        </div>
+
+                        <!-- Ô địa điểm (Location) -->
+                        <div class="split-search-field split-search-location" id="locationFieldWrapper">
+                            <svg class="split-location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <input type="text"
+                                   id="locationSearchInput"
+                                   class="split-input"
+                                   placeholder="No location set"
+                                   autocomplete="off">
+                            <button type="button" class="split-gps-btn" id="locationMenuToggleBtn" title="Chọn nhanh địa điểm">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="7"/>
+                                    <circle cx="12" cy="12" r="2"/>
+                                    <line x1="12" y1="2" x2="12" y2="5"/>
+                                    <line x1="12" y1="19" x2="12" y2="22"/>
+                                    <line x1="2" y1="12" x2="5" y2="12"/>
+                                    <line x1="19" y1="12" x2="22" y2="12"/>
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown gợi ý địa điểm -->
+                            <div class="location-dropdown" id="locationDropdown" style="display: none;">
+                                <div class="dropdown-section-title">Quick Locations</div>
+                                <button type="button" class="dropdown-item active" data-location="">No location set (All)</button>
+                                <button type="button" class="dropdown-item" data-location="Online">Online</button>
+                                <button type="button" class="dropdown-item" data-location="Việt Nam">Việt Nam (HCM / Hà Nội / Đà Nẵng)</button>
+                                <button type="button" class="dropdown-item" data-location="JP">Japan (JP)</button>
+                                <button type="button" class="dropdown-item" data-location="SE">Sweden (SE)</button>
+                                <button type="button" class="dropdown-item" data-location="TH">Thailand (TH)</button>
+                                <button type="button" class="dropdown-item" data-location="SV">El Salvador (SV)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== BODY CONTENT ==================== -->
+            <section class="search-body">
+                <div class="search-container">
+                    <!-- Hàng nút lọc Pills: Filters, Game, Date -->
+                    <div class="filter-pills-row">
+                        <!-- Nút 1: Filters -->
+                        <div class="pill-dropdown-wrapper" id="filtersPillWrapper">
+                            <button type="button" class="filter-pill-btn" id="filtersPillBtn">
+                                <span id="filtersPillLabel">Filters</span>
+                                <svg class="pill-caret" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                            </button>
+                            <div class="pill-dropdown-menu" id="filtersDropdownMenu" style="display: none;">
+                                <div class="dropdown-section-title">Registration Status</div>
+                                <button type="button" class="dropdown-item active" data-filter-status="">All Statuses</button>
+                                <button type="button" class="dropdown-item" data-filter-status="open">Registration Open</button>
+                                <button type="button" class="dropdown-item" data-filter-status="closing">Registration Closes Soon</button>
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-section-title">Event Type</div>
+                                <button type="button" class="dropdown-item active" data-filter-type="">All Types</button>
+                                <button type="button" class="dropdown-item" data-filter-type="online">Online Only</button>
+                                <button type="button" class="dropdown-item" data-filter-type="offline">In-Person (Offline)</button>
+                            </div>
+                        </div>
+
+                        <!-- Nút 2: Game -->
+                        <div class="pill-dropdown-wrapper" id="gamePillWrapper">
+                            <button type="button" class="filter-pill-btn" id="gamePillBtn">
+                                <span id="gamePillLabel">Game</span>
+                                <svg class="pill-caret" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                            </button>
+                            <div class="pill-dropdown-menu pill-dropdown-scroll" id="gameDropdownMenu" style="display: none;">
+                                <div class="dropdown-section-title">Select Game</div>
+                                <button type="button" class="dropdown-item active" data-game="">All Games</button>
+                                <button type="button" class="dropdown-item" data-game="Super Smash Bros. Ultimate">Super Smash Bros. Ultimate</button>
+                                <button type="button" class="dropdown-item" data-game="Street Fighter 6">Street Fighter 6</button>
+                                <button type="button" class="dropdown-item" data-game="Avatar Legends: The Fighting Game">Avatar Legends: The Fighting Game</button>
+                                <button type="button" class="dropdown-item" data-game="2XKO">2XKO</button>
+                                <button type="button" class="dropdown-item" data-game="Valorant">Valorant</button>
+                                <button type="button" class="dropdown-item" data-game="Liên Minh Huyền Thoại">Liên Minh Huyền Thoại</button>
+                                <button type="button" class="dropdown-item" data-game="CS2">CS2</button>
+                                <button type="button" class="dropdown-item" data-game="PUBG">PUBG</button>
+                                <button type="button" class="dropdown-item" data-game="Dota 2">Dota 2</button>
+                                <button type="button" class="dropdown-item" data-game="FIFA Online">FIFA Online</button>
+                            </div>
+                        </div>
+
+                        <!-- Nút 3: Date -->
+                        <div class="pill-dropdown-wrapper" id="datePillWrapper">
+                            <button type="button" class="filter-pill-btn" id="datePillBtn">
+                                <span id="datePillLabel">Date</span>
+                                <svg class="pill-caret" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7 10l5 5 5-5z"/>
+                                </svg>
+                            </button>
+                            <div class="pill-dropdown-menu" id="dateDropdownMenu" style="display: none;">
+                                <div class="dropdown-section-title">Time Period</div>
+                                <button type="button" class="dropdown-item active" data-date="">Any Date</button>
+                                <button type="button" class="dropdown-item" data-date="Oct">October 2026</button>
+                                <button type="button" class="dropdown-item" data-date="Nov">November 2026</button>
+                                <button type="button" class="dropdown-item" data-date="Dec">December 2026</button>
+                            </div>
+                        </div>
+
+                        <!-- Nút Reset khi đang áp dụng bộ lọc -->
+                        <button type="button" class="filter-reset-btn" id="resetFiltersBtn" style="display: none;">
+                            Reset filters
+                        </button>
+                    </div>
+
+                    <!-- Danh sách thẻ giải đấu ngang -->
+                    <div class="tournament-list" id="searchTournamentList">
+                        <!-- Render bởi search.js -->
+                    </div>
+
+                    <!-- Trạng thái trống -->
+                    <div class="search-empty-state" id="searchEmptyState" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <h3>No tournaments found</h3>
+                        <p>Try adjusting your search keywords, location, or filter options.</p>
+                    </div>
+
+                    <!-- Phân trang (Pagination) -->
+                    <nav class="search-pagination" id="searchPagination" aria-label="Tournament pagination">
+                        <!-- Render bởi search.js -->
+                    </nav>
+                </div>
+            </section>
+        </div>
+    </th:block>
+
+    <script type="module" th:src="@{/js/pages/home/search.js}"></script>
+</body>
+</html>

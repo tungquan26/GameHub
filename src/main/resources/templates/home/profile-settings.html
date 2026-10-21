@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app-layout :: layout('Account & Profile Settings - BTP Tournament', 'profile', ~{::link}, ~{::pageContent}, ~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/pages/home/profile.css}">
+    <link rel="stylesheet" th:href="@{/css/common/toast.css}">
+</head>
+<body>
+    <th:block th:fragment="pageContent">
+        <div class="pfs-wrapper">
+            <!-- Thanh chuyển đổi nhanh giữa Profile Settings & Account Settings -->
+            <aside class="pfs-subnav">
+                <a th:href="@{/profile}" class="pfs-user-mini-card">
+                    <div class="pfs-mini-avatar">
+                        <img id="settingsMiniAvatarImg" src="" alt="Avatar" style="display: none;">
+                        <span id="settingsMiniAvatarInitial">T</span>
+                    </div>
+                    <div class="pfs-mini-meta">
+                        <strong id="settingsMiniTagName">tungquan</strong>
+                        <span>View Profile</span>
+                    </div>
+                </a>
+
+                <nav class="pfs-nav-list">
+                    <button type="button" class="pfs-nav-item active" data-tab="profile" id="tabBtnProfile">
+                        Profile Settings
+                    </button>
+                    <button type="button" class="pfs-nav-item" data-tab="account" id="tabBtnAccount">
+                        Account Settings
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- KHU VỰC NỘI DUNG SETTINGS -->
+            <div class="pfs-main">
+                <!-- ==================== TAB 1: PROFILE SETTINGS ==================== -->
+                <section class="pfs-panel" id="panelProfileSettings">
+                    <form id="profileSettingsForm" novalidate="novalidate">
+                        <div class="pfs-profile-grid">
+                            <!-- Cột trái: Các trường thông tin -->
+                            <div class="pfs-form-column">
+                                <h1 class="pfs-main-heading">Profile Settings</h1>
+
+                                <!-- Ảnh đại diện & Tag Name -->
+                                <div class="pfs-identity-block">
+                                    <div class="pfs-avatar-editor">
+                                        <div class="pfs-avatar-circle" id="settingsAvatarPreview">
+                                            <img id="settingsAvatarImg" src="" alt="Avatar" style="display: none;">
+                                            <span id="settingsAvatarInitial">T</span>
+                                        </div>
+                                        <div class="pfs-avatar-btns">
+                                            <input type="file" id="settingsAvatarInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden="hidden">
+                                            <button type="button" class="pfs-link-btn" id="uploadAvatarBtn">Change avatar</button>
+                                            <button type="button" class="pfs-link-btn danger" id="removeAvatarBtn" style="display: none;">Remove</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="pfs-outlined-group">
+                                        <label class="pfs-floating-label" for="inputGamerTag">GamerTag <span class="req">*</span></label>
+                                        <input type="text" id="inputGamerTag" class="pfs-outlined-input" value="tungquan" required>
+                                    </div>
+                                </div>
+
+                                <!-- Bio -->
+                                <div class="pfs-bio-block">
+                                    <label class="pfs-plain-label" for="inputBio">Enter a short bio to show with your gamertag</label>
+                                    <input type="text" id="inputBio" class="pfs-outlined-input pfs-plain-box" placeholder="">
+                                </div>
+
+                                <!-- Display pronouns -->
+                                <label class="pfs-checkbox-row">
+                                    <input type="checkbox" id="checkDisplayPronouns">
+                                    <span class="pfs-checkbox-box"></span>
+                                    <span class="pfs-checkbox-text">Display pronouns</span>
+                                </label>
+
+                                <div class="pfs-outlined-group" id="pronounsInputWrap" style="display: none; margin-top: 12px;">
+                                    <label class="pfs-floating-label" for="inputPronouns">Pronouns</label>
+                                    <input type="text" id="inputPronouns" class="pfs-outlined-input" placeholder="e.g. He/Him, She/Her, They/Them">
+                                </div>
+
+                                <!-- Location and Contact Info -->
+                                <div class="pfs-section-block">
+                                    <h2 class="pfs-sub-heading">Location and Contact Info</h2>
+                                    <p class="pfs-sub-desc">Tournaments that you sign up for may require some or all of this contact info.</p>
+
+                                    <!-- Country * -->
+                                    <div class="pfs-field-wrap">
+                                        <div class="pfs-outlined-group">
+                                            <label class="pfs-floating-label" for="selectCountry">Country <span class="req">*</span></label>
+                                            <select id="selectCountry" class="pfs-outlined-input pfs-select">
+                                                <option value="Vietnam">Vietnam</option>
+                                                <option value="United States">United States</option>
+                                                <option value="South Korea">South Korea</option>
+                                                <option value="Japan">Japan</option>
+                                                <option value="Singapore">Singapore</option>
+                                                <option value="Thailand">Thailand</option>
+                                                <option value="United Kingdom">United Kingdom</option>
+                                                <option value="Australia">Australia</option>
+                                            </select>
+                                            <span class="pfs-select-caret">&#9662;</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- City -->
+                                    <div class="pfs-field-wrap">
+                                        <div class="pfs-outlined-group">
+                                            <label class="pfs-floating-label" for="inputCity">City</label>
+                                            <input type="text" id="inputCity" class="pfs-outlined-input">
+                                        </div>
+                                        <span class="pfs-optional-hint">Optional</span>
+                                    </div>
+
+                                    <!-- Zip Code -->
+                                    <div class="pfs-field-wrap">
+                                        <div class="pfs-outlined-group">
+                                            <label class="pfs-floating-label" for="inputZipCode">Zip Code</label>
+                                            <input type="text" id="inputZipCode" class="pfs-outlined-input">
+                                        </div>
+                                        <span class="pfs-optional-hint">Optional</span>
+                                    </div>
+
+                                    <!-- Phone Number -->
+                                    <div class="pfs-field-wrap">
+                                        <div class="pfs-outlined-group">
+                                            <label class="pfs-floating-label" for="inputPhone">Phone Number</label>
+                                            <input type="text" id="inputPhone" class="pfs-outlined-input">
+                                        </div>
+                                        <span class="pfs-optional-hint">Optional</span>
+                                    </div>
+
+                                    <!-- Display city dropdown -->
+                                    <div class="pfs-display-city-wrap">
+                                        <button type="button" class="pfs-display-city-btn" id="displayCityBtn">
+                                            <span id="displayCityText">Display city</span>
+                                            <span class="pfs-caret-sm">&#9662;</span>
+                                        </button>
+                                        <div class="pfs-display-city-menu" id="displayCityMenu" style="display: none;">
+                                            <button type="button" class="pfs-city-opt" data-val="Display city">Display city</button>
+                                            <button type="button" class="pfs-city-opt" data-val="Hide city">Hide city</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Birthday -->
+                                <div class="pfs-section-block">
+                                    <h2 class="pfs-sub-heading">Birthday</h2>
+                                    <div class="pfs-birthday-display" id="birthdayFormattedText">January 10th, 2002</div>
+                                </div>
+                            </div>
+
+                            <!-- Cột phải: Nút Update Account giống ảnh mẫu -->
+                            <div class="pfs-action-column">
+                                <button type="submit" class="pfs-update-account-btn" id="updateAccountBtn" disabled="disabled">
+                                    Update Account
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- ==================== TAB 2: ACCOUNT SETTINGS ==================== -->
+                <section class="pfs-panel" id="panelAccountSettings" style="display: none;">
+                    <div class="pfs-form-column">
+                        <h1 class="pfs-main-heading">Account Settings</h1>
+
+                        <!-- Email -->
+                        <div class="pfs-section-block pfs-first-block">
+                            <h2 class="pfs-sub-heading">Email</h2>
+                            <p class="pfs-sub-desc">Email address is never shown publicly. Tournaments and events may ask permission to your email during registration.</p>
+                            <div class="pfs-current-email" id="currentEmailDisplay">quanquan4101990@gmail.com</div>
+                            <button type="button" class="pfs-change-email-link" id="toggleChangeEmailBtn">Change email</button>
+
+                            <!-- Khung đổi email ẩn/hiện khi bấm Change email -->
+                            <div class="pfs-change-email-box" id="changeEmailBox" style="display: none;">
+                                <div class="pfs-outlined-group">
+                                    <label class="pfs-floating-label" for="inputNewEmail">New Email <span class="req">*</span></label>
+                                    <input type="email" id="inputNewEmail" class="pfs-outlined-input" placeholder="you@example.com">
+                                </div>
+                                <div class="pfs-email-actions">
+                                    <button type="button" class="pfs-save-btn active" id="saveNewEmailBtn">Update Email</button>
+                                    <button type="button" class="pfs-cancel-link" id="cancelNewEmailBtn">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <form id="passwordSettingsForm" class="pfs-section-block" novalidate="novalidate">
+                            <h2 class="pfs-sub-heading">Password</h2>
+
+                            <div class="pfs-field-wrap">
+                                <div class="pfs-outlined-group">
+                                    <label class="pfs-floating-label" for="inputOldPassword">Old Password <span class="req">*</span></label>
+                                    <input type="password" id="inputOldPassword" class="pfs-outlined-input">
+                                </div>
+                            </div>
+
+                            <div class="pfs-field-wrap">
+                                <div class="pfs-outlined-group pfs-password-group">
+                                    <label class="pfs-floating-label" for="inputNewPassword">New Password <span class="req">*</span></label>
+                                    <input type="password" id="inputNewPassword" class="pfs-outlined-input has-eye">
+                                    <button type="button" class="pfs-eye-btn" id="toggleNewPasswordEye" aria-label="Show or hide password">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="pfs-save-btn" id="savePasswordBtn" disabled="disabled">Save</button>
+                        </form>
+
+                        <!-- Delete Account -->
+                        <div class="pfs-section-block">
+                            <h2 class="pfs-sub-heading">Delete Account</h2>
+                            <p class="pfs-sub-desc">Close your user account and remove all associated personal data. This cannot be undone.</p>
+                            <button type="button" class="pfs-delete-account-btn" id="deleteAccountBtn">Delete Account</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/toast :: toast}"></div>
+    </th:block>
+
+    <script type="module" th:src="@{/js/pages/home/profile.js}"></script>
+</body>
+</html>

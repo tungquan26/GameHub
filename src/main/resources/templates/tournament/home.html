@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/tournament-layout :: layout('Tournament Home - BTP Tournament', 'Home', 'home', ~{::link}, ~{::pageContent}, ~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/pages/tournament/home.css}">
+</head>
+<body>
+    <th:block th:fragment="pageContent">
+        <div class="th-page-wrapper">
+            <!-- ==================== PHẦN ĐẦU: ẢNH BÌA & THÔNG TIN GIẢI ĐẤU ==================== -->
+            <div class="th-hero-section">
+                <!-- Ảnh bìa (Banner) -->
+                <div class="th-banner-box" id="homeBannerBox">
+                    <img id="homeBannerImg" src="" alt="Tournament Banner" class="th-banner-img" style="display: none;">
+                    <div id="homeBannerFallback" class="th-banner-fallback"></div>
+                </div>
+
+                <!-- Thanh thông tin đại diện bên dưới Banner -->
+                <div class="th-header-bar">
+                    <div class="th-header-inner">
+                        <div class="th-profile-box">
+                            <img id="homeProfileImg" src="" alt="Profile Avatar" class="th-profile-img" style="display: none;">
+                            <div id="homeProfileFallback" class="th-profile-fallback">N</div>
+                        </div>
+
+                        <div class="th-identity-info">
+                            <span class="th-type-label">TOURNAMENT</span>
+                            <h1 class="th-tourney-title" id="homeTourneyName">Nguyễn Quân</h1>
+                            <div class="th-meta-list">
+                                <!-- Ngày tháng -->
+                                <div class="th-meta-item">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="th-meta-icon">
+                                        <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span id="homeDateRange">Oct 15th — 16th, 2026</span>
+                                </div>
+
+                                <!-- Địa điểm -->
+                                <div class="th-meta-item" id="homeMetaVenueWrap">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="th-meta-icon">
+                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span id="homeVenueText">Chưa cập nhật địa điểm</span>
+                                </div>
+
+                                <!-- Liên hệ -->
+                                <div class="th-meta-item" id="homeMetaContactWrap">
+                                    <span class="th-meta-icon" id="homeMetaContactIcon"></span>
+                                    <a href="#" id="homeContactLink" class="th-meta-link">quannguyen041026@gmail.com</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CÁC SECTION NỘI DUNG BÊN DƯỚI (RENDER ĐỘNG THEO CẤU HÌNH HOMEPAGE EDITOR) ==================== -->
+            <div class="th-sections-container" id="thSectionsContainer">
+                <!-- Các Section, Column Layout và Widget được render tại đây bởi home.js -->
+            </div>
+
+            <!-- Thanh nút + Add Section ở cuối trang khi đang ở chế độ Edit Page -->
+            <div class="th-add-section-wrap" id="bottomAddSectionWrap" style="display: none;">
+                <button type="button" class="th-add-section-btn" id="bottomAddSectionBtn">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
+                    </svg>
+                    <span>Add Section</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== HỘP HOMEPAGE GÓC DƯỚI PHẢI (CHUẨN START.GG) ==================== -->
+        <div class="th-floating-editor" id="floatingHomepageBox">
+            <button type="button" class="th-floating-close" id="floatingToggleCollapseBtn" aria-label="Toggle collapse" title="Thu gọn / Mở rộng">
+                <svg viewBox="0 0 20 20" fill="currentColor" id="floatingChevronIcon">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+
+            <div class="th-floating-info">
+                <h4 class="th-floating-title" id="floatingBoxTitle">Homepage</h4>
+                <p class="th-floating-sub" id="floatingStatsText">4 sections · 5 total widgets</p>
+            </div>
+
+            <div class="th-floating-body" id="floatingBodyWrap">
+                <!-- Trạng thái mặc định: Nút Edit Page -->
+                <div id="floatingViewActions" class="th-floating-view-actions">
+                    <button type="button" class="th-floating-edit-btn" id="startEditPageBtn">Edit Page</button>
+                </div>
+
+                <!-- Trạng thái đang chỉnh sửa (Edit Mode) -->
+                <div id="floatingEditActions" class="th-floating-edit-actions" style="display: none;">
+                    <div class="th-floating-quick-tools">
+                        <button type="button" class="th-floating-tool-btn" id="floatingAddSectionBtn">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
+                            </svg>
+                            <span>Add Section</span>
+                        </button>
+                        <button type="button" class="th-floating-tool-btn secondary" id="floatingResetLayoutBtn" title="Khôi phục bố cục mặc định">
+                            <span>Reset Default</span>
+                        </button>
+                    </div>
+                    <div class="th-floating-save-bar">
+                        <button type="button" class="th-floating-cancel-btn" id="cancelEditPageBtn">Cancel</button>
+                        <button type="button" class="th-floating-save-btn" id="saveEditPageBtn">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL 1: CHỌN WIDGET ĐỂ THÊM VÀO CỘT ==================== -->
+        <div class="th-modal-backdrop" id="widgetPickerModal" style="display: none;">
+            <div class="th-modal-card">
+                <div class="th-modal-header">
+                    <div>
+                        <h3 class="th-modal-title">Add Widget</h3>
+                        <p class="th-modal-subtitle">Select a widget to add to this section column</p>
+                    </div>
+                    <button type="button" class="th-modal-close" id="closeWidgetPickerBtn">&times;</button>
+                </div>
+                <div class="th-modal-body">
+                    <div class="th-widget-picker-grid" id="widgetPickerGrid">
+                        <button type="button" class="th-widget-option" data-widget-type="MARKDOWN">
+                            <div class="th-widget-option-icon">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 5A.75.75 0 012.75 9h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 9.75zm0 5a.75.75 0 01.75-.75h9.5a.75.75 0 010 1.5h-9.5a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="th-widget-option-info">
+                                <strong>Markdown / Text</strong>
+                                <span>Add custom text, announcements, or formatted Markdown content.</span>
+                            </div>
+                        </button>
+
+                        <button type="button" class="th-widget-option" data-widget-type="IMAGE">
+                            <div class="th-widget-option-icon">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M1 5.25A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17H3.25A2.25 2.25 0 011 14.75v-9.5zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 00.75-.75v-2.69l-2.22-2.219a.75.75 0 00-1.06 0l-1.91 1.909.47.47a.75.75 0 11-1.06 1.06L6.53 8.091a.75.75 0 00-1.06 0l-2.97 2.97zM12 7a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="th-widget-option-info">
+                                <strong>Image</strong>
+                                <span>Upload an image or paste an image URL with optional caption and link.</span>
+                            </div>
+                        </button>
+
+                        <button type="button" class="th-widget-option" data-widget-type="GAME_INFO">
+                            <div class="th-widget-option-icon">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                                </svg>
+                            </div>
+                            <div class="th-widget-option-info">
+                                <strong>Game Info &amp; Format</strong>
+                                <span>Display the tournament game, bracket format, and start time.</span>
+                            </div>
+                        </button>
+
+                        <button type="button" class="th-widget-option" data-widget-type="LOCATION">
+                            <div class="th-widget-option-icon">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="th-widget-option-info">
+                                <strong>Location &amp; Map</strong>
+                                <span>Show venue address, directions button, and embedded Google Map.</span>
+                            </div>
+                        </button>
+
+                        <button type="button" class="th-widget-option" data-widget-type="CONTACT">
+                            <div class="th-widget-option-icon">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z"/>
+                                    <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z"/>
+                                </svg>
+                            </div>
+                            <div class="th-widget-option-info">
+                                <strong>Contact Info</strong>
+                                <span>Display tournament organizer Email or Discord link.</span>
+                            </div>
+                        </button>
+
+                        <button type="button" class="th-widget-option" data-widget-type="RULES">
+                            <div class="th-widget-option-icon">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v13A1.5 1.5 0 004.5 18h11a1.5 1.5 0 001.5-1.5V7.621a1.5 1.5 0 00-.44-1.06l-4.12-4.122A1.5 1.5 0 0011.378 2H4.5zm2.25 8.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5zm0 3a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="th-widget-option-info">
+                                <strong>Rules</strong>
+                                <span>Display tournament rules with expandable Show more / Show less.</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL 2: CHỈNH SỬA WIDGET MARKDOWN / TEXT ==================== -->
+        <div class="th-modal-backdrop" id="markdownWidgetModal" style="display: none;">
+            <div class="th-modal-card">
+                <div class="th-modal-header">
+                    <div>
+                        <h3 class="th-modal-title">Edit Custom Text / Markdown Widget</h3>
+                        <p class="th-modal-subtitle">Customize widget heading and Markdown content</p>
+                    </div>
+                    <button type="button" class="th-modal-close" id="closeMarkdownModalBtn">&times;</button>
+                </div>
+                <div class="th-modal-body">
+                    <div class="th-modal-field">
+                        <label for="mdWidgetTitleInput">Widget Title (Optional)</label>
+                        <input type="text" id="mdWidgetTitleInput" class="th-modal-input" placeholder="e.g. Overview, Schedule, Prizes...">
+                    </div>
+                    <div class="th-modal-field">
+                        <label for="mdWidgetContentInput">Content (Supports Markdown)</label>
+                        <textarea id="mdWidgetContentInput" class="th-modal-textarea" rows="6" placeholder="Write content using Markdown..."></textarea>
+                    </div>
+                </div>
+                <div class="th-modal-footer">
+                    <button type="button" class="th-floating-cancel-btn" id="cancelMarkdownModalBtn">Cancel</button>
+                    <button type="button" class="th-floating-save-btn" id="saveMarkdownModalBtn">Apply</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL 3: CHỈNH SỬA WIDGET ẢNH (IMAGE WIDGET) ==================== -->
+        <div class="th-modal-backdrop" id="imageWidgetModal" style="display: none;">
+            <div class="th-modal-card">
+                <div class="th-modal-header">
+                    <div>
+                        <h3 class="th-modal-title">Edit Image Widget</h3>
+                        <p class="th-modal-subtitle">Upload an image from your device or paste an image URL</p>
+                    </div>
+                    <button type="button" class="th-modal-close" id="closeImageModalBtn">&times;</button>
+                </div>
+                <div class="th-modal-body">
+                    <div class="th-modal-field">
+                        <label for="imgWidgetTitleInput">Widget Title (Optional)</label>
+                        <input type="text" id="imgWidgetTitleInput" class="th-modal-input" placeholder="e.g. Tournament Poster, Sponsors, Prize Pool...">
+                    </div>
+
+                    <div class="th-modal-field">
+                        <label>Image Source</label>
+                        <div class="th-img-upload-zone" id="imgWidgetUploadZone">
+                            <input type="file" id="imgWidgetFileInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden="hidden">
+                            <div id="imgWidgetEmptyState" class="th-img-empty-state">
+                                <button type="button" class="th-img-upload-btn" id="selectImgWidgetFileBtn">Upload Image</button>
+                                <span>PNG, JPG, WEBP, or GIF (Max 4MB)</span>
+                            </div>
+                            <div id="imgWidgetPreviewState" class="th-img-preview-state" style="display: none;">
+                                <img id="imgWidgetPreviewTag" src="" alt="Preview">
+                                <button type="button" class="th-img-remove-btn" id="removeImgWidgetFileBtn">Remove Image</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="th-modal-field">
+                        <label for="imgWidgetUrlInput">Or Image URL</label>
+                        <input type="url" id="imgWidgetUrlInput" class="th-modal-input" placeholder="https://example.com/banner.png">
+                    </div>
+
+                    <div class="th-modal-field">
+                        <label for="imgWidgetCaptionInput">Caption (Optional)</label>
+                        <input type="text" id="imgWidgetCaptionInput" class="th-modal-input" placeholder="Short description below the image...">
+                    </div>
+
+                    <div class="th-modal-field">
+                        <label for="imgWidgetLinkInput">Click Link URL (Optional)</label>
+                        <input type="url" id="imgWidgetLinkInput" class="th-modal-input" placeholder="https://...">
+                    </div>
+
+                    <p id="imgWidgetErrorMsg" class="th-img-error-msg" style="display: none;"></p>
+                </div>
+                <div class="th-modal-footer">
+                    <button type="button" class="th-floating-cancel-btn" id="cancelImageModalBtn">Cancel</button>
+                    <button type="button" class="th-floating-save-btn" id="saveImageModalBtn">Apply</button>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <script type="module" th:src="@{/js/pages/tournament/home.js}"></script>
+</body>
+</html>

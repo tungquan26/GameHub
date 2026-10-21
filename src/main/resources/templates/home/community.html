@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app-layout :: layout('Community & Teams - BTP Tournament', 'community', ~{::link}, ~{::pageContent}, ~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/pages/home/community.css}">
+</head>
+<body>
+    <th:block th:fragment="pageContent">
+        <div class="cm-page-wrapper">
+            <!-- ==================== 1. COMMUNITY HERO HEADER ==================== -->
+            <section class="cm-hero-banner">
+                <div class="cm-hero-pattern"></div>
+                <div class="cm-hero-inner">
+                    <div class="cm-hero-left">
+                        <span class="cm-hero-eyebrow">BTP ESPORTS COMMUNITY HUB</span>
+                        <h1 class="cm-hero-title">Community &amp; Teams</h1>
+                        <p class="cm-hero-desc">
+                            Tạo đội tuyển của riêng bạn, chiêu mộ đồng đội và theo dõi tất cả các đội tuyển bạn đang tham gia tranh tài.
+                        </p>
+                        <div class="cm-hero-actions">
+                            <button type="button" class="cm-btn-primary" id="openCreateTeamBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                <span>Tạo Team mới</span>
+                            </button>
+                            <a href="#discoverTeamsSection" class="cm-btn-secondary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                </svg>
+                                <span>Tìm đội tuyển</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Thẻ tóm tắt trạng thái đội tuyển của người dùng hiện tại -->
+                    <div class="cm-profile-status-card">
+                        <div class="cm-status-user-row">
+                            <div class="cm-user-avatar" id="cmCurrentUserAvatar">N</div>
+                            <div class="cm-user-info">
+                                <span class="cm-user-label">HỒ SƠ TUYỂN THỦ</span>
+                                <strong class="cm-user-name" id="cmCurrentUserName">Nguyễn Quân</strong>
+                            </div>
+                        </div>
+                        <div class="cm-status-stats">
+                            <div class="cm-stat-box">
+                                <span class="cm-stat-num" id="statMyTeamsCount">0</span>
+                                <span class="cm-stat-label">Team đang thuộc</span>
+                            </div>
+                            <div class="cm-stat-divider"></div>
+                            <div class="cm-stat-box">
+                                <span class="cm-stat-num" id="statCaptainCount">0</span>
+                                <span class="cm-stat-label">Đội trưởng</span>
+                            </div>
+                        </div>
+                        <div class="cm-status-Current-tags" id="cmUserTeamBadges">
+                            <!-- Danh sách huy hiệu nhanh các team đang tham gia -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== 2. KHU VỰC: TEAM CỦA TÔI ==================== -->
+            <section class="cm-section" id="myTeamsSection">
+                <div class="cm-section-header">
+                    <div>
+                        <div class="cm-section-title-row">
+                            <h2 class="cm-section-title">Đội tuyển của tôi</h2>
+                            <span class="cm-count-pill" id="myTeamsBadgeCount">0 đội</span>
+                        </div>
+                        <p class="cm-section-subtitle">Danh sách các đội tuyển bạn đã tạo hoặc đang là thành viên chính thức</p>
+                    </div>
+                    <button type="button" class="cm-btn-outline-blue" id="openCreateTeamTopBtn">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
+                        </svg>
+                        <span>Tạo Team riêng</span>
+                    </button>
+                </div>
+
+                <!-- Grid danh sách Team của tôi -->
+                <div class="cm-my-teams-grid" id="myTeamsGrid"></div>
+
+                <!-- Trạng thái trống nếu chưa thuộc Team nào -->
+                <div class="cm-empty-box" id="myTeamsEmptyState" style="display: none;">
+                    <div class="cm-empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 010 7.75"/>
+                        </svg>
+                    </div>
+                    <h3>Bạn chưa thuộc đội tuyển nào</h3>
+                    <p>Hãy tạo ngay một Team của riêng bạn để làm Đội trưởng hoặc gia nhập các đội tuyển đang tuyển thành viên bên dưới.</p>
+                    <button type="button" class="cm-btn-primary" id="emptyCreateTeamBtn">+ Tạo Team đầu tiên của bạn</button>
+                </div>
+            </section>
+
+            <!-- ==================== 3. KHU VỰC: KHÁM PHÁ CỘNG ĐỒNG ==================== -->
+            <section class="cm-section" id="discoverTeamsSection">
+                <div class="cm-filter-bar">
+                    <div>
+                        <h2 class="cm-section-title">Khám phá Đội tuyển Cộng đồng</h2>
+                        <p class="cm-section-subtitle">Tìm kiếm và gia nhập các đội tuyển đang hoạt động trên hệ thống</p>
+                    </div>
+
+                    <div class="cm-filter-controls">
+                        <div class="cm-search-box">
+                            <svg class="cm-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" id="communitySearchInput" class="cm-search-input" placeholder="Tìm theo tên đội, tag [BTP] hoặc thành viên...">
+                        </div>
+
+                        <select id="communityGameFilter" class="cm-select">
+                            <option value="">Tất cả tựa game</option>
+                            <option value="Liên Minh Huyền Thoại">Liên Minh Huyền Thoại</option>
+                            <option value="Valorant">Valorant</option>
+                            <option value="CS2">CS2</option>
+                            <option value="PUBG">PUBG</option>
+                            <option value="Dota 2">Dota 2</option>
+                            <option value="Teamfight Tactics">Teamfight Tactics</option>
+                            <option value="FIFA Online">FIFA Online</option>
+                            <option value="Street Fighter 6">Street Fighter 6</option>
+                        </select>
+
+                        <select id="communityStatusFilter" class="cm-select">
+                            <option value="">Mọi trạng thái</option>
+                            <option value="RECRUITING">Đang tuyển thành viên</option>
+                            <option value="MY_TEAM">Team tôi đang tham gia</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Grid danh sách các Team cộng đồng -->
+                <div class="cm-community-grid" id="communityTeamsGrid"></div>
+
+                <div class="cm-empty-box" id="communityEmptyState" style="display: none;">
+                    <h3>Không tìm thấy đội tuyển phù hợp</h3>
+                    <p>Thử thay đổi từ khóa tìm kiếm hoặc tự tạo một đội tuyển mới cho tựa game này.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- ==================== MODAL TẠO / QUẢN LÝ TEAM ==================== -->
+        <div class="cm-modal-backdrop" id="teamFormModal" style="display: none;">
+            <div class="cm-modal-card">
+                <div class="cm-modal-header">
+                    <div>
+                        <h3 class="cm-modal-title" id="teamModalTitle">Tạo Đội Tuyển Mới</h3>
+                        <p class="cm-modal-subtitle" id="teamModalSubtitle">Thiết lập hồ sơ đội tuyển, biểu tượng và danh sách thành viên</p>
+                    </div>
+                    <button type="button" class="cm-modal-close" id="closeTeamModalBtn">&times;</button>
+                </div>
+
+                <form id="teamModalForm" novalidate="novalidate">
+                    <div class="cm-modal-body">
+                        <!-- Hàng 1: Tên Team & Team Tag -->
+                        <div class="cm-form-row">
+                            <div class="cm-form-field">
+                                <label for="teamNameInput">Tên Đội Tuyển <span class="req">*</span></label>
+                                <input type="text" id="teamNameInput" class="cm-input" placeholder="VD: BTP Gaming, T1 Vietnam..." required>
+                            </div>
+                            <div class="cm-form-field">
+                                <label for="teamTagInput">Tag Viết Tắt (2 - 5 ký tự) <span class="req">*</span></label>
+                                <input type="text" id="teamTagInput" class="cm-input" placeholder="VD: BTP, GAM, VKE" maxlength="5" required>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 2: Tựa game chính & Trạng thái tuyển quân -->
+                        <div class="cm-form-row">
+                            <div class="cm-form-field">
+                                <label for="teamGameInput">Tựa Game Thi Đấu Chính <span class="req">*</span></label>
+                                <select id="teamGameInput" class="cm-input" required>
+                                    <option value="Liên Minh Huyền Thoại">Liên Minh Huyền Thoại</option>
+                                    <option value="Valorant">Valorant</option>
+                                    <option value="CS2">CS2</option>
+                                    <option value="PUBG">PUBG</option>
+                                    <option value="Dota 2">Dota 2</option>
+                                    <option value="Teamfight Tactics">Teamfight Tactics</option>
+                                    <option value="FIFA Online">FIFA Online</option>
+                                    <option value="Street Fighter 6">Street Fighter 6</option>
+                                </select>
+                            </div>
+
+                            <div class="cm-form-field">
+                                <label for="teamRecruitingInput">Trạng Thái Đội Hình</label>
+                                <select id="teamRecruitingInput" class="cm-input">
+                                    <option value="true">Đang mở tuyển thành viên</option>
+                                    <option value="false">Đã chốt đội hình</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 3: Logo đội & Màu chủ đạo -->
+                        <div class="cm-form-row">
+                            <div class="cm-form-field">
+                                <label>Logo Đội Tuyển</label>
+                                <div class="cm-logo-upload-box">
+                                    <input type="file" id="teamLogoFileInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden="hidden">
+                                    <div class="cm-logo-preview" id="teamLogoPreviewBox">BTP</div>
+                                    <div class="cm-logo-actions">
+                                        <button type="button" class="cm-btn-xs" id="uploadTeamLogoBtn">Tải ảnh Logo</button>
+                                        <button type="button" class="cm-btn-xs danger" id="removeTeamLogoBtn" style="display: none;">Xóa ảnh</button>
+                                        <span class="cm-logo-hint">PNG/JPG tối đa 4MB</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cm-form-field">
+                                <label>Màu Huy Hiệu Đội</label>
+                                <div class="cm-color-swatches" id="teamColorSwatches">
+                                    <button type="button" class="cm-color-swatch active" data-color="#4f78ff" style="background:#4f78ff;"></button>
+                                    <button type="button" class="cm-color-swatch" data-color="#e11d48" style="background:#e11d48;"></button>
+                                    <button type="button" class="cm-color-swatch" data-color="#10b981" style="background:#10b981;"></button>
+                                    <button type="button" class="cm-color-swatch" data-color="#f59e0b" style="background:#f59e0b;"></button>
+                                    <button type="button" class="cm-color-swatch" data-color="#8b5cf6" style="background:#8b5cf6;"></button>
+                                    <button type="button" class="cm-color-swatch" data-color="#06b6d4" style="background:#06b6d4;"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 4: Danh sách thành viên thêm cùng -->
+                        <div class="cm-form-field">
+                            <label for="teamMembersInput">Danh sách đồng đội (Ngăn cách bằng dấu phẩy `,`)</label>
+                            <input type="text" id="teamMembersInput" class="cm-input" placeholder="VD: Minh Tuấn, Hoàng Long, Đức Anh...">
+                            <span class="cm-field-hint">Bạn (<strong id="modalCaptainNameHint">Nguyễn Quân</strong>) sẽ tự động được gán làm <strong>Đội trưởng</strong> của đội này.</span>
+                        </div>
+
+                        <!-- Hàng 5: Giới thiệu / Khẩu hiệu đội -->
+                        <div class="cm-form-field">
+                            <label for="teamDescInput">Giới thiệu ngắn / Yêu cầu tuyển thành viên</label>
+                            <textarea id="teamDescInput" class="cm-textarea" rows="3" placeholder="VD: Đội tuyển bán chuyên khu vực Hà Nội, tìm kiếm người chơi vị trí Jungle / Duelist..."></textarea>
+                        </div>
+
+                        <p id="teamModalErrorMsg" class="cm-error-msg" style="display: none;"></p>
+                    </div>
+
+                    <div class="cm-modal-footer">
+                        <button type="button" class="cm-btn-cancel" id="cancelTeamModalBtn">Hủy</button>
+                        <button type="submit" class="cm-btn-save" id="saveTeamModalBtn">Lưu Đội Tuyển</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </th:block>
+
+    <script type="module" th:src="@{/js/pages/home/community.js}"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app-layout :: layout('My Events - BTP Tournament', 'tournaments', ~{::link}, ~{::pageContent}, ~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/pages/home/events.css}">
+</head>
+<body>
+    <th:block th:fragment="pageContent">
+        <div class="ev-page">
+            <!-- ==================== 1. HEADER BANNER ==================== -->
+            <section class="ev-hero">
+                <div class="ev-hero-pattern"></div>
+                <div class="ev-container ev-hero-inner">
+                    <div class="ev-hero-left">
+                        <span class="ev-eyebrow">TOURNAMENT MANAGEMENT &amp; PARTICIPATION</span>
+                        <h1 class="ev-title">My Events</h1>
+                        <p class="ev-subtitle">
+                            Danh sách các giải đấu bạn đang trực tiếp tổ chức (<strong>Organizer</strong>) hoặc đăng ký tham gia thi đấu (<strong>Player</strong>).
+                        </p>
+                        <div class="ev-hero-actions">
+                            <a th:href="@{/create}" class="ev-btn ev-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="17" height="17">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                <span>Create Event</span>
+                            </a>
+                            <a th:href="@{/search}" class="ev-btn ev-btn-secondary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                </svg>
+                                <span>Find Events</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Thẻ thống kê nhanh -->
+                    <div class="ev-stats-card">
+                        <div class="ev-stat-item">
+                            <span class="ev-stat-num" id="evTotalCount">0</span>
+                            <span class="ev-stat-label">Total Events</span>
+                        </div>
+                        <div class="ev-stat-divider"></div>
+                        <div class="ev-stat-item">
+                            <span class="ev-stat-num ev-num-organizer" id="evOrganizerCount">0</span>
+                            <span class="ev-stat-label">Organizer</span>
+                        </div>
+                        <div class="ev-stat-divider"></div>
+                        <div class="ev-stat-item">
+                            <span class="ev-stat-num ev-num-player" id="evPlayerCount">0</span>
+                            <span class="ev-stat-label">Player</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== 2. FILTER BAR & DANH SÁCH THẺ NGANG ==================== -->
+            <section class="ev-body">
+                <div class="ev-container">
+                    <!-- Thanh công cụ: Lọc theo vai trò (All / Organizer / Player) & Tìm kiếm -->
+                    <div class="ev-toolbar">
+                        <div class="ev-role-tabs" id="evRoleTabs">
+                            <button type="button" class="ev-role-tab active" data-role="">
+                                All Events
+                            </button>
+                            <button type="button" class="ev-role-tab" data-role="Organizer">
+                                <span class="ev-dot ev-dot-organizer"></span>
+                                Organizer
+                            </button>
+                            <button type="button" class="ev-role-tab" data-role="Player">
+                                <span class="ev-dot ev-dot-player"></span>
+                                Player
+                            </button>
+                        </div>
+
+                        <div class="ev-search-box">
+                            <svg class="ev-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text"
+                                   id="evSearchInput"
+                                   class="ev-search-input"
+                                   placeholder="Search your events..."
+                                   autocomplete="off">
+                        </div>
+                    </div>
+
+                    <!-- Danh sách giải đấu theo chiều ngang -->
+                    <div class="ev-horizontal-list" id="evTournamentList">
+                        <!-- Render tự động bởi events.js -->
+                    </div>
+
+                    <!-- Trạng thái trống -->
+                    <div class="ev-empty-state" id="evEmptyState" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+                            <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
+                            <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
+                            <path d="M4 22h16"/>
+                            <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
+                        </svg>
+                        <h3>Không tìm thấy sự kiện nào</h3>
+                        <p>Thử thay đổi bộ lọc vai trò hoặc từ khóa tìm kiếm của bạn.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </th:block>
+
+    <script type="module" th:src="@{/js/pages/home/events.js}"></script>
+</body>
+</html>
