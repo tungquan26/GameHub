@@ -3,186 +3,219 @@
 // =====================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Mốc ngày tham chiếu mặc định để các bộ lọc Next 7 Days / Past 7 Days luôn khớp dữ liệu mẫu
+    const TODAY = new Date('2026-10-22T00:00:00');
+
     // ===== Dữ liệu mẫu chuẩn theo thiết kế Start.gg + Dashboard =====
     const DEFAULT_TOURNAMENTS = [
         {
             id: 101,
             name: '第74回スマバトSP',
             dateLabel: 'Upcoming • Oct 24th, 2026',
-            monthTag: 'Oct',
+            startDate: '2026-10-24',
             game: 'Super Smash Bros. Ultimate',
             gameDisplay: 'Super Smash Bros. Ultimate',
             location: '大東市, JP',
             attendees: 312,
-            status: 'closing',
+            status: 'upcoming',
+            badgeLabel: 'Registration Closes Soon',
+            badgeClass: 'stc-badge-closing',
             image: '/images/game1.png'
         },
         {
             id: 102,
             name: 'LEGENDS7',
-            dateLabel: 'Upcoming • Oct 24th, 2026',
-            monthTag: 'Oct',
+            dateLabel: 'Upcoming • Oct 26th, 2026',
+            startDate: '2026-10-26',
             game: 'Super Smash Bros. Ultimate',
             gameDisplay: 'Super Smash Bros. Ultimate',
             location: 'San Salvador, SV',
             attendees: 326,
-            status: 'closing',
+            status: 'upcoming',
+            badgeLabel: 'Upcoming',
+            badgeClass: 'stc-badge-upcoming',
             image: '/images/game2.png'
         },
         {
             id: 103,
             name: 'World Warrior 2026 - Japan 5',
-            dateLabel: 'Upcoming • Nov 28th, 2026',
-            monthTag: 'Nov',
+            dateLabel: 'In Progress • Oct 21st - Oct 23rd, 2026',
+            startDate: '2026-10-21',
             game: 'Street Fighter 6',
             gameDisplay: 'Street Fighter 6',
             location: 'Online',
             attendees: 426,
-            status: 'open',
+            status: 'in_progress',
+            badgeLabel: 'In Progress',
+            badgeClass: 'stc-badge-progress',
             image: '/images/game3.png'
         },
         {
             id: 104,
             name: 'Headstomper 2026',
             dateLabel: 'Upcoming • Nov 6th, 2026',
-            monthTag: 'Nov',
+            startDate: '2026-11-06',
             game: 'Avatar Legends: The Fighting Game',
             gameDisplay: 'Avatar Legends: The Fighting Game — and 10 more games',
             location: 'Malmö, SE',
             attendees: 450,
-            status: 'open',
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game4.png'
         },
         {
             id: 105,
             name: 'TGU 2026',
             dateLabel: 'Upcoming • Nov 13th, 2026',
-            monthTag: 'Nov',
+            startDate: '2026-11-13',
             game: '2XKO',
             gameDisplay: '2XKO — and 7 more games',
             location: 'Tambon Ban Mai, TH',
-            attendees: 0,
-            status: 'open',
+            attendees: 180,
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game5.png'
         },
         {
             id: 1,
             name: 'VCT Champions 2026 — Vietnam Qualifier',
-            dateLabel: 'Upcoming • Nov 15th, 2026',
-            monthTag: 'Nov',
+            dateLabel: 'In Progress • Oct 22nd, 2026',
+            startDate: '2026-10-22',
             game: 'Valorant',
             gameDisplay: 'Valorant',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 128,
-            status: 'open',
+            status: 'in_progress',
+            badgeLabel: 'In Progress',
+            badgeClass: 'stc-badge-progress',
             image: '/images/game1.png'
         },
         {
             id: 2,
             name: 'LCK Summer Split — Open Qualifiers',
             dateLabel: 'Upcoming • Dec 1st, 2026',
-            monthTag: 'Dec',
+            startDate: '2026-12-01',
             game: 'Liên Minh Huyền Thoại',
             gameDisplay: 'Liên Minh Huyền Thoại',
             location: 'Online',
             attendees: 256,
-            status: 'open',
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game2.png'
         },
         {
             id: 3,
             name: 'CS2 Major Vietnam — Community Cup',
-            dateLabel: 'Upcoming • Nov 22nd, 2026',
-            monthTag: 'Nov',
+            dateLabel: 'Completed • Oct 18th, 2026',
+            startDate: '2026-10-18',
             game: 'CS2',
             gameDisplay: 'CS2',
             location: 'Hà Nội, Việt Nam',
             attendees: 64,
-            status: 'closing',
+            status: 'completed',
+            badgeLabel: 'Completed',
+            badgeClass: 'stc-badge-completed',
             image: '/images/game3.png'
         },
         {
             id: 4,
             name: 'PUBG Mobile Pro League VN Season 8',
-            dateLabel: 'Upcoming • Dec 5th, 2026',
-            monthTag: 'Dec',
+            dateLabel: 'Upcoming • Dec 15th, 2026',
+            startDate: '2026-12-15',
             game: 'PUBG',
             gameDisplay: 'PUBG',
             location: 'Online',
             attendees: 80,
-            status: 'open',
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game4.png'
         },
         {
             id: 5,
             name: 'Dota 2 Southeast Asia Championship',
-            dateLabel: 'Upcoming • Dec 10th, 2026',
-            monthTag: 'Dec',
+            dateLabel: 'Upcoming • Feb 10th, 2027',
+            startDate: '2027-02-10',
             game: 'Dota 2',
             gameDisplay: 'Dota 2',
             location: 'Bangkok, TH',
             attendees: 32,
-            status: 'open',
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game5.png'
         },
         {
             id: 6,
             name: 'FIFA Online 4 — Giải Vô Địch Quốc Gia',
-            dateLabel: 'Upcoming • Nov 28th, 2026',
-            monthTag: 'Nov',
+            dateLabel: 'Completed • Oct 16th, 2026',
+            startDate: '2026-10-16',
             game: 'FIFA Online',
             gameDisplay: 'FIFA Online',
             location: 'Đà Nẵng, Việt Nam',
             attendees: 48,
-            status: 'closing',
+            status: 'completed',
+            badgeLabel: 'Completed',
+            badgeClass: 'stc-badge-completed',
             image: '/images/game6.png'
         },
         {
             id: 7,
             name: 'Street Fighter 6 — Saigon Showdown',
             dateLabel: 'Upcoming • Nov 12th, 2026',
-            monthTag: 'Nov',
+            startDate: '2026-11-12',
             game: 'Street Fighter 6',
             gameDisplay: 'Street Fighter 6',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 96,
-            status: 'closing',
+            status: 'upcoming',
+            badgeLabel: 'Registration Closes Soon',
+            badgeClass: 'stc-badge-closing',
             image: '/images/game1.png'
         },
         {
             id: 8,
             name: 'Super Smash Bros Ultimate — Campus League',
             dateLabel: 'Upcoming • Nov 20th, 2026',
-            monthTag: 'Nov',
+            startDate: '2026-11-20',
             game: 'Super Smash Bros. Ultimate',
             gameDisplay: 'Super Smash Bros. Ultimate',
             location: 'Online',
             attendees: 160,
-            status: 'open',
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game2.png'
         },
         {
             id: 9,
             name: 'Valorant Rising Stars — Rookie Cup',
-            dateLabel: 'Upcoming • Nov 25th, 2026',
-            monthTag: 'Nov',
+            dateLabel: 'Upcoming • Jan 18th, 2027',
+            startDate: '2027-01-18',
             game: 'Valorant',
             gameDisplay: 'Valorant',
             location: 'Online',
             attendees: 200,
-            status: 'open',
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game3.png'
         },
         {
             id: 10,
             name: 'League of Legends — University Championship',
-            dateLabel: 'Upcoming • Dec 2nd, 2026',
-            monthTag: 'Dec',
+            dateLabel: 'Upcoming • Mar 2nd, 2027',
+            startDate: '2027-03-02',
             game: 'Liên Minh Huyền Thoại',
             gameDisplay: 'Liên Minh Huyền Thoại',
             location: 'Hà Nội, Việt Nam',
             attendees: 112,
-            status: 'open',
+            status: 'upcoming',
+            badgeLabel: 'Registration Open',
+            badgeClass: 'stc-badge-open',
             image: '/images/game4.png'
         }
     ];
@@ -196,10 +229,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterState = {
         keyword: '',
         location: '',
-        status: '',     // '' | 'open' | 'closing'
-        eventType: '',  // '' | 'online' | 'offline'
+        statuses: [],       // ['upcoming', 'in_progress', 'completed']
         game: '',
-        dateMonth: ''   // '' | 'Oct' | 'Nov' | 'Dec'
+        dateRanges: [],     // ['next_7_days', 'next_month', 'next_3_months', 'next_6_months', 'past_7_days', 'custom']
+        customStartDate: '',
+        customEndDate: ''
     };
 
     // ===== DOM Elements =====
@@ -213,6 +247,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtersPillBtn = document.getElementById('filtersPillBtn');
     const filtersPillLabel = document.getElementById('filtersPillLabel');
     const filtersDropdownMenu = document.getElementById('filtersDropdownMenu');
+    const statusCheckboxes = filtersDropdownMenu.querySelectorAll('input[name="statusFilter"]');
+    const clearStatusFilterBtn = document.getElementById('clearStatusFilterBtn');
+    const doneStatusFilterBtn = document.getElementById('doneStatusFilterBtn');
 
     const gamePillBtn = document.getElementById('gamePillBtn');
     const gamePillLabel = document.getElementById('gamePillLabel');
@@ -221,13 +258,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const datePillBtn = document.getElementById('datePillBtn');
     const datePillLabel = document.getElementById('datePillLabel');
     const dateDropdownMenu = document.getElementById('dateDropdownMenu');
+    const dateRangeCheckboxes = dateDropdownMenu.querySelectorAll('input[name="dateRangeFilter"]');
+    const customDatesBox = document.getElementById('customDatesBox');
+    const customStartDateInput = document.getElementById('customStartDateInput');
+    const customEndDateInput = document.getElementById('customEndDateInput');
+    const clearDateFilterBtn = document.getElementById('clearDateFilterBtn');
+    const doneDateFilterBtn = document.getElementById('doneDateFilterBtn');
 
     const resetFiltersBtn = document.getElementById('resetFiltersBtn');
     const listContainer = document.getElementById('searchTournamentList');
     const emptyState = document.getElementById('searchEmptyState');
     const paginationContainer = document.getElementById('searchPagination');
 
-    // ===== Nạp thêm dữ liệu từ API /api/tournaments (Phương án A) =====
+    // ===== Nạp thêm dữ liệu từ API /api/tournaments =====
     async function loadApiTournaments() {
         try {
             const response = await fetch('/api/tournaments');
@@ -241,36 +284,98 @@ document.addEventListener('DOMContentLoaded', () => {
                 const monthTag = monthNames[startObj.getMonth()] || 'Nov';
                 const day = startObj.getDate() || 15;
                 const year = startObj.getFullYear() || 2026;
+                const isoDate = startObj.toISOString().slice(0, 10);
                 const gameName = item.game && item.game.name ? item.game.name : 'Valorant';
                 const attendeesCount = Array.isArray(item.registrations) ? item.registrations.length : 64;
+
+                let normalizedStatus = 'upcoming';
+                let badgeLabel = 'Registration Open';
+                let badgeClass = 'stc-badge-open';
+                let prefixLabel = 'Upcoming';
+
+                if (item.status === 'IN_PROGRESS' || item.status === 'ONGOING') {
+                    normalizedStatus = 'in_progress';
+                    badgeLabel = 'In Progress';
+                    badgeClass = 'stc-badge-progress';
+                    prefixLabel = 'In Progress';
+                } else if (item.status === 'COMPLETED' || item.status === 'FINISHED') {
+                    normalizedStatus = 'completed';
+                    badgeLabel = 'Completed';
+                    badgeClass = 'stc-badge-completed';
+                    prefixLabel = 'Completed';
+                } else if (item.status === 'REGISTRATION_CLOSED') {
+                    normalizedStatus = 'upcoming';
+                    badgeLabel = 'Registration Closes Soon';
+                    badgeClass = 'stc-badge-closing';
+                }
 
                 return {
                     id: item.tournamentId || (500 + idx),
                     name: item.name || 'BTP Community Tournament',
-                    dateLabel: `Upcoming • ${monthTag} ${day}th, ${year}`,
-                    monthTag,
+                    dateLabel: `${prefixLabel} • ${monthTag} ${day}th, ${year}`,
+                    startDate: isoDate,
                     game: gameName,
                     gameDisplay: gameName,
                     location: 'Online',
                     attendees: attendeesCount,
-                    status: item.status === 'REGISTRATION_CLOSED' ? 'closing' : 'open',
+                    status: normalizedStatus,
+                    badgeLabel,
+                    badgeClass,
                     image: `/images/game${(idx % 6) + 1}.png`
                 };
             });
 
-            // Ghép dữ liệu từ API lên đầu danh sách nhưng giữ nguyên bộ dữ liệu mẫu
             allTournaments = [...mappedFromApi, ...DEFAULT_TOURNAMENTS];
             applyFilters();
         } catch (err) {
-            // Nếu API chưa có dữ liệu hoặc lỗi mạng thì vẫn dùng DEFAULT_TOURNAMENTS mượt mà
+            // Giữ nguyên dữ liệu mẫu nếu API chưa sẵn sàng
         }
+    }
+
+    // ===== Kiểm tra 1 giải đấu có khớp bộ lọc ngày bắt đầu không =====
+    function matchesDateRangeFilter(tournament) {
+        if (filterState.dateRanges.length === 0) return true;
+
+        const tDate = new Date(tournament.startDate + 'T00:00:00');
+        if (isNaN(tDate.getTime())) return true;
+
+        const diffDays = (tDate.getTime() - TODAY.getTime()) / (1000 * 60 * 60 * 24);
+
+        return filterState.dateRanges.some(rangeKey => {
+            switch (rangeKey) {
+                case 'next_7_days':
+                    return diffDays >= 0 && diffDays <= 7;
+                case 'next_month':
+                    return diffDays >= 0 && diffDays <= 31;
+                case 'next_3_months':
+                    return diffDays >= 0 && diffDays <= 92;
+                case 'next_6_months':
+                    return diffDays >= 0 && diffDays <= 185;
+                case 'past_7_days':
+                    return diffDays >= -7 && diffDays <= 0;
+                case 'custom': {
+                    let afterStart = true;
+                    let beforeEnd = true;
+                    if (filterState.customStartDate) {
+                        const fromDate = new Date(filterState.customStartDate + 'T00:00:00');
+                        afterStart = tDate >= fromDate;
+                    }
+                    if (filterState.customEndDate) {
+                        const toDate = new Date(filterState.customEndDate + 'T23:59:59');
+                        beforeEnd = tDate <= toDate;
+                    }
+                    return afterStart && beforeEnd;
+                }
+                default:
+                    return true;
+            }
+        });
     }
 
     // ===== Render 1 thẻ giải đấu ngang =====
     function createHorizontalCardHTML(tournament) {
-        const isClosing = tournament.status === 'closing';
-        const badgeClass = isClosing ? 'stc-badge-closing' : 'stc-badge-open';
-        const badgeText = isClosing ? 'Registration Closes Soon' : 'Registration Open';
+        const badgeClass = tournament.badgeClass || 'stc-badge-open';
+        const badgeText = tournament.badgeLabel || 'Registration Open';
 
         const attendeesRowHTML = tournament.attendees > 0
             ? `
@@ -337,8 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderPagination(totalPages) {
         paginationContainer.innerHTML = '';
-
-        // Hiển thị giống mẫu Start.gg: 1 2 3 4 5 ... 100 >
         const maxDisplayPages = Math.max(totalPages, 1);
 
         for (let p = 1; p <= Math.min(maxDisplayPages, 5); p++) {
@@ -372,7 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
             paginationContainer.appendChild(lastBtn);
         }
 
-        // Nút Next (>)
         const nextBtn = document.createElement('button');
         nextBtn.type = 'button';
         nextBtn.className = 'page-circle-btn';
@@ -407,24 +509,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. Location
             const matchesLocation = !loc || t.location.toLowerCase().includes(loc);
 
-            // 3. Status filter
-            const matchesStatus = !filterState.status || t.status === filterState.status;
+            // 3. Status filter (Upcoming / In Progress / Completed)
+            const matchesStatus =
+                filterState.statuses.length === 0 ||
+                filterState.statuses.includes(t.status);
 
-            // 4. Event Type (Online / Offline)
-            let matchesType = true;
-            if (filterState.eventType === 'online') {
-                matchesType = t.location.toLowerCase() === 'online';
-            } else if (filterState.eventType === 'offline') {
-                matchesType = t.location.toLowerCase() !== 'online';
-            }
-
-            // 5. Game filter
+            // 4. Game filter
             const matchesGame = !filterState.game || t.game === filterState.game;
 
-            // 6. Date filter
-            const matchesDate = !filterState.dateMonth || t.monthTag === filterState.dateMonth;
+            // 5. Start Date filter
+            const matchesDate = matchesDateRangeFilter(t);
 
-            return matchesKeyword && matchesLocation && matchesStatus && matchesType && matchesGame && matchesDate;
+            return matchesKeyword && matchesLocation && matchesStatus && matchesGame && matchesDate;
         });
 
         currentPage = 1;
@@ -433,13 +529,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateFilterPillLabels() {
-        // Cập nhật trạng thái nút Filters
-        let activeFilterCount = 0;
-        if (filterState.status) activeFilterCount++;
-        if (filterState.eventType) activeFilterCount++;
+        // Cập nhật trạng thái nút Filters (STATUS)
+        const statusCount = filterState.statuses.length;
+        const statusNameMap = {
+            upcoming: 'Upcoming',
+            in_progress: 'In Progress',
+            completed: 'Completed'
+        };
 
-        if (activeFilterCount > 0) {
-            filtersPillLabel.textContent = `Filters (${activeFilterCount})`;
+        if (statusCount === 1) {
+            filtersPillLabel.textContent = statusNameMap[filterState.statuses[0]] || 'Filters (1)';
+            filtersPillBtn.classList.add('has-active-filter');
+        } else if (statusCount > 1) {
+            filtersPillLabel.textContent = `Filters (${statusCount})`;
             filtersPillBtn.classList.add('has-active-filter');
         } else {
             filtersPillLabel.textContent = 'Filters';
@@ -455,10 +557,22 @@ document.addEventListener('DOMContentLoaded', () => {
             gamePillBtn.classList.remove('has-active-filter');
         }
 
-        // Cập nhật nút Date
-        if (filterState.dateMonth) {
-            const monthMap = { Oct: 'Oct 2026', Nov: 'Nov 2026', Dec: 'Dec 2026' };
-            datePillLabel.textContent = monthMap[filterState.dateMonth] || 'Date';
+        // Cập nhật nút Date (Start Date)
+        const dateCount = filterState.dateRanges.length;
+        const dateLabelMap = {
+            next_7_days: 'Next 7 Days',
+            next_month: 'Next Month',
+            next_3_months: 'Next 3 Months',
+            next_6_months: 'Next 6 Months',
+            past_7_days: 'Past 7 Days',
+            custom: 'Custom Dates'
+        };
+
+        if (dateCount === 1) {
+            datePillLabel.textContent = dateLabelMap[filterState.dateRanges[0]] || 'Date';
+            datePillBtn.classList.add('has-active-filter');
+        } else if (dateCount > 1) {
+            datePillLabel.textContent = `Date (${dateCount})`;
             datePillBtn.classList.add('has-active-filter');
         } else {
             datePillLabel.textContent = 'Date';
@@ -469,10 +583,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasAnyFilter = Boolean(
             filterState.keyword ||
             filterState.location ||
-            filterState.status ||
-            filterState.eventType ||
+            filterState.statuses.length > 0 ||
             filterState.game ||
-            filterState.dateMonth
+            filterState.dateRanges.length > 0
         );
         resetFiltersBtn.style.display = hasAnyFilter ? 'inline-block' : 'none';
     }
@@ -554,26 +667,93 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleDropdown(dateDropdownMenu);
     });
 
-    // Chọn mục trong Filters Dropdown
+    // Ngăn sự kiện click bên trong Popover làm đóng menu ngoài ý muốn
     filtersDropdownMenu.addEventListener('click', (e) => {
         e.stopPropagation();
-        const item = e.target.closest('.dropdown-item');
-        if (!item) return;
+    });
 
-        if (item.hasAttribute('data-filter-status')) {
-            filterState.status = item.getAttribute('data-filter-status') || '';
-            filtersDropdownMenu.querySelectorAll('[data-filter-status]').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-        } else if (item.hasAttribute('data-filter-type')) {
-            filterState.eventType = item.getAttribute('data-filter-type') || '';
-            filtersDropdownMenu.querySelectorAll('[data-filter-type]').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-        }
+    dateDropdownMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 
+    // ===== Xử lý Checkboxes & Clear / Done trong Filters (STATUS) =====
+    function syncStatusStateFromDOM() {
+        filterState.statuses = Array.from(statusCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+    }
+
+    statusCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            syncStatusStateFromDOM();
+            applyFilters();
+        });
+    });
+
+    clearStatusFilterBtn.addEventListener('click', () => {
+        statusCheckboxes.forEach(cb => { cb.checked = false; });
+        filterState.statuses = [];
         applyFilters();
     });
 
-    // Chọn mục trong Game Dropdown
+    doneStatusFilterBtn.addEventListener('click', () => {
+        syncStatusStateFromDOM();
+        applyFilters();
+        closeAllDropdowns();
+    });
+
+    // ===== Xử lý Checkboxes & Clear / Done trong Date (Start Date) =====
+    function syncDateStateFromDOM() {
+        filterState.dateRanges = Array.from(dateRangeCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        filterState.customStartDate = customStartDateInput ? customStartDateInput.value : '';
+        filterState.customEndDate = customEndDateInput ? customEndDateInput.value : '';
+
+        if (customDatesBox) {
+            customDatesBox.style.display = filterState.dateRanges.includes('custom') ? 'flex' : 'none';
+        }
+    }
+
+    dateRangeCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            syncDateStateFromDOM();
+            applyFilters();
+        });
+    });
+
+    if (customStartDateInput) {
+        customStartDateInput.addEventListener('change', () => {
+            syncDateStateFromDOM();
+            applyFilters();
+        });
+    }
+
+    if (customEndDateInput) {
+        customEndDateInput.addEventListener('change', () => {
+            syncDateStateFromDOM();
+            applyFilters();
+        });
+    }
+
+    clearDateFilterBtn.addEventListener('click', () => {
+        dateRangeCheckboxes.forEach(cb => { cb.checked = false; });
+        if (customStartDateInput) customStartDateInput.value = '';
+        if (customEndDateInput) customEndDateInput.value = '';
+        if (customDatesBox) customDatesBox.style.display = 'none';
+        filterState.dateRanges = [];
+        filterState.customStartDate = '';
+        filterState.customEndDate = '';
+        applyFilters();
+    });
+
+    doneDateFilterBtn.addEventListener('click', () => {
+        syncDateStateFromDOM();
+        applyFilters();
+        closeAllDropdowns();
+    });
+
+    // ===== Chọn mục trong Game Dropdown =====
     gameDropdownMenu.addEventListener('click', (e) => {
         e.stopPropagation();
         const item = e.target.closest('.dropdown-item');
@@ -587,40 +767,30 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters();
     });
 
-    // Chọn mục trong Date Dropdown
-    dateDropdownMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const item = e.target.closest('.dropdown-item');
-        if (!item) return;
-
-        filterState.dateMonth = item.getAttribute('data-date') || '';
-        dateDropdownMenu.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
-        item.classList.add('active');
-
-        closeAllDropdowns();
-        applyFilters();
-    });
-
-    // Nút Reset tất cả bộ lọc
+    // ===== Nút Reset tất cả bộ lọc =====
     resetFiltersBtn.addEventListener('click', () => {
         filterState.keyword = '';
         filterState.location = '';
-        filterState.status = '';
-        filterState.eventType = '';
+        filterState.statuses = [];
         filterState.game = '';
-        filterState.dateMonth = '';
+        filterState.dateRanges = [];
+        filterState.customStartDate = '';
+        filterState.customEndDate = '';
 
         tournamentSearchInput.value = '';
         locationSearchInput.value = '';
         clearKeywordBtn.style.display = 'none';
 
-        document.querySelectorAll('.pill-dropdown-menu .dropdown-item, .location-dropdown .dropdown-item').forEach(el => {
+        statusCheckboxes.forEach(cb => { cb.checked = false; });
+        dateRangeCheckboxes.forEach(cb => { cb.checked = false; });
+        if (customStartDateInput) customStartDateInput.value = '';
+        if (customEndDateInput) customEndDateInput.value = '';
+        if (customDatesBox) customDatesBox.style.display = 'none';
+
+        document.querySelectorAll('#gameDropdownMenu .dropdown-item, .location-dropdown .dropdown-item').forEach(el => {
             const isDefault =
                 el.getAttribute('data-location') === '' ||
-                el.getAttribute('data-filter-status') === '' ||
-                el.getAttribute('data-filter-type') === '' ||
-                el.getAttribute('data-game') === '' ||
-                el.getAttribute('data-date') === '';
+                el.getAttribute('data-game') === '';
             el.classList.toggle('active', isDefault);
         });
 

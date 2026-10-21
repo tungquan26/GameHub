@@ -83,16 +83,29 @@
                                     <path d="M7 10l5 5 5-5z"/>
                                 </svg>
                             </button>
-                            <div class="pill-dropdown-menu" id="filtersDropdownMenu" style="display: none;">
-                                <div class="dropdown-section-title">Registration Status</div>
-                                <button type="button" class="dropdown-item active" data-filter-status="">All Statuses</button>
-                                <button type="button" class="dropdown-item" data-filter-status="open">Registration Open</button>
-                                <button type="button" class="dropdown-item" data-filter-status="closing">Registration Closes Soon</button>
-                                <div class="dropdown-divider"></div>
-                                <div class="dropdown-section-title">Event Type</div>
-                                <button type="button" class="dropdown-item active" data-filter-type="">All Types</button>
-                                <button type="button" class="dropdown-item" data-filter-type="online">Online Only</button>
-                                <button type="button" class="dropdown-item" data-filter-type="offline">In-Person (Offline)</button>
+                            <div class="pill-dropdown-menu filter-popover-card" id="filtersDropdownMenu" style="display: none;">
+                                <div class="popover-body">
+                                    <div class="popover-section-title">STATUS</div>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="statusFilter" value="upcoming">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Upcoming</span>
+                                    </label>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="statusFilter" value="in_progress">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">In Progress</span>
+                                    </label>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="statusFilter" value="completed">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Completed</span>
+                                    </label>
+                                </div>
+                                <div class="popover-footer">
+                                    <button type="button" class="popover-btn-clear" id="clearStatusFilterBtn">Clear</button>
+                                    <button type="button" class="popover-btn-done" id="doneStatusFilterBtn">Done</button>
+                                </div>
                             </div>
                         </div>
 
@@ -128,12 +141,55 @@
                                     <path d="M7 10l5 5 5-5z"/>
                                 </svg>
                             </button>
-                            <div class="pill-dropdown-menu" id="dateDropdownMenu" style="display: none;">
-                                <div class="dropdown-section-title">Time Period</div>
-                                <button type="button" class="dropdown-item active" data-date="">Any Date</button>
-                                <button type="button" class="dropdown-item" data-date="Oct">October 2026</button>
-                                <button type="button" class="dropdown-item" data-date="Nov">November 2026</button>
-                                <button type="button" class="dropdown-item" data-date="Dec">December 2026</button>
+                            <div class="pill-dropdown-menu filter-popover-card" id="dateDropdownMenu" style="display: none;">
+                                <div class="popover-header">Start Date</div>
+                                <div class="popover-body">
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="dateRangeFilter" value="next_7_days">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Next 7 Days</span>
+                                    </label>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="dateRangeFilter" value="next_month">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Next Month</span>
+                                    </label>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="dateRangeFilter" value="next_3_months">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Next 3 Months</span>
+                                    </label>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="dateRangeFilter" value="next_6_months">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Next 6 Months</span>
+                                    </label>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="dateRangeFilter" value="past_7_days">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Past 7 Days</span>
+                                    </label>
+                                    <label class="popover-check-item">
+                                        <input type="checkbox" name="dateRangeFilter" value="custom">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="check-label-text">Custom Dates</span>
+                                    </label>
+
+                                    <div class="custom-dates-box" id="customDatesBox" style="display: none;">
+                                        <div class="custom-date-field">
+                                            <label for="customStartDateInput">From</label>
+                                            <input type="date" id="customStartDateInput" class="custom-date-input">
+                                        </div>
+                                        <div class="custom-date-field">
+                                            <label for="customEndDateInput">To</label>
+                                            <input type="date" id="customEndDateInput" class="custom-date-input">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="popover-footer">
+                                    <button type="button" class="popover-btn-clear" id="clearDateFilterBtn">Clear</button>
+                                    <button type="button" class="popover-btn-done" id="doneDateFilterBtn">Done</button>
+                                </div>
                             </div>
                         </div>
 
