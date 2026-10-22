@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app-layout :: layout('Account & Profile Settings - BTP Tournament', 'profile', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/app-layout :: layout('Cài đặt hồ sơ & Tài khoản - BTP Tournament', 'profile', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/home/profile.css}">
     <link rel="stylesheet" th:href="@{/css/common/toast.css}">
@@ -8,7 +8,7 @@
 <body>
     <th:block th:fragment="pageContent">
         <div class="pfs-wrapper">
-            <!-- Thanh chuyển đổi nhanh giữa Profile Settings & Account Settings -->
+            <!-- Thanh chuyển đổi nhanh giữa Cài đặt hồ sơ & Cài đặt tài khoản -->
             <aside class="pfs-subnav">
                 <a th:href="@{/profile}" class="pfs-user-mini-card">
                     <div class="pfs-mini-avatar">
@@ -17,29 +17,29 @@
                     </div>
                     <div class="pfs-mini-meta">
                         <strong id="settingsMiniTagName">tungquan</strong>
-                        <span>View Profile</span>
+                        <span>Xem hồ sơ</span>
                     </div>
                 </a>
 
                 <nav class="pfs-nav-list">
                     <button type="button" class="pfs-nav-item active" data-tab="profile" id="tabBtnProfile">
-                        Profile Settings
+                        Cài đặt hồ sơ
                     </button>
                     <button type="button" class="pfs-nav-item" data-tab="account" id="tabBtnAccount">
-                        Account Settings
+                        Cài đặt tài khoản
                     </button>
                 </nav>
             </aside>
 
-            <!-- KHU VỰC NỘI DUNG SETTINGS -->
+            <!-- KHU VỰC NỘI DUNG CÀI ĐẶT -->
             <div class="pfs-main">
-                <!-- ==================== TAB 1: PROFILE SETTINGS ==================== -->
+                <!-- ==================== TAB 1: CÀI ĐẶT HỒ SƠ ==================== -->
                 <section class="pfs-panel" id="panelProfileSettings">
                     <form id="profileSettingsForm" novalidate="novalidate">
                         <div class="pfs-profile-grid">
                             <!-- Cột trái: Các trường thông tin -->
                             <div class="pfs-form-column">
-                                <h1 class="pfs-main-heading">Profile Settings</h1>
+                                <h1 class="pfs-main-heading">Cài đặt hồ sơ</h1>
 
                                 <!-- Ảnh đại diện & Tag Name -->
                                 <div class="pfs-identity-block">
@@ -50,156 +50,156 @@
                                         </div>
                                         <div class="pfs-avatar-btns">
                                             <input type="file" id="settingsAvatarInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden="hidden">
-                                            <button type="button" class="pfs-link-btn" id="uploadAvatarBtn">Change avatar</button>
-                                            <button type="button" class="pfs-link-btn danger" id="removeAvatarBtn" style="display: none;">Remove</button>
+                                            <button type="button" class="pfs-link-btn" id="uploadAvatarBtn">Đổi ảnh đại diện</button>
+                                            <button type="button" class="pfs-link-btn danger" id="removeAvatarBtn" style="display: none;">Xóa ảnh</button>
                                         </div>
                                     </div>
 
                                     <div class="pfs-outlined-group">
-                                        <label class="pfs-floating-label" for="inputGamerTag">GamerTag <span class="req">*</span></label>
+                                        <label class="pfs-floating-label" for="inputGamerTag">Tên hiển thị (GamerTag) <span class="req">*</span></label>
                                         <input type="text" id="inputGamerTag" class="pfs-outlined-input" value="tungquan" required>
                                     </div>
                                 </div>
 
                                 <!-- Bio -->
                                 <div class="pfs-bio-block">
-                                    <label class="pfs-plain-label" for="inputBio">Enter a short bio to show with your gamertag</label>
-                                    <input type="text" id="inputBio" class="pfs-outlined-input pfs-plain-box" placeholder="">
+                                    <label class="pfs-plain-label" for="inputBio">Nhập tiểu sử ngắn hiển thị cùng tên của bạn</label>
+                                    <input type="text" id="inputBio" class="pfs-outlined-input pfs-plain-box" placeholder="VD: Tuyển thủ bán chuyên, yêu thích các giải đấu Esports...">
                                 </div>
 
-                                <!-- Display pronouns -->
+                                <!-- Hiển thị đại từ nhân xưng -->
                                 <label class="pfs-checkbox-row">
                                     <input type="checkbox" id="checkDisplayPronouns">
                                     <span class="pfs-checkbox-box"></span>
-                                    <span class="pfs-checkbox-text">Display pronouns</span>
+                                    <span class="pfs-checkbox-text">Hiển thị đại từ nhân xưng</span>
                                 </label>
 
                                 <div class="pfs-outlined-group" id="pronounsInputWrap" style="display: none; margin-top: 12px;">
-                                    <label class="pfs-floating-label" for="inputPronouns">Pronouns</label>
-                                    <input type="text" id="inputPronouns" class="pfs-outlined-input" placeholder="e.g. He/Him, She/Her, They/Them">
+                                    <label class="pfs-floating-label" for="inputPronouns">Đại từ nhân xưng</label>
+                                    <input type="text" id="inputPronouns" class="pfs-outlined-input" placeholder="VD: Anh ấy, Cô ấy...">
                                 </div>
 
-                                <!-- Location and Contact Info -->
+                                <!-- Địa điểm và Thông tin liên hệ -->
                                 <div class="pfs-section-block">
-                                    <h2 class="pfs-sub-heading">Location and Contact Info</h2>
-                                    <p class="pfs-sub-desc">Tournaments that you sign up for may require some or all of this contact info.</p>
+                                    <h2 class="pfs-sub-heading">Địa điểm và Thông tin liên hệ</h2>
+                                    <p class="pfs-sub-desc">Các giải đấu bạn đăng ký tham gia có thể yêu cầu một số thông tin liên hệ dưới đây.</p>
 
-                                    <!-- Country * -->
+                                    <!-- Quốc gia * -->
                                     <div class="pfs-field-wrap">
                                         <div class="pfs-outlined-group">
-                                            <label class="pfs-floating-label" for="selectCountry">Country <span class="req">*</span></label>
+                                            <label class="pfs-floating-label" for="selectCountry">Quốc gia <span class="req">*</span></label>
                                             <select id="selectCountry" class="pfs-outlined-input pfs-select">
-                                                <option value="Vietnam">Vietnam</option>
-                                                <option value="United States">United States</option>
-                                                <option value="South Korea">South Korea</option>
-                                                <option value="Japan">Japan</option>
+                                                <option value="Việt Nam">Việt Nam</option>
+                                                <option value="Hoa Kỳ">Hoa Kỳ</option>
+                                                <option value="Hàn Quốc">Hàn Quốc</option>
+                                                <option value="Nhật Bản">Nhật Bản</option>
                                                 <option value="Singapore">Singapore</option>
-                                                <option value="Thailand">Thailand</option>
-                                                <option value="United Kingdom">United Kingdom</option>
-                                                <option value="Australia">Australia</option>
+                                                <option value="Thái Lan">Thái Lan</option>
+                                                <option value="Vương quốc Anh">Vương quốc Anh</option>
+                                                <option value="Úc">Úc</option>
                                             </select>
                                             <span class="pfs-select-caret">&#9662;</span>
                                         </div>
                                     </div>
 
-                                    <!-- City -->
+                                    <!-- Thành phố -->
                                     <div class="pfs-field-wrap">
                                         <div class="pfs-outlined-group">
-                                            <label class="pfs-floating-label" for="inputCity">City</label>
+                                            <label class="pfs-floating-label" for="inputCity">Thành phố</label>
                                             <input type="text" id="inputCity" class="pfs-outlined-input">
                                         </div>
-                                        <span class="pfs-optional-hint">Optional</span>
+                                        <span class="pfs-optional-hint">Không bắt buộc</span>
                                     </div>
 
-                                    <!-- Zip Code -->
+                                    <!-- Mã bưu chính -->
                                     <div class="pfs-field-wrap">
                                         <div class="pfs-outlined-group">
-                                            <label class="pfs-floating-label" for="inputZipCode">Zip Code</label>
+                                            <label class="pfs-floating-label" for="inputZipCode">Mã bưu chính</label>
                                             <input type="text" id="inputZipCode" class="pfs-outlined-input">
                                         </div>
-                                        <span class="pfs-optional-hint">Optional</span>
+                                        <span class="pfs-optional-hint">Không bắt buộc</span>
                                     </div>
 
-                                    <!-- Phone Number -->
+                                    <!-- Số điện thoại -->
                                     <div class="pfs-field-wrap">
                                         <div class="pfs-outlined-group">
-                                            <label class="pfs-floating-label" for="inputPhone">Phone Number</label>
+                                            <label class="pfs-floating-label" for="inputPhone">Số điện thoại</label>
                                             <input type="text" id="inputPhone" class="pfs-outlined-input">
                                         </div>
-                                        <span class="pfs-optional-hint">Optional</span>
+                                        <span class="pfs-optional-hint">Không bắt buộc</span>
                                     </div>
 
-                                    <!-- Display city dropdown -->
+                                    <!-- Tùy chọn hiển thị thành phố -->
                                     <div class="pfs-display-city-wrap">
                                         <button type="button" class="pfs-display-city-btn" id="displayCityBtn">
-                                            <span id="displayCityText">Display city</span>
+                                            <span id="displayCityText">Hiển thị thành phố</span>
                                             <span class="pfs-caret-sm">&#9662;</span>
                                         </button>
                                         <div class="pfs-display-city-menu" id="displayCityMenu" style="display: none;">
-                                            <button type="button" class="pfs-city-opt" data-val="Display city">Display city</button>
-                                            <button type="button" class="pfs-city-opt" data-val="Hide city">Hide city</button>
+                                            <button type="button" class="pfs-city-opt" data-val="Hiển thị thành phố">Hiển thị thành phố</button>
+                                            <button type="button" class="pfs-city-opt" data-val="Ẩn thành phố">Ẩn thành phố</button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Birthday -->
+                                <!-- Ngày sinh -->
                                 <div class="pfs-section-block">
-                                    <h2 class="pfs-sub-heading">Birthday</h2>
-                                    <div class="pfs-birthday-display" id="birthdayFormattedText">January 10th, 2002</div>
+                                    <h2 class="pfs-sub-heading">Ngày sinh</h2>
+                                    <div class="pfs-birthday-display" id="birthdayFormattedText">10 Tháng 01, 2002</div>
                                 </div>
                             </div>
 
-                            <!-- Cột phải: Nút Update Account giống ảnh mẫu -->
+                            <!-- Cột phải: Nút Cập nhật hồ sơ -->
                             <div class="pfs-action-column">
                                 <button type="submit" class="pfs-update-account-btn" id="updateAccountBtn" disabled="disabled">
-                                    Update Account
+                                    Cập nhật hồ sơ
                                 </button>
                             </div>
                         </div>
                     </form>
                 </section>
 
-                <!-- ==================== TAB 2: ACCOUNT SETTINGS ==================== -->
+                <!-- ==================== TAB 2: CÀI ĐẶT TÀI KHOẢN ==================== -->
                 <section class="pfs-panel" id="panelAccountSettings" style="display: none;">
                     <div class="pfs-form-column">
-                        <h1 class="pfs-main-heading">Account Settings</h1>
+                        <h1 class="pfs-main-heading">Cài đặt tài khoản</h1>
 
                         <!-- Email -->
                         <div class="pfs-section-block pfs-first-block">
                             <h2 class="pfs-sub-heading">Email</h2>
-                            <p class="pfs-sub-desc">Email address is never shown publicly. Tournaments and events may ask permission to your email during registration.</p>
+                            <p class="pfs-sub-desc">Địa chỉ email không bao giờ hiển thị công khai. Ban tổ chức giải đấu có thể liên hệ qua email này khi bạn đăng ký thi đấu.</p>
                             <div class="pfs-current-email" id="currentEmailDisplay">quanquan4101990@gmail.com</div>
-                            <button type="button" class="pfs-change-email-link" id="toggleChangeEmailBtn">Change email</button>
+                            <button type="button" class="pfs-change-email-link" id="toggleChangeEmailBtn">Đổi địa chỉ email</button>
 
-                            <!-- Khung đổi email ẩn/hiện khi bấm Change email -->
+                            <!-- Khung đổi email ẩn/hiện khi bấm Đổi địa chỉ email -->
                             <div class="pfs-change-email-box" id="changeEmailBox" style="display: none;">
                                 <div class="pfs-outlined-group">
-                                    <label class="pfs-floating-label" for="inputNewEmail">New Email <span class="req">*</span></label>
-                                    <input type="email" id="inputNewEmail" class="pfs-outlined-input" placeholder="you@example.com">
+                                    <label class="pfs-floating-label" for="inputNewEmail">Email mới <span class="req">*</span></label>
+                                    <input type="email" id="inputNewEmail" class="pfs-outlined-input" placeholder="ban@example.com">
                                 </div>
                                 <div class="pfs-email-actions">
-                                    <button type="button" class="pfs-save-btn active" id="saveNewEmailBtn">Update Email</button>
-                                    <button type="button" class="pfs-cancel-link" id="cancelNewEmailBtn">Cancel</button>
+                                    <button type="button" class="pfs-save-btn active" id="saveNewEmailBtn">Lưu Email</button>
+                                    <button type="button" class="pfs-cancel-link" id="cancelNewEmailBtn">Hủy</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Password -->
+                        <!-- Mật khẩu -->
                         <form id="passwordSettingsForm" class="pfs-section-block" novalidate="novalidate">
-                            <h2 class="pfs-sub-heading">Password</h2>
+                            <h2 class="pfs-sub-heading">Mật khẩu</h2>
 
                             <div class="pfs-field-wrap">
                                 <div class="pfs-outlined-group">
-                                    <label class="pfs-floating-label" for="inputOldPassword">Old Password <span class="req">*</span></label>
+                                    <label class="pfs-floating-label" for="inputOldPassword">Mật khẩu hiện tại <span class="req">*</span></label>
                                     <input type="password" id="inputOldPassword" class="pfs-outlined-input">
                                 </div>
                             </div>
 
                             <div class="pfs-field-wrap">
                                 <div class="pfs-outlined-group pfs-password-group">
-                                    <label class="pfs-floating-label" for="inputNewPassword">New Password <span class="req">*</span></label>
+                                    <label class="pfs-floating-label" for="inputNewPassword">Mật khẩu mới <span class="req">*</span></label>
                                     <input type="password" id="inputNewPassword" class="pfs-outlined-input has-eye">
-                                    <button type="button" class="pfs-eye-btn" id="toggleNewPasswordEye" aria-label="Show or hide password">
+                                    <button type="button" class="pfs-eye-btn" id="toggleNewPasswordEye" aria-label="Hiện hoặc ẩn mật khẩu">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                             <circle cx="12" cy="12" r="3"/>
@@ -208,14 +208,14 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="pfs-save-btn" id="savePasswordBtn" disabled="disabled">Save</button>
+                            <button type="submit" class="pfs-save-btn" id="savePasswordBtn" disabled="disabled">Lưu mật khẩu</button>
                         </form>
 
-                        <!-- Delete Account -->
+                        <!-- Xóa tài khoản -->
                         <div class="pfs-section-block">
-                            <h2 class="pfs-sub-heading">Delete Account</h2>
-                            <p class="pfs-sub-desc">Close your user account and remove all associated personal data. This cannot be undone.</p>
-                            <button type="button" class="pfs-delete-account-btn" id="deleteAccountBtn">Delete Account</button>
+                            <h2 class="pfs-sub-heading">Xóa tài khoản</h2>
+                            <p class="pfs-sub-desc">Đóng tài khoản người dùng và xóa toàn bộ dữ liệu cá nhân liên quan. Hành động này không thể hoàn tác.</p>
+                            <button type="button" class="pfs-delete-account-btn" id="deleteAccountBtn">Xóa tài khoản</button>
                         </div>
                     </div>
                 </section>

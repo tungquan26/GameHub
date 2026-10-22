@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{layouts/base :: commonHead('Tournament View - BTP Tournament')}" />
+    <th:block th:replace="~{layouts/base :: commonHead('Xem giải đấu - BTP Tournament')}" />
     <link rel="stylesheet" th:href="@{/css/layouts/app-layout.css}">
     <link rel="stylesheet" th:href="@{/css/pages/tournament/home.css}">
     <link rel="stylesheet" th:href="@{/css/pages/tournament/view.css}">
@@ -11,19 +11,19 @@
     <!-- 1. SIDEBAR CHÍNH (72px) -->
     <aside th:replace="~{fragments/app-sidebar :: sidebar('tournaments')}"></aside>
 
-    <!-- 2. HỘP BÊN TRÁI GIẢI ĐẤU (CHUẨN ẢNH MẪU ĐÃ LƯỢC BỎ) -->
+    <!-- 2. HỘP BÊN TRÁI GIẢI ĐẤU -->
     <aside class="tv-sidebar" id="tournamentSidebar">
         <!-- Header giải đấu có nền ảnh Banner tối màu -->
         <div class="tv-header" id="tvSidebarBanner">
             <div class="tv-header-overlay">
                 <div class="tv-identity">
                     <div class="tv-avatar-box">
-                        <img id="tvSidebarAvatarImg" src="" alt="Avatar" class="tv-avatar-img" style="display: none;">
-                        <div id="tvSidebarAvatarFallback" class="tv-avatar-fallback">N</div>
+                        <img id="tvSidebarAvatarImg" src="" alt="Ảnh đại diện" class="tv-avatar-img" style="display: none;">
+                        <div id="tvSidebarAvatarFallback" class="tv-avatar-fallback">G</div>
                     </div>
                     <div class="tv-title-group">
-                        <h2 class="tv-tourney-name" id="tvSidebarTourneyName">Nguyễn Quân</h2>
-                        <span class="tv-tourney-label">TOURNAMENT</span>
+                        <h2 class="tv-tourney-name" id="tvSidebarTourneyName">Giải đấu mới</h2>
+                        <span class="tv-tourney-label">GIẢI ĐẤU</span>
                     </div>
                 </div>
             </div>
@@ -31,9 +31,9 @@
 
         <!-- Phần thân hộp bên trái -->
         <div class="tv-sidebar-body">
-            <!-- Nút Register Now -->
+            <!-- Nút Đăng ký tham gia -->
             <div class="tv-register-wrap">
-                <button type="button" class="tv-register-btn" id="tvRegisterNowBtn">Register Now</button>
+                <button type="button" class="tv-register-btn" id="tvRegisterNowBtn">Đăng ký tham gia</button>
             </div>
 
             <!-- Ngày tháng & Địa điểm -->
@@ -45,7 +45,7 @@
                         <line x1="8" y1="2" x2="8" y2="6"/>
                         <line x1="3" y1="10" x2="21" y2="10"/>
                     </svg>
-                    <span id="tvSidebarDateRange">Oct 15th — 16th, 2026</span>
+                    <span id="tvSidebarDateRange">15/10 — 16/10/2026</span>
                 </div>
 
                 <div class="tv-meta-row">
@@ -57,10 +57,10 @@
                 </div>
             </div>
 
-            <!-- Đường phân cách (Đã bỏ 4 phần Home, Attendees, Register, Events và chữ EVENTS) -->
+            <!-- Đường phân cách -->
             <div class="tv-divider"></div>
 
-            <!-- Danh sách Thông tin trò chơi từ Game Info với định dạng giống trên hình -->
+            <!-- Danh sách Thông tin bộ môn từ Game Info -->
             <div class="tv-game-list" id="tvSidebarGameInfoList">
                 <!-- Được render động bởi view.js -->
             </div>
@@ -76,27 +76,27 @@
             <!-- PHẦN ĐẦU: ẢNH BÌA & THÔNG TIN GIẢI ĐẤU -->
             <div class="th-hero-section">
                 <div class="th-banner-box" id="homeBannerBox">
-                    <img id="homeBannerImg" src="" alt="Tournament Banner" class="th-banner-img" style="display: none;">
+                    <img id="homeBannerImg" src="" alt="Ảnh bìa giải đấu" class="th-banner-img" style="display: none;">
                     <div id="homeBannerFallback" class="th-banner-fallback"></div>
                 </div>
 
                 <div class="th-header-bar">
                     <div class="th-header-inner">
                         <div class="th-profile-box">
-                            <img id="homeProfileImg" src="" alt="Profile Avatar" class="th-profile-img" style="display: none;">
-                            <div id="homeProfileFallback" class="th-profile-fallback">N</div>
+                            <img id="homeProfileImg" src="" alt="Ảnh đại diện giải đấu" class="th-profile-img" style="display: none;">
+                            <div id="homeProfileFallback" class="th-profile-fallback">G</div>
                         </div>
 
                         <div class="th-identity-info">
-                            <span class="th-type-label">TOURNAMENT</span>
-                            <h1 class="th-tourney-title" id="homeTourneyName">Nguyễn Quân</h1>
+                            <span class="th-type-label">GIẢI ĐẤU</span>
+                            <h1 class="th-tourney-title" id="homeTourneyName">Giải đấu mới</h1>
                             <div class="th-meta-list">
                                 <!-- Ngày tháng -->
                                 <div class="th-meta-item">
                                     <svg viewBox="0 0 20 20" fill="currentColor" class="th-meta-icon">
                                         <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span id="homeDateRange">Oct 15th — 16th, 2026</span>
+                                    <span id="homeDateRange">15/10 — 16/10/2026</span>
                                 </div>
 
                                 <!-- Địa điểm -->

@@ -1,4 +1,5 @@
 import { showToast } from '../../common/toast.js';
+import { syncActiveTournamentToList } from '../../common/utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('registrationSettingsForm');
@@ -54,14 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (new Date(currentEndDate) <= new Date(currentStartDate)) {
-            errorMsg.textContent = 'Registration End Date must be after Registration Start Date.';
+            errorMsg.textContent = 'Thời gian đóng đăng ký phải sau thời gian mở đăng ký.';
             errorMsg.style.display = 'block';
             saveBtn.disabled = true;
             return false;
         }
 
         if (currentMax < FIXED_MIN_TEAM_SIZE) {
-            errorMsg.textContent = `Maximum Team Size must be greater than or equal to Minimum Team Size (${FIXED_MIN_TEAM_SIZE}).`;
+            errorMsg.textContent = `Số thành viên tối đa mỗi đội phải lớn hơn hoặc bằng số thành viên tối thiểu (${FIXED_MIN_TEAM_SIZE}).`;
             errorMsg.style.display = 'block';
             saveBtn.disabled = true;
             return false;
@@ -86,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!checkState()) return;
 
         saveBtn.disabled = true;
-        saveBtn.textContent = 'Saving...';
+        saveBtn.textContent = 'Đang lưu...';
 
         setTimeout(() => {
             savedState.registrationStartDate = regStartDateInput.value;
@@ -96,10 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
             savedState.maxTeams = FIXED_MAX_TEAMS;
 
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
+            syncActiveTournamentToList();
 
-            saveBtn.textContent = 'Save changes';
+            saveBtn.textContent = 'Lưu thay đổi';
             checkState();
-            showToast('Registration settings saved successfully.');
+            showToast('Đã lưu cài đặt đăng ký thành công.');
         }, 300);
     });
 });

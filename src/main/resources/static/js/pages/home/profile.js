@@ -1,10 +1,30 @@
 import { showToast } from '../../common/toast.js';
-import { escapeHtml } from '../../common/utils.js';
+import {
+    escapeHtml,
+    getCreatedTournaments,
+    setActiveTournamentById,
+    renderCirclePagination
+} from '../../common/utils.js';
 import { getStoredUserProfile, syncGlobalUserProfile } from '../../layouts/app-layout.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_KEY_PROFILE = 'btp_user_profile';
     let userProfile = getStoredUserProfile();
+
+    const GAME_IMAGES = {
+        'Liên Minh Huyền Thoại': '/images/game1.png',
+        'League of Legends': '/images/game1.png',
+        'Valorant': '/images/game2.png',
+        'Teamfight Tactics': '/images/game3.png',
+        'CS2': '/images/game4.png',
+        'Delta Force': '/images/game5.png',
+        'The Isle': '/images/game6.png',
+        'PUBG': '/images/game1.png',
+        'Dota 2': '/images/game2.png',
+        'FIFA Online': '/images/game3.png',
+        'Street Fighter 6': '/images/game1.png',
+        'Super Smash Bros. Ultimate': '/images/game2.png'
+    };
 
     function saveUserProfile(updated) {
         userProfile = { ...userProfile, ...updated };
@@ -30,10 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const joinedEl = document.getElementById('publicProfileJoined');
         const locationEl = document.getElementById('publicProfileLocation');
         const organizedList = document.getElementById('organizedTournamentsList');
+        const organizedPagination = document.getElementById('organizedPagination');
 
         publicProfileTagName.textContent = userProfile.tagName;
         if (userCodeEl) userCodeEl.textContent = userProfile.userCode;
-        if (joinedEl) joinedEl.textContent = userProfile.joinedDate;
+        if (joinedEl) {
+            const joined = userProfile.joinedDate === 'October 2026' ? 'Tháng 10, 2026' : userProfile.joinedDate;
+            joinedEl.textContent = joined;
+        }
 
         // Avatar
         if (avatarImg && avatarInitial) {
@@ -49,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Pronouns
+        // Đại từ nhân xưng
         if (pronounsEl) {
             if (userProfile.displayPronouns && userProfile.pronouns.trim()) {
                 pronounsEl.textContent = userProfile.pronouns.trim();
@@ -59,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Bio
+        // Tiểu sử
         if (bioEl) {
             if (userProfile.bio.trim()) {
                 bioEl.textContent = userProfile.bio.trim();
@@ -69,62 +93,105 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Location (City + Country hoặc chỉ Country)
+        // Địa điểm (Thành phố + Quốc gia hoặc chỉ Quốc gia)
         if (locationEl) {
-            const showCity = userProfile.displayCityMode === 'Display city' && userProfile.city.trim();
+            const countryLabel = userProfile.country === 'Vietnam' ? 'Việt Nam' : userProfile.country;
+            const showCity = (userProfile.displayCityMode === 'Hiển thị thành phố' || userProfile.displayCityMode === 'Display city') && userProfile.city.trim();
             locationEl.textContent = showCity
-                ? `${userProfile.city.trim()}, ${userProfile.country}`
-                : userProfile.country;
+                ? `${userProfile.city.trim()}, ${countryLabel}`
+                : countryLabel;
         }
 
-        // Danh sách giải đấu đã tổ chức (TOURNAMENTS ORGANIZED)
+        // Danh sách giải đấu đã tổ chức (GIẢI ĐẤU ĐÃ TỔ CHỨC) + Phân trang (3 giải đấu/trang)
         if (organizedList) {
-            const rawTourney = sessionStorage.getItem('btp_tournament_data');
-            let tourney = null;
-            try {
-                tourney = rawTourney ? JSON.parse(rawTourney) : null;
-            } catch {
-                tourney = null;
-            }
-            const tourneyImg = sessionStorage.getItem('btp_tournament_profile_img') || '/images/logo.png';
-            const tourneyName = tourney?.name || 'Nguyễn Quân';
-            const tourneyAddress = tourney?.venueAddress || 'Hà Nội, VN';
-            const dateRangeText = formatTourneyDateRange(tourney?.startDate, tourney?.endDate);
+            const createdList = getCreatedTournaments();
+            const items = createdList.length > 0
+                ? createdList.map(entry => {
+                    const d = entry?.details || entry || {};
+                    const g = entry?.gameInfo || {};
+                    const gameName = g.game || 'Liên Minh Huyền Thoại';
+                    const resolvedName = entry?.name || d.name || 'Nguyễn Quân';
+                    const resolvedAddress = (entry?.venueAddress ?? d.venueAddress ?? '').trim() || 'Hà Nội, Việt Nam';
+                    const resolvedStart = entry?.startDate || d.startDate || '';
+                    const resolvedEnd = entry?.endDate || d.endDate || '';
+                    return {
+                        id: entry?.id || resolvedName || 'default',
+                        name: resolvedName,
+                        address: resolvedAddress,
+                        dateRangeText: formatTourneyDateRange(resolvedStart, resolvedEnd),
+                        img: entry?.profileImg || GAME_IMAGES[gameName] || '/images/logo.png'
+                    };
+                })
+                : [
+                    {
+                        id: 'default',
+                        name: 'Nguyễn Quân',
+                        address: 'Hà Nội, Việt Nam',
+                        dateRangeText: '15 Thg 10, 2026 - 16 Thg 10, 2026',
+                        img: '/images/logo.png'
+                    }
+                ];
 
-            organizedList.innerHTML = `
-                <a href="/tournament/home" class="pf-tourney-item">
-                    <img src="${escapeHtml(tourneyImg)}" alt="${escapeHtml(tourneyName)}" class="pf-tourney-thumb">
-                    <div class="pf-tourney-info">
-                        <span class="pf-tourney-date">${escapeHtml(dateRangeText)}</span>
-                        <strong class="pf-tourney-name">${escapeHtml(tourneyName)}</strong>
-                        <span class="pf-tourney-loc">${escapeHtml(tourneyAddress)}</span>
-                    </div>
-                </a>
-            `;
+            const ITEMS_PER_PAGE = 3;
+            let currentOrgPage = 1;
+
+            function renderOrganizedPage() {
+                const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+                if (currentOrgPage > totalPages) currentOrgPage = totalPages;
+
+                const startIdx = (currentOrgPage - 1) * ITEMS_PER_PAGE;
+                const pagedItems = items.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+
+                organizedList.innerHTML = pagedItems.map(item => `
+                    <a href="/tournament/home" class="pf-tourney-item" data-tourney-id="${escapeHtml(item.id)}">
+                        <img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name)}" class="pf-tourney-thumb">
+                        <div class="pf-tourney-info">
+                            <span class="pf-tourney-date">${escapeHtml(item.dateRangeText)}</span>
+                            <strong class="pf-tourney-name">${escapeHtml(item.name)}</strong>
+                            <span class="pf-tourney-loc">${escapeHtml(item.address)}</span>
+                        </div>
+                    </a>
+                `).join('');
+
+                organizedList.querySelectorAll('.pf-tourney-item').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = link.getAttribute('data-tourney-id');
+                        if (targetId && targetId !== 'default') {
+                            setActiveTournamentById(targetId);
+                        }
+                        window.location.href = '/tournament/home';
+                    });
+                });
+
+                renderCirclePagination(organizedPagination, currentOrgPage, totalPages, (nextPage) => {
+                    currentOrgPage = nextPage;
+                    renderOrganizedPage();
+                });
+            }
+
+            renderOrganizedPage();
         }
     }
 
     function formatTourneyDateRange(startIso, endIso) {
-        if (!startIso && !endIso) return 'Oct 15th, 2026 - Oct 16th, 2026';
+        if (!startIso && !endIso) return '15 Thg 10, 2026 - 16 Thg 10, 2026';
         const fmt = (iso) => {
             if (!iso) return '';
             const d = new Date(iso);
             if (Number.isNaN(d.getTime())) return '';
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const day = d.getDate();
-            const suffix = (day % 10 === 1 && day !== 11) ? 'st'
-                : (day % 10 === 2 && day !== 12) ? 'nd'
-                : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
-            return `${months[d.getMonth()]} ${day}${suffix}, ${d.getFullYear()}`;
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            return `${day} Thg ${month}, ${d.getFullYear()}`;
         };
         const s = fmt(startIso);
         const e = fmt(endIso);
         if (s && e) return `${s} - ${e}`;
-        return s || e || 'Oct 15th, 2026 - Oct 16th, 2026';
+        return s || e || '15 Thg 10, 2026 - 16 Thg 10, 2026';
     }
 
     // =========================================================================
-    // B. LOGIC TRANG PROFILE SETTINGS & ACCOUNT SETTINGS (/profile/settings)
+    // B. LOGIC TRANG CÀI ĐẶT HỒ SƠ & TÀI KHOẢN (/profile/settings)
     // =========================================================================
     const profileSettingsForm = document.getElementById('profileSettingsForm');
     if (!profileSettingsForm) return;
@@ -139,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsMiniAvatarInitial = document.getElementById('settingsMiniAvatarInitial');
     const settingsMiniTagName = document.getElementById('settingsMiniTagName');
 
-    // Các trường trong Profile Settings
+    // Các trường trong Cài đặt hồ sơ
     const settingsAvatarImg = document.getElementById('settingsAvatarImg');
     const settingsAvatarInitial = document.getElementById('settingsAvatarInitial');
     const settingsAvatarInput = document.getElementById('settingsAvatarInput');
@@ -161,7 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateAccountBtn = document.getElementById('updateAccountBtn');
 
     let draftAvatarUrl = userProfile.avatarUrl;
-    let draftDisplayCityMode = userProfile.displayCityMode || 'Display city';
+    let draftDisplayCityMode = (userProfile.displayCityMode === 'Hide city')
+        ? 'Ẩn thành phố'
+        : 'Hiển thị thành phố';
 
     // Chuyển tab dựa theo query ?tab=profile hoặc ?tab=account
     function switchSettingsTab(tabName) {
@@ -182,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tabBtnProfile.addEventListener('click', () => switchSettingsTab('profile'));
     tabBtnAccount.addEventListener('click', () => switchSettingsTab('account'));
 
-    // Nạp dữ liệu vào form Profile Settings
+    // Nạp dữ liệu vào form Cài đặt hồ sơ
     function populateSettingsUI() {
         const initial = (userProfile.tagName.charAt(0) || 'T').toUpperCase();
         settingsMiniTagName.textContent = userProfile.tagName;
@@ -214,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
         checkDisplayPronouns.checked = Boolean(userProfile.displayPronouns);
         pronounsInputWrap.style.display = checkDisplayPronouns.checked ? 'block' : 'none';
         inputPronouns.value = userProfile.pronouns || '';
-        selectCountry.value = userProfile.country || 'Vietnam';
+        selectCountry.value = (userProfile.country === 'Vietnam') ? 'Việt Nam' : (userProfile.country || 'Việt Nam');
         inputCity.value = userProfile.city || '';
         inputZipCode.value = userProfile.zipCode || '';
         inputPhone.value = userProfile.phone || '';
@@ -249,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = e.target.files?.[0];
         if (!file) return;
         if (file.size > 4 * 1024 * 1024) {
-            showToast('Ảnh đại diện không được vượt quá 4MB', 'error');
+            showToast('Ảnh đại diện không được vượt quá 4MB.', 'error');
             return;
         }
         const reader = new FileReader();
@@ -274,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         markProfileDirty();
     });
 
-    // Dropdown Display city
+    // Dropdown Hiển thị thành phố
     displayCityBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const isHidden = displayCityMenu.style.display === 'none';
@@ -294,12 +363,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (displayCityMenu) displayCityMenu.style.display = 'none';
     });
 
-    // Lưu Profile Settings khi bấm Update Account
+    // Lưu Cài đặt hồ sơ khi bấm Cập nhật hồ sơ
     profileSettingsForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const newTag = inputGamerTag.value.trim();
         if (!newTag) {
-            showToast('GamerTag không được để trống', 'error');
+            showToast('Tên hiển thị (GamerTag) không được để trống.', 'error');
             inputGamerTag.focus();
             return;
         }
@@ -320,11 +389,11 @@ document.addEventListener('DOMContentLoaded', () => {
         populateSettingsUI();
         updateAccountBtn.disabled = true;
         updateAccountBtn.classList.remove('active');
-        showToast('Account profile updated successfully!', 'success');
+        showToast('Đã cập nhật hồ sơ cá nhân thành công!', 'success');
     });
 
     // =========================================================================
-    // C. LOGIC ACCOUNT SETTINGS (Email, Password, Delete Account)
+    // C. LOGIC CÀI ĐẶT TÀI KHOẢN (Email, Mật khẩu, Xóa tài khoản)
     // =========================================================================
     const currentEmailDisplay = document.getElementById('currentEmailDisplay');
     const toggleChangeEmailBtn = document.getElementById('toggleChangeEmailBtn');
@@ -353,16 +422,16 @@ document.addEventListener('DOMContentLoaded', () => {
     saveNewEmailBtn.addEventListener('click', () => {
         const nextEmail = inputNewEmail.value.trim();
         if (!nextEmail || !nextEmail.includes('@')) {
-            showToast('Please enter a valid email address.', 'error');
+            showToast('Vui lòng nhập địa chỉ email hợp lệ.', 'error');
             return;
         }
         saveUserProfile({ email: nextEmail });
         currentEmailDisplay.textContent = nextEmail;
         changeEmailBox.style.display = 'none';
-        showToast('Email updated successfully!', 'success');
+        showToast('Đã cập nhật địa chỉ email thành công!', 'success');
     });
 
-    // Password form
+    // Đổi mật khẩu
     const passwordSettingsForm = document.getElementById('passwordSettingsForm');
     const inputOldPassword = document.getElementById('inputOldPassword');
     const inputNewPassword = document.getElementById('inputNewPassword');
@@ -387,19 +456,19 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (!inputOldPassword.value.trim() || !inputNewPassword.value.trim()) return;
         if (inputNewPassword.value.trim().length < 6) {
-            showToast('New password must be at least 6 characters.', 'error');
+            showToast('Mật khẩu mới phải có ít nhất 6 ký tự.', 'error');
             return;
         }
         inputOldPassword.value = '';
         inputNewPassword.value = '';
         checkPasswordReady();
-        showToast('Password updated successfully!', 'success');
+        showToast('Đã cập nhật mật khẩu thành công!', 'success');
     });
 
-    // Delete Account
+    // Xóa tài khoản
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
     deleteAccountBtn.addEventListener('click', () => {
-        const confirmed = window.confirm('Are you sure you want to permanently delete your account? This cannot be undone.');
+        const confirmed = window.confirm('Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản của mình? Hành động này không thể hoàn tác.');
         if (!confirmed) return;
         sessionStorage.removeItem(STORAGE_KEY_PROFILE);
         window.location.href = '/login';

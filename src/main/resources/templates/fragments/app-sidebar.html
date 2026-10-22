@@ -23,7 +23,7 @@
                     </a>
                     <a th:href="@{/search}" class="sidebar-item"
                        th:classappend="${activeNav == 'search'} ? ' active' : ''"
-                       data-tooltip="Tìm kiếm">
+                       data-tooltip="Tìm kiếm giải đấu">
                         <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"/>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -31,7 +31,7 @@
                     </a>
                     <a th:href="@{/events}" class="sidebar-item"
                        th:classappend="${activeNav == 'tournaments'} ? ' active' : ''"
-                       data-tooltip="Sự kiện">
+                       data-tooltip="Giải đấu của tôi">
                         <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 9H4.5a2.5 2.5 0 010-5H6"/>
                             <path d="M18 9h1.5a2.5 2.5 0 000-5H18"/>
@@ -67,12 +67,12 @@
                     </a>
                 </div>
 
-                <!-- Nút dấu cộng (+) Create Event giống Start.gg -->
+                <!-- Nút dấu cộng (+) Tạo giải đấu -->
                 <div class="sidebar-group">
                     <a th:href="@{/create}" class="sidebar-item sidebar-item-create"
                        th:classappend="${activeNav == 'create'} ? ' active' : ''"
                        id="sidebarCreateEventBtn"
-                       data-tooltip="Create event">
+                       data-tooltip="Tạo giải đấu">
                         <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -94,9 +94,9 @@
                     <!-- Hộp Popup Menu hiện ra khi bấm nút Hồ sơ -->
                     <div class="sidebar-profile-popover" id="sidebarProfilePopover" style="display: none;">
                         <div class="spp-menu-list">
-                            <a th:href="@{/profile/settings(tab='profile')}" class="spp-menu-item">Profile Settings</a>
-                            <a th:href="@{/profile/settings(tab='account')}" class="spp-menu-item">Account Settings</a>
-                            <a th:href="@{/login}" class="spp-menu-item spp-menu-logout" id="logoutBtn">Logout</a>
+                            <a th:href="@{/profile/settings(tab='profile')}" class="spp-menu-item">Cài đặt hồ sơ</a>
+                            <a th:href="@{/profile/settings(tab='account')}" class="spp-menu-item">Cài đặt tài khoản</a>
+                            <a th:href="@{/login}" class="spp-menu-item spp-menu-logout" id="logoutBtn">Đăng xuất</a>
                         </div>
                         <div class="spp-divider"></div>
                         <a th:href="@{/profile}" class="spp-user-footer" id="popoverUserProfileLink">
@@ -124,7 +124,7 @@
         <a th:href="@{/dashboard}" class="mobile-logo-link">
             <img th:src="@{/images/logo_bieutuong.png}" alt="Logo" class="mobile-logo-img">
         </a>
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Mở menu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <line x1="3" y1="12" x2="21" y2="12"/>

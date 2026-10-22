@@ -1,6 +1,6 @@
 import { CONTACT_ICONS } from '../../common/icons.js';
 import { showToast } from '../../common/toast.js';
-import { escapeHtml, renderMarkdownToHtml } from '../../common/utils.js';
+import { escapeHtml, renderMarkdownToHtml, getCreatedTournaments, setActiveTournamentById } from '../../common/utils.js';
 import { initAppSidebar } from '../../layouts/app-layout.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -24,23 +24,47 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const FORMAT_LABELS = {
-        'SINGLE_ELIMINATION': 'Single Elimination',
-        'DOUBLE_ELIMINATION': 'Double Elimination',
-        'ROUND_ROBIN': 'Round Robin',
-        'SWISS': 'Swiss'
+        'SINGLE_ELIMINATION': 'Loại trực tiếp',
+        'DOUBLE_ELIMINATION': 'Nhánh thắng - Nhánh thua',
+        'ROUND_ROBIN': 'Vòng tròn tính điểm',
+        'SWISS': 'Thể thức Thụy Sĩ'
     };
 
     const STAGE_LABELS = {
-        'SINGLE_STAGE': 'Single Stage',
-        'TWO_STAGE': 'Two Stage'
+        'SINGLE_STAGE': '1 giai đoạn',
+        'TWO_STAGE': '2 giai đoạn'
     };
 
-    // 1. Đọc dữ liệu từ sessionStorage
-    const rawDetails = sessionStorage.getItem('btp_tournament_data');
-    const details = rawDetails ? JSON.parse(rawDetails) : {};
+    const TITLE_VI_MAP = {
+        'Overview': 'Tổng quan',
+        'Game Info': 'Thông tin bộ môn',
+        'Location': 'Địa điểm',
+        'Contact Info': 'Thông tin liên hệ',
+        'Rules': 'Điều lệ',
+        'Custom Text': 'Nội dung tùy chỉnh',
+        'New Section': 'Khu vực mới'
+    };
 
+    function localizeTitle(title) {
+        const clean = (title || '').trim();
+        return TITLE_VI_MAP[clean] || clean;
+    }
+
+    // 1. Đọc dữ liệu từ sessionStorage (đồng bộ với danh sách nhiều giải đấu đã tạo)
     const rawSelectedView = sessionStorage.getItem('btp_selected_view_tournament');
     const selectedView = rawSelectedView ? JSON.parse(rawSelectedView) : null;
+
+    if (selectedView) {
+        if (selectedView.storeId) {
+            setActiveTournamentById(selectedView.storeId);
+        } else if (selectedView.name) {
+            setActiveTournamentById(selectedView.name);
+        }
+    }
+
+    const createdTournaments = getCreatedTournaments();
+    const rawDetails = sessionStorage.getItem('btp_tournament_data');
+    const details = rawDetails ? JSON.parse(rawDetails) : {};
 
     const rawRegSettings = sessionStorage.getItem('btp_tournament_reg_settings');
     const regSettings = rawRegSettings ? JSON.parse(rawRegSettings) : null;
@@ -51,7 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Kiểm tra xem giải đấu đang xem có phải giải do chính người dùng tạo trong phiên này không
     const isOwnCreatedTourney = Boolean(
         !selectedView ||
-        (details.name && selectedView.name && details.name.trim().toLowerCase() === selectedView.name.trim().toLowerCase())
+        (details.name && selectedView.name && details.name.trim().toLowerCase() === selectedView.name.trim().toLowerCase()) ||
+        createdTournaments.some(t => ((t?.name || t?.details?.name || '').trim().toLowerCase()) === (selectedView?.name || '').trim().toLowerCase())
     );
 
     const profileImg = isOwnCreatedTourney
@@ -61,10 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ? (sessionStorage.getItem('btp_tournament_banner_img') || '')
         : '';
 
-    const defaultRulesMarkdown = `# Game Tournament Management System — System Modules\n## 1. Module Authentication & User Management\n**Công dụng**\n- Quản lý tài khoản người dùng và phân quyền ban tổ chức.\n- Đảm bảo mọi thành viên tham gia tuân thủ đúng quy định chung của giải đấu.\n- Nghiêm cấm sử dụng phần mềm thứ 3 can thiệp vào trò chơi.`;
+    const defaultRulesMarkdown = `# Hệ thống quản lý giải đấu — Quy định chung\n## 1. Quy định tài khoản & Đội tuyển tham gia\n**Nội dung chính**\n- Quản lý tài khoản người dùng và phân quyền ban tổ chức.\n- Đảm bảo mọi thành viên tham gia tuân thủ đúng quy định chung của giải đấu.\n- Nghiêm cấm sử dụng phần mềm thứ 3 can thiệp vào trò chơi.`;
     const rulesMarkdown = sessionStorage.getItem('btp_tournament_rules') || defaultRulesMarkdown;
 
-    const tourneyName = (isOwnCreatedTourney ? details.name : selectedView?.name) || details.name || 'Nguyễn Quân';
+    const tourneyName = (isOwnCreatedTourney ? details.name : selectedView?.name) || details.name || 'Giải đấu mới';
     const startDate = (isOwnCreatedTourney ? details.startDate : selectedView?.startDate) || details.startDate || '2026-10-15T00:00';
     const endDate = (isOwnCreatedTourney ? details.endDate : selectedView?.endDate) || details.endDate || startDate;
     const venueAddress = isOwnCreatedTourney
@@ -78,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedGame = isOwnCreatedTourney
         ? (gameInfo.game || 'Liên Minh Huyền Thoại')
         : (selectedView?.game || gameInfo.game || 'Liên Minh Huyền Thoại');
-    const selectedFormat = FORMAT_LABELS[gameInfo.format] || 'Single Elimination';
-    const selectedStage = STAGE_LABELS[gameInfo.stageType] || 'Single Stage';
+    const selectedFormat = FORMAT_LABELS[gameInfo.format] || 'Loại trực tiếp';
+    const selectedStage = STAGE_LABELS[gameInfo.stageType] || '1 giai đoạn';
 
     // =========================================================================
     // 2. XÁC ĐỊNH TƯ CÁCH NGƯỜI DÙNG & TRẠNG THÁI GIẢI ĐẤU CHO NÚT BÊN TRÁI
@@ -92,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function isUserRegisteredFor(nameToCheck) {
         if (!nameToCheck) return false;
         const normalized = nameToCheck.trim().toLowerCase();
-        if (selectedView?.role === 'Player' && selectedView?.name?.trim().toLowerCase() === normalized) {
+        if ((selectedView?.role === 'Player' || selectedView?.role === 'Tuyển thủ') && selectedView?.name?.trim().toLowerCase() === normalized) {
             return true;
         }
         try {
@@ -107,34 +132,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function isUserOrganizerOf(nameToCheck) {
         if (!nameToCheck) return false;
         const normalized = nameToCheck.trim().toLowerCase();
-        if (selectedView?.role === 'Organizer' && selectedView?.name?.trim().toLowerCase() === normalized) {
+        if ((selectedView?.role === 'Organizer' || selectedView?.role === 'Ban tổ chức') && selectedView?.name?.trim().toLowerCase() === normalized) {
             return true;
         }
         if (details.name && details.name.trim().toLowerCase() === normalized) {
             return true;
         }
+        if (createdTournaments.some(t => ((t?.name || t?.details?.name || '').trim().toLowerCase()) === normalized)) {
+            return true;
+        }
         return ORGANIZER_SAMPLE_NAMES.includes(normalized);
     }
 
-    // Xác định trạng thái giải đấu: 'OPEN_REGISTRATION' | 'REGISTRATION_NOT_STARTED' | 'REGISTRATION_CLOSED' | 'IN_PROGRESS' | 'COMPLETED'
     function resolveTournamentStatus() {
         const rawStatus = (selectedView?.status || '').toLowerCase();
         const badgeLabel = (selectedView?.badgeLabel || '').toLowerCase();
 
-        if (rawStatus === 'completed' || badgeLabel === 'completed') {
+        if (rawStatus === 'completed' || badgeLabel === 'completed' || badgeLabel === 'đã kết thúc') {
             return 'COMPLETED';
         }
-        if (rawStatus === 'in_progress' || rawStatus === 'ongoing' || badgeLabel === 'in progress') {
+        if (rawStatus === 'in_progress' || rawStatus === 'ongoing' || badgeLabel === 'in progress' || badgeLabel === 'đang diễn ra') {
             return 'IN_PROGRESS';
         }
-        if (rawStatus === 'closed' || rawStatus === 'registration_closed' || badgeLabel === 'registration closed') {
+        if (rawStatus === 'closed' || rawStatus === 'registration_closed' || badgeLabel === 'registration closed' || badgeLabel === 'đã đóng đăng ký') {
             return 'REGISTRATION_CLOSED';
         }
-        if (badgeLabel === 'upcoming') {
+        if (badgeLabel === 'upcoming' || badgeLabel === 'sắp diễn ra') {
             return 'REGISTRATION_NOT_STARTED';
         }
 
-        // Nếu là giải đấu do người dùng tạo và đã cấu hình ngày đăng ký trong Registration Settings
         if (isOwnCreatedTourney && regSettings?.registrationStartDate && regSettings?.registrationEndDate) {
             const now = new Date();
             const regStart = new Date(regSettings.registrationStartDate);
@@ -173,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tvSidebarAvatarImg.style.display = 'block';
             tvSidebarAvatarFallback.style.display = 'none';
         } else {
-            tvSidebarAvatarFallback.textContent = tourneyName.trim().charAt(0).toUpperCase() || 'T';
+            tvSidebarAvatarFallback.textContent = tourneyName.trim().charAt(0).toUpperCase() || 'G';
         }
     }
 
@@ -185,7 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tvSidebarLocation.textContent = venueAddress || 'Hà Nội, Việt Nam';
     }
 
-    // Hiển thị thông tin trò chơi từ Game Info theo đúng định dạng ảnh mẫu
     if (tvSidebarGameInfoList) {
         const eventDateText = formatFullSingleDate(startDate);
         const gameTitleLine = `[${selectedStage}] ${selectedGame} (${selectedFormat})`;
@@ -210,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Cập nhật giao diện và hành vi cho nút #tvRegisterNowBtn dựa trên tư cách người dùng & trạng thái giải đấu
     function updateActionButtonState() {
         if (!tvRegisterNowBtn) return;
 
@@ -222,25 +246,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const isOrganizer = isUserOrganizerOf(tourneyName);
         const isRegisteredPlayer = isUserRegisteredFor(tourneyName);
 
-        // 1. Giải đấu đã hoàn thành hoặc đang diễn ra -> ưu tiên hiển thị trạng thái giải đấu
+        // 1. Giải đấu đã hoàn thành hoặc đang diễn ra
         if (currentStatus === 'COMPLETED') {
             tvRegisterNowBtn.classList.add('is-status-completed');
             tvRegisterNowBtn.disabled = true;
-            tvRegisterNowBtn.textContent = 'Completed';
+            tvRegisterNowBtn.textContent = 'Đã kết thúc';
             return;
         }
 
         if (currentStatus === 'IN_PROGRESS') {
             tvRegisterNowBtn.classList.add('is-status-ongoing');
             tvRegisterNowBtn.disabled = true;
-            tvRegisterNowBtn.textContent = 'In Progress';
+            tvRegisterNowBtn.textContent = 'Đang diễn ra';
             return;
         }
 
-        // 2. Nếu người dùng đã thuộc giải đấu (Organizer hoặc Player đã đăng ký)
+        // 2. Nếu người dùng đã thuộc giải đấu (Ban tổ chức hoặc Tuyển thủ đã đăng ký)
         if (isOrganizer) {
             tvRegisterNowBtn.classList.add('is-organizer');
-            tvRegisterNowBtn.textContent = 'Manage Tournament';
+            tvRegisterNowBtn.textContent = 'Quản lý giải đấu';
             tvRegisterNowBtn.onclick = () => {
                 window.location.href = '/tournament/details';
             };
@@ -250,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isRegisteredPlayer) {
             tvRegisterNowBtn.classList.add('is-registered');
             tvRegisterNowBtn.disabled = true;
-            tvRegisterNowBtn.textContent = '✓ Registered';
+            tvRegisterNowBtn.textContent = '✓ Đã đăng ký';
             return;
         }
 
@@ -258,19 +282,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentStatus === 'REGISTRATION_CLOSED') {
             tvRegisterNowBtn.classList.add('is-status-closed');
             tvRegisterNowBtn.disabled = true;
-            tvRegisterNowBtn.textContent = 'Registration Closed';
+            tvRegisterNowBtn.textContent = 'Đã đóng đăng ký';
             return;
         }
 
         if (currentStatus === 'REGISTRATION_NOT_STARTED') {
             tvRegisterNowBtn.classList.add('is-status-upcoming');
             tvRegisterNowBtn.disabled = true;
-            tvRegisterNowBtn.textContent = 'Registration Not Open';
+            tvRegisterNowBtn.textContent = 'Chưa mở đăng ký';
             return;
         }
 
-        // 4. Người dùng CHƯA thuộc giải đấu VÀ giải đấu ĐANG mở đăng ký -> Hiện Register Now
-        tvRegisterNowBtn.textContent = 'Register Now';
+        // 4. Người dùng CHƯA thuộc giải đấu VÀ giải đấu ĐANG mở đăng ký
+        tvRegisterNowBtn.textContent = 'Đăng ký tham gia';
         tvRegisterNowBtn.onclick = () => {
             try {
                 const rawList = sessionStorage.getItem('btp_registered_tournaments');
@@ -279,13 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!exists) {
                     regList.unshift({
                         name: tourneyName,
-                        dateLabel: `Upcoming • ${formatShortDateRange(startDate, endDate)}`,
+                        dateLabel: `Sắp diễn ra • ${formatShortDateRange(startDate, endDate)}`,
                         startDate,
                         endDate,
                         game: selectedGame,
                         location: venueAddress || 'Hà Nội, Việt Nam',
                         attendees: (selectedView?.attendees || 64) + 1,
-                        role: 'Player',
+                        role: 'Tuyển thủ',
                         image: profileImg || GAME_IMAGES[selectedGame] || '/images/game1.png'
                     });
                     sessionStorage.setItem('btp_registered_tournaments', JSON.stringify(regList));
@@ -301,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateActionButtonState();
 
     // =========================================================================
-    // 4. RENDER PHẦN BÊN PHẢI (ĐỒNG BỘ 100% VỚI TRANG HOME CỦA GIẢI ĐẤU)
+    // 4. RENDER PHẦN BÊN PHẢI (ĐỒNG BỘ 100% VỚI TRANG CHỦ CỦA GIẢI ĐẤU)
     // =========================================================================
     const homeBannerImg = document.getElementById('homeBannerImg');
     const homeBannerFallback = document.getElementById('homeBannerFallback');
@@ -319,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             homeProfileImg.style.display = 'block';
             homeProfileFallback.style.display = 'none';
         } else {
-            homeProfileFallback.textContent = tourneyName.trim().charAt(0).toUpperCase() || 'T';
+            homeProfileFallback.textContent = tourneyName.trim().charAt(0).toUpperCase() || 'G';
         }
     }
 
@@ -334,12 +358,11 @@ document.addEventListener('DOMContentLoaded', () => {
     homeContactLink.textContent = contactValue;
     homeContactLink.href = contactType === 'EMAIL' ? `mailto:${contactValue}` : contactValue;
 
-    // Render các Section & Widget từ btp_tournament_homepage_layout chuẩn class của home.css
     const STORAGE_KEY_LAYOUT = 'btp_tournament_homepage_layout';
     const DEFAULT_HOMEPAGE_LAYOUT = [
         {
             id: 'sec_overview',
-            title: 'Overview',
+            title: 'Tổng quan',
             layout: '1col',
             columns: [
                 [
@@ -354,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             id: 'sec_game',
-            title: 'Game Info',
+            title: 'Thông tin bộ môn',
             layout: '1col',
             columns: [
                 [
@@ -375,19 +398,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         id: 'wid_location',
                         type: 'LOCATION',
-                        title: 'Location'
+                        title: 'Địa điểm'
                     },
                     {
                         id: 'wid_contact',
                         type: 'CONTACT',
-                        title: 'Contact Info'
+                        title: 'Thông tin liên hệ'
                     }
                 ]
             ]
         },
         {
             id: 'sec_rules',
-            title: 'Rules',
+            title: 'Điều lệ',
             layout: '1col',
             columns: [
                 [
@@ -417,8 +440,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = loadSavedLayout();
 
     function buildWidgetContentHtml(widget) {
-        const headingHtml = widget.title
-            ? `<h3 class="th-widget-title">${escapeHtml(widget.title)}</h3>`
+        const displayTitle = localizeTitle(widget.title);
+        const headingHtml = displayTitle
+            ? `<h3 class="th-widget-title">${escapeHtml(displayTitle)}</h3>`
             : '';
 
         if (widget.type === 'MARKDOWN') {
@@ -438,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!imgSrc) return '';
 
-            const imgTagHtml = `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(caption || widget.title || 'Tournament Image')}" class="th-image-widget-img">`;
+            const imgTagHtml = `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(caption || displayTitle || 'Hình ảnh giải đấu')}" class="th-image-widget-img">`;
             const wrappedImgHtml = linkUrl
                 ? `<a href="${escapeHtml(linkUrl)}" target="_blank" rel="noopener" class="th-image-widget-link">${imgTagHtml}</a>`
                 : imgTagHtml;
@@ -490,14 +514,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <svg viewBox="0 0 24 24" fill="currentColor" class="th-loc-icon">
                                         <path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/>
                                     </svg>
-                                    <span>Directions</span>
+                                    <span>Chỉ đường</span>
                                 </a>
                                 <button type="button" class="th-loc-action-btn js-copy-location-btn" data-venue="${escapeHtml(venueAddress)}">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="th-loc-icon">
                                         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                                         <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
                                     </svg>
-                                    <span>Copy Link</span>
+                                    <span>Sao chép liên kết</span>
                                 </button>
                             </div>
                         </div>
@@ -511,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${headingHtml}
                     <div class="th-card th-location-card">
                         <div class="th-location-left">
-                            <div class="th-location-address">Chưa cập nhật địa điểm (Vui lòng nhập tại mục Details)</div>
+                            <div class="th-location-address">Chưa cập nhật địa điểm (Vui lòng nhập tại mục Chi tiết)</div>
                         </div>
                         <div class="th-location-map">
                             <iframe src="https://maps.google.com/maps?q=Viet%20Nam&t=&z=5&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -542,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="th-rules-body collapsed js-rules-body">
                         ${renderMarkdownToHtml(rulesMarkdown)}
                     </div>
-                    <button type="button" class="th-show-more-btn js-rules-toggle-btn">Show more</button>
+                    <button type="button" class="th-show-more-btn js-rules-toggle-btn">Xem thêm</button>
                 </div>
             `;
         }
@@ -554,8 +578,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!sectionsContainer) return;
 
         sectionsContainer.innerHTML = sections.map(sec => {
-            const viewSectionTitle = (sec.title && sec.title.trim())
-                ? `<h2 class="th-section-title">${escapeHtml(sec.title)}</h2>`
+            const secTitle = localizeTitle(sec.title);
+            const viewSectionTitle = secTitle
+                ? `<h2 class="th-section-title">${escapeHtml(secTitle)}</h2>`
                 : '';
 
             const columnsHtml = (sec.columns || [[]]).map((colWidgets, colIdx) => {
@@ -591,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const venue = btn.getAttribute('data-venue') || '';
                 const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`;
                 navigator.clipboard?.writeText(mapUrl);
-                showToast('Location link copied to clipboard.');
+                showToast('Đã sao chép liên kết địa điểm vào bộ nhớ tạm.');
             });
         });
 
@@ -601,7 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const body = card?.querySelector('.js-rules-body');
                 if (!body) return;
                 const isCollapsed = body.classList.toggle('collapsed');
-                btn.textContent = isCollapsed ? 'Show more' : 'Show less';
+                btn.textContent = isCollapsed ? 'Xem thêm' : 'Thu gọn';
             });
         });
     }
@@ -609,75 +634,50 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPublicSections();
 
     // =========================================================================
-    // 5. CÁC HÀM ĐỊNH DẠNG NGÀY THÁNG CHUẨN START.GG
+    // 5. CÁC HÀM ĐỊNH DẠNG NGÀY THÁNG TIẾNG VIỆT
     // =========================================================================
-    function getOrdinalSuffix(day) {
-        if (day > 3 && day < 21) return 'th';
-        switch (day % 10) {
-            case 1: return 'st';
-            case 2: return 'nd';
-            case 3: return 'rd';
-            default: return 'th';
-        }
-    }
-
     function formatShortDateRange(startStr, endStr) {
         const s = new Date(startStr);
         const e = new Date(endStr);
-        if (Number.isNaN(s.getTime())) return 'Oct 15th — 16th, 2026';
+        if (Number.isNaN(s.getTime())) return '15/10 — 16/10/2026';
 
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const sMonth = months[s.getMonth()];
-        const sDay = `${s.getDate()}${getOrdinalSuffix(s.getDate())}`;
+        const sDay = String(s.getDate()).padStart(2, '0');
+        const sMonth = String(s.getMonth() + 1).padStart(2, '0');
         const sYear = s.getFullYear();
 
         if (Number.isNaN(e.getTime())) {
-            return `${sMonth} ${sDay}, ${sYear}`;
+            return `${sDay}/${sMonth}/${sYear}`;
         }
 
-        const eMonth = months[e.getMonth()];
-        const eDay = `${e.getDate()}${getOrdinalSuffix(e.getDate())}`;
+        const eDay = String(e.getDate()).padStart(2, '0');
+        const eMonth = String(e.getMonth() + 1).padStart(2, '0');
         const eYear = e.getFullYear();
 
-        if (sYear === eYear && s.getMonth() === e.getMonth()) {
-            if (s.getDate() === e.getDate()) {
-                return `${sMonth} ${sDay}, ${sYear}`;
-            }
-            return `${sMonth} ${sDay} — ${eDay}, ${sYear}`;
+        if (sYear === eYear && sMonth === eMonth && sDay === eDay) {
+            return `${sDay}/${sMonth}/${sYear}`;
         }
-        return `${sMonth} ${sDay}, ${sYear} — ${eMonth} ${eDay}, ${eYear}`;
+        if (sYear === eYear) {
+            return `${sDay}/${sMonth} — ${eDay}/${eMonth}/${sYear}`;
+        }
+        return `${sDay}/${sMonth}/${sYear} — ${eDay}/${eMonth}/${eYear}`;
     }
 
     function formatFullSingleDate(dateStr) {
         const d = new Date(dateStr);
-        if (Number.isNaN(d.getTime())) return 'October 15th 2026';
-        const fullMonths = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-        const m = fullMonths[d.getMonth()];
-        const day = `${d.getDate()}${getOrdinalSuffix(d.getDate())}`;
-        const yr = d.getFullYear();
-        return `${m} ${day} ${yr}`;
+        if (Number.isNaN(d.getTime())) return 'Ngày 15 tháng 10 năm 2026';
+        return `Ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`;
     }
 
     function formatFullTimestamp(dateStr) {
         const d = new Date(dateStr);
-        if (Number.isNaN(d.getTime())) return 'October 15th 2026 at 12:00 AM ICT';
+        if (Number.isNaN(d.getTime())) return 'Ngày 15/10/2026 lúc 00:00 ICT';
 
-        const fullMonths = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-        const monthName = fullMonths[d.getMonth()];
-        const dayOrd = `${d.getDate()}${getOrdinalSuffix(d.getDate())}`;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
-
-        let hours = d.getHours();
+        const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
 
-        return `${monthName} ${dayOrd} ${year} at ${hours}:${minutes} ${ampm} ICT`;
+        return `Ngày ${day}/${month}/${year} lúc ${hours}:${minutes} ICT`;
     }
 });

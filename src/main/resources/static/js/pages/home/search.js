@@ -1,228 +1,325 @@
-﻿// =====================================================
-// Search Tournaments Script — Start.gg Style
+// =====================================================
+// Search Tournaments Script — Đồng bộ giải đấu đã tạo & Tiếng Việt
 // =====================================================
 
+import {
+    getCreatedTournaments,
+    setActiveTournamentById
+} from '../../common/utils.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Mốc ngày tham chiếu mặc định để các bộ lọc Next 7 Days / Past 7 Days luôn khớp dữ liệu mẫu
     const TODAY = new Date('2026-10-22T00:00:00');
 
-    // ===== Dữ liệu mẫu chuẩn theo thiết kế Start.gg + Dashboard =====
+    const GAME_IMAGES = {
+        'Liên Minh Huyền Thoại': '/images/game1.png',
+        'League of Legends': '/images/game1.png',
+        'Valorant': '/images/game2.png',
+        'Teamfight Tactics': '/images/game3.png',
+        'CS2': '/images/game4.png',
+        'Delta Force': '/images/game5.png',
+        'The Isle': '/images/game6.png',
+        'PUBG': '/images/game1.png',
+        'Dota 2': '/images/game2.png',
+        'FIFA Online': '/images/game3.png',
+        'Street Fighter 6': '/images/game1.png',
+        'Super Smash Bros. Ultimate': '/images/game2.png'
+    };
+
+    const FORMAT_MAP = {
+        SINGLE_ELIMINATION: 'Loại trực tiếp đơn',
+        DOUBLE_ELIMINATION: 'Loại trực tiếp kép',
+        ROUND_ROBIN: 'Vòng tròn tính điểm',
+        SWISS: 'Hệ Thụy Sĩ'
+    };
+
+    // ===== Dữ liệu mẫu giải đấu =====
     const DEFAULT_TOURNAMENTS = [
         {
             id: 101,
             name: '第74回スマバトSP',
-            dateLabel: 'Upcoming • Oct 24th, 2026',
+            dateLabel: 'Sắp diễn ra • 24 Thg 10, 2026',
             startDate: '2026-10-24',
             game: 'Super Smash Bros. Ultimate',
             gameDisplay: 'Super Smash Bros. Ultimate',
             location: '大東市, JP',
             attendees: 312,
             status: 'upcoming',
-            badgeLabel: 'Registration Closes Soon',
+            badgeLabel: 'Sắp đóng đăng ký',
             badgeClass: 'stc-badge-closing',
             image: '/images/game1.png'
         },
         {
             id: 102,
             name: 'LEGENDS7',
-            dateLabel: 'Upcoming • Oct 26th, 2026',
+            dateLabel: 'Sắp diễn ra • 26 Thg 10, 2026',
             startDate: '2026-10-26',
             game: 'Super Smash Bros. Ultimate',
             gameDisplay: 'Super Smash Bros. Ultimate',
             location: 'San Salvador, SV',
             attendees: 326,
             status: 'upcoming',
-            badgeLabel: 'Upcoming',
+            badgeLabel: 'Sắp diễn ra',
             badgeClass: 'stc-badge-upcoming',
             image: '/images/game2.png'
         },
         {
             id: 103,
             name: 'World Warrior 2026 - Japan 5',
-            dateLabel: 'In Progress • Oct 21st - Oct 23rd, 2026',
+            dateLabel: 'Đang diễn ra • 21 - 23 Thg 10, 2026',
             startDate: '2026-10-21',
             game: 'Street Fighter 6',
             gameDisplay: 'Street Fighter 6',
-            location: 'Online',
+            location: 'Trực tuyến',
             attendees: 426,
             status: 'in_progress',
-            badgeLabel: 'In Progress',
+            badgeLabel: 'Đang diễn ra',
             badgeClass: 'stc-badge-progress',
             image: '/images/game3.png'
         },
         {
             id: 104,
             name: 'Headstomper 2026',
-            dateLabel: 'Upcoming • Nov 6th, 2026',
+            dateLabel: 'Sắp diễn ra • 06 Thg 11, 2026',
             startDate: '2026-11-06',
             game: 'Avatar Legends: The Fighting Game',
-            gameDisplay: 'Avatar Legends: The Fighting Game — and 10 more games',
+            gameDisplay: 'Avatar Legends: The Fighting Game — cùng 10 bộ môn khác',
             location: 'Malmö, SE',
             attendees: 450,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game4.png'
         },
         {
             id: 105,
             name: 'TGU 2026',
-            dateLabel: 'Upcoming • Nov 13th, 2026',
+            dateLabel: 'Sắp diễn ra • 13 Thg 11, 2026',
             startDate: '2026-11-13',
             game: '2XKO',
-            gameDisplay: '2XKO — and 7 more games',
+            gameDisplay: '2XKO — cùng 7 bộ môn khác',
             location: 'Tambon Ban Mai, TH',
             attendees: 180,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game5.png'
         },
         {
             id: 1,
-            name: 'VCT Champions 2026 — Vietnam Qualifier',
-            dateLabel: 'In Progress • Oct 22nd, 2026',
+            name: 'VCT Champions 2026 — Vòng loại Việt Nam',
+            dateLabel: 'Đang diễn ra • 22 Thg 10, 2026',
             startDate: '2026-10-22',
             game: 'Valorant',
             gameDisplay: 'Valorant',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 128,
             status: 'in_progress',
-            badgeLabel: 'In Progress',
+            badgeLabel: 'Đang diễn ra',
             badgeClass: 'stc-badge-progress',
             image: '/images/game1.png'
         },
         {
             id: 2,
-            name: 'LCK Summer Split — Open Qualifiers',
-            dateLabel: 'Upcoming • Dec 1st, 2026',
+            name: 'LCK Mùa Hè — Vòng loại Mở rộng',
+            dateLabel: 'Sắp diễn ra • 01 Thg 12, 2026',
             startDate: '2026-12-01',
             game: 'Liên Minh Huyền Thoại',
             gameDisplay: 'Liên Minh Huyền Thoại',
-            location: 'Online',
+            location: 'Trực tuyến',
             attendees: 256,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game2.png'
         },
         {
             id: 3,
-            name: 'CS2 Major Vietnam — Community Cup',
-            dateLabel: 'Completed • Oct 18th, 2026',
+            name: 'CS2 Major Vietnam — Cúp Cộng Đồng',
+            dateLabel: 'Đã kết thúc • 18 Thg 10, 2026',
             startDate: '2026-10-18',
             game: 'CS2',
             gameDisplay: 'CS2',
             location: 'Hà Nội, Việt Nam',
             attendees: 64,
             status: 'completed',
-            badgeLabel: 'Completed',
+            badgeLabel: 'Đã kết thúc',
             badgeClass: 'stc-badge-completed',
             image: '/images/game3.png'
         },
         {
             id: 4,
-            name: 'PUBG Mobile Pro League VN Season 8',
-            dateLabel: 'Upcoming • Dec 15th, 2026',
+            name: 'PUBG Mobile Pro League VN Mùa 8',
+            dateLabel: 'Sắp diễn ra • 15 Thg 12, 2026',
             startDate: '2026-12-15',
             game: 'PUBG',
             gameDisplay: 'PUBG',
-            location: 'Online',
+            location: 'Trực tuyến',
             attendees: 80,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game4.png'
         },
         {
             id: 5,
-            name: 'Dota 2 Southeast Asia Championship',
-            dateLabel: 'Upcoming • Feb 10th, 2027',
+            name: 'Giải Vô Địch Dota 2 Đông Nam Á',
+            dateLabel: 'Sắp diễn ra • 10 Thg 02, 2027',
             startDate: '2027-02-10',
             game: 'Dota 2',
             gameDisplay: 'Dota 2',
             location: 'Bangkok, TH',
             attendees: 32,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game5.png'
         },
         {
             id: 6,
             name: 'FIFA Online 4 — Giải Vô Địch Quốc Gia',
-            dateLabel: 'Completed • Oct 16th, 2026',
+            dateLabel: 'Đã kết thúc • 16 Thg 10, 2026',
             startDate: '2026-10-16',
             game: 'FIFA Online',
             gameDisplay: 'FIFA Online',
             location: 'Đà Nẵng, Việt Nam',
             attendees: 48,
             status: 'completed',
-            badgeLabel: 'Completed',
+            badgeLabel: 'Đã kết thúc',
             badgeClass: 'stc-badge-completed',
             image: '/images/game6.png'
         },
         {
             id: 7,
-            name: 'Street Fighter 6 — Saigon Showdown',
-            dateLabel: 'Upcoming • Nov 12th, 2026',
+            name: 'Street Fighter 6 — Đại Chiến Sài Gòn',
+            dateLabel: 'Sắp diễn ra • 12 Thg 11, 2026',
             startDate: '2026-11-12',
             game: 'Street Fighter 6',
             gameDisplay: 'Street Fighter 6',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 96,
             status: 'upcoming',
-            badgeLabel: 'Registration Closes Soon',
+            badgeLabel: 'Sắp đóng đăng ký',
             badgeClass: 'stc-badge-closing',
             image: '/images/game1.png'
         },
         {
             id: 8,
-            name: 'Super Smash Bros Ultimate — Campus League',
-            dateLabel: 'Upcoming • Nov 20th, 2026',
+            name: 'Super Smash Bros Ultimate — Giải Sinh Viên',
+            dateLabel: 'Sắp diễn ra • 20 Thg 11, 2026',
             startDate: '2026-11-20',
             game: 'Super Smash Bros. Ultimate',
             gameDisplay: 'Super Smash Bros. Ultimate',
-            location: 'Online',
+            location: 'Trực tuyến',
             attendees: 160,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game2.png'
         },
         {
             id: 9,
-            name: 'Valorant Rising Stars — Rookie Cup',
-            dateLabel: 'Upcoming • Jan 18th, 2027',
+            name: 'Valorant Rising Stars — Cúp Tân Binh',
+            dateLabel: 'Sắp diễn ra • 18 Thg 01, 2027',
             startDate: '2027-01-18',
             game: 'Valorant',
             gameDisplay: 'Valorant',
-            location: 'Online',
+            location: 'Trực tuyến',
             attendees: 200,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game3.png'
         },
         {
             id: 10,
-            name: 'League of Legends — University Championship',
-            dateLabel: 'Upcoming • Mar 2nd, 2027',
+            name: 'Liên Minh Huyền Thoại — Giải Thể Thao Sinh Viên',
+            dateLabel: 'Sắp diễn ra • 02 Thg 03, 2027',
             startDate: '2027-03-02',
             game: 'Liên Minh Huyền Thoại',
             gameDisplay: 'Liên Minh Huyền Thoại',
             location: 'Hà Nội, Việt Nam',
             attendees: 112,
             status: 'upcoming',
-            badgeLabel: 'Registration Open',
+            badgeLabel: 'Đang mở đăng ký',
             badgeClass: 'stc-badge-open',
             image: '/images/game4.png'
         }
     ];
 
+    function formatVietnameseShortDate(startStr, endStr) {
+        const s = new Date(startStr);
+        const e = new Date(endStr);
+        if (Number.isNaN(s.getTime())) return '15 - 16 Thg 10, 2026';
+        const pad = (n) => String(n).padStart(2, '0');
+        const sDay = pad(s.getDate());
+        const sMonth = pad(s.getMonth() + 1);
+        const sYear = s.getFullYear();
+
+        if (Number.isNaN(e.getTime())) return `${sDay} Thg ${sMonth}, ${sYear}`;
+        const eDay = pad(e.getDate());
+        const eMonth = pad(e.getMonth() + 1);
+        const eYear = e.getFullYear();
+
+        if (sYear === eYear && sMonth === eMonth) {
+            if (sDay === eDay) return `${sDay} Thg ${sMonth}, ${sYear}`;
+            return `${sDay} - ${eDay} Thg ${sMonth}, ${sYear}`;
+        }
+        return `${sDay} Thg ${sMonth} - ${eDay} Thg ${eMonth}, ${eYear}`;
+    }
+
+    function buildInitialSearchList() {
+        const list = [];
+        try {
+            const createdList = getCreatedTournaments();
+            createdList.forEach((entry, idx) => {
+                if (!entry) return;
+                const d = entry.details || entry;
+                const tourneyName = (entry.name || d.name || '').trim();
+                if (!tourneyName) return;
+
+                const gameInfo = entry.gameInfo || {};
+                const gameName = gameInfo.game || 'Liên Minh Huyền Thoại';
+                const formatName = FORMAT_MAP[gameInfo.format] || 'Loại trực tiếp đơn';
+                const startDate = entry.startDate || d.startDate || '';
+                const endDate = entry.endDate || d.endDate || '';
+                const isoStart = startDate ? startDate.slice(0, 10) : '2026-10-24';
+                const venueAddress = (entry.venueAddress ?? d.venueAddress ?? '').trim() || 'Hà Nội, Việt Nam';
+                const profileImg = entry.profileImg || '';
+
+                list.push({
+                    id: entry.id || `created_${900 + idx}`,
+                    storeId: entry.id || tourneyName,
+                    name: tourneyName,
+                    dateLabel: `Sắp diễn ra • ${formatVietnameseShortDate(startDate, endDate)}`,
+                    startDate: isoStart,
+                    endDate,
+                    game: gameName,
+                    gameDisplay: `${gameName} · ${formatName}`,
+                    location: venueAddress,
+                    attendees: 64,
+                    role: 'Organizer',
+                    status: 'upcoming',
+                    badgeLabel: 'Đang mở đăng ký',
+                    badgeClass: 'stc-badge-open',
+                    image: profileImg || GAME_IMAGES[gameName] || '/images/game1.png'
+                });
+            });
+        } catch {
+            // fallback
+        }
+
+        DEFAULT_TOURNAMENTS.forEach(item => {
+            if (!list.some(existing => existing.name.toLowerCase() === item.name.toLowerCase())) {
+                list.push(item);
+            }
+        });
+
+        return list;
+    }
+
     // ===== Trạng thái tìm kiếm & phân trang =====
     const ITEMS_PER_PAGE = 5;
-    let allTournaments = [...DEFAULT_TOURNAMENTS];
+    let allTournaments = buildInitialSearchList();
     let filteredTournaments = [...allTournaments];
     let currentPage = 1;
 
@@ -280,43 +377,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const mappedFromApi = data.map((item, idx) => {
                 const startObj = item.startDate ? new Date(item.startDate) : new Date(2026, 10, 15);
-                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                const monthTag = monthNames[startObj.getMonth()] || 'Nov';
-                const day = startObj.getDate() || 15;
+                const day = String(startObj.getDate() || 15).padStart(2, '0');
+                const month = String((startObj.getMonth() || 10) + 1).padStart(2, '0');
                 const year = startObj.getFullYear() || 2026;
                 const isoDate = startObj.toISOString().slice(0, 10);
                 const gameName = item.game && item.game.name ? item.game.name : 'Valorant';
                 const attendeesCount = Array.isArray(item.registrations) ? item.registrations.length : 64;
 
                 let normalizedStatus = 'upcoming';
-                let badgeLabel = 'Registration Open';
+                let badgeLabel = 'Đang mở đăng ký';
                 let badgeClass = 'stc-badge-open';
-                let prefixLabel = 'Upcoming';
+                let prefixLabel = 'Sắp diễn ra';
 
                 if (item.status === 'IN_PROGRESS' || item.status === 'ONGOING') {
                     normalizedStatus = 'in_progress';
-                    badgeLabel = 'In Progress';
+                    badgeLabel = 'Đang diễn ra';
                     badgeClass = 'stc-badge-progress';
-                    prefixLabel = 'In Progress';
+                    prefixLabel = 'Đang diễn ra';
                 } else if (item.status === 'COMPLETED' || item.status === 'FINISHED') {
                     normalizedStatus = 'completed';
-                    badgeLabel = 'Completed';
+                    badgeLabel = 'Đã kết thúc';
                     badgeClass = 'stc-badge-completed';
-                    prefixLabel = 'Completed';
+                    prefixLabel = 'Đã kết thúc';
                 } else if (item.status === 'REGISTRATION_CLOSED') {
                     normalizedStatus = 'upcoming';
-                    badgeLabel = 'Registration Closes Soon';
+                    badgeLabel = 'Sắp đóng đăng ký';
                     badgeClass = 'stc-badge-closing';
                 }
 
                 return {
                     id: item.tournamentId || (500 + idx),
-                    name: item.name || 'BTP Community Tournament',
-                    dateLabel: `${prefixLabel} • ${monthTag} ${day}th, ${year}`,
+                    name: item.name || 'Giải đấu Cộng đồng BTP',
+                    dateLabel: `${prefixLabel} • ${day} Thg ${month}, ${year}`,
                     startDate: isoDate,
                     game: gameName,
                     gameDisplay: gameName,
-                    location: 'Online',
+                    location: 'Trực tuyến',
                     attendees: attendeesCount,
                     status: normalizedStatus,
                     badgeLabel,
@@ -325,10 +421,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             });
 
-            allTournaments = [...mappedFromApi, ...DEFAULT_TOURNAMENTS];
+            const baseList = buildInitialSearchList();
+            mappedFromApi.forEach(apiItem => {
+                if (!baseList.some(existing => existing.name.toLowerCase() === apiItem.name.toLowerCase())) {
+                    baseList.push(apiItem);
+                }
+            });
+            allTournaments = baseList;
             applyFilters();
         } catch (err) {
-            // Giữ nguyên dữ liệu mẫu nếu API chưa sẵn sàng
+            // Giữ nguyên dữ liệu hiện có nếu API chưa sẵn sàng
         }
     }
 
@@ -375,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== Render 1 thẻ giải đấu ngang =====
     function createHorizontalCardHTML(tournament) {
         const badgeClass = tournament.badgeClass || 'stc-badge-open';
-        const badgeText = tournament.badgeLabel || 'Registration Open';
+        const badgeText = tournament.badgeLabel || 'Đang mở đăng ký';
 
         const attendeesRowHTML = tournament.attendees > 0
             ? `
@@ -383,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/>
                     </svg>
-                    <span>${tournament.attendees} Attendees</span>
+                    <span>${tournament.attendees} người tham dự</span>
                 </div>
             `
             : '';
@@ -500,24 +602,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const loc = filterState.location.trim().toLowerCase();
 
         filteredTournaments = allTournaments.filter(t => {
-            // 1. Keyword
             const matchesKeyword = !kw ||
                 t.name.toLowerCase().includes(kw) ||
                 t.game.toLowerCase().includes(kw) ||
                 (t.gameDisplay && t.gameDisplay.toLowerCase().includes(kw));
 
-            // 2. Location
             const matchesLocation = !loc || t.location.toLowerCase().includes(loc);
 
-            // 3. Status filter (Upcoming / In Progress / Completed)
             const matchesStatus =
                 filterState.statuses.length === 0 ||
                 filterState.statuses.includes(t.status);
 
-            // 4. Game filter
             const matchesGame = !filterState.game || t.game === filterState.game;
 
-            // 5. Start Date filter
             const matchesDate = matchesDateRangeFilter(t);
 
             return matchesKeyword && matchesLocation && matchesStatus && matchesGame && matchesDate;
@@ -529,57 +626,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateFilterPillLabels() {
-        // Cập nhật trạng thái nút Filters (STATUS)
         const statusCount = filterState.statuses.length;
         const statusNameMap = {
-            upcoming: 'Upcoming',
-            in_progress: 'In Progress',
-            completed: 'Completed'
+            upcoming: 'Sắp diễn ra',
+            in_progress: 'Đang diễn ra',
+            completed: 'Đã kết thúc'
         };
 
         if (statusCount === 1) {
-            filtersPillLabel.textContent = statusNameMap[filterState.statuses[0]] || 'Filters (1)';
+            filtersPillLabel.textContent = statusNameMap[filterState.statuses[0]] || 'Trạng thái (1)';
             filtersPillBtn.classList.add('has-active-filter');
         } else if (statusCount > 1) {
-            filtersPillLabel.textContent = `Filters (${statusCount})`;
+            filtersPillLabel.textContent = `Trạng thái (${statusCount})`;
             filtersPillBtn.classList.add('has-active-filter');
         } else {
-            filtersPillLabel.textContent = 'Filters';
+            filtersPillLabel.textContent = 'Trạng thái';
             filtersPillBtn.classList.remove('has-active-filter');
         }
 
-        // Cập nhật nút Game
         if (filterState.game) {
             gamePillLabel.textContent = filterState.game;
             gamePillBtn.classList.add('has-active-filter');
         } else {
-            gamePillLabel.textContent = 'Game';
+            gamePillLabel.textContent = 'Tựa game';
             gamePillBtn.classList.remove('has-active-filter');
         }
 
-        // Cập nhật nút Date (Start Date)
         const dateCount = filterState.dateRanges.length;
         const dateLabelMap = {
-            next_7_days: 'Next 7 Days',
-            next_month: 'Next Month',
-            next_3_months: 'Next 3 Months',
-            next_6_months: 'Next 6 Months',
-            past_7_days: 'Past 7 Days',
-            custom: 'Custom Dates'
+            next_7_days: '7 ngày tới',
+            next_month: 'Tháng tới',
+            next_3_months: '3 tháng tới',
+            next_6_months: '6 tháng tới',
+            past_7_days: '7 ngày qua',
+            custom: 'Tùy chọn ngày'
         };
 
         if (dateCount === 1) {
-            datePillLabel.textContent = dateLabelMap[filterState.dateRanges[0]] || 'Date';
+            datePillLabel.textContent = dateLabelMap[filterState.dateRanges[0]] || 'Ngày bắt đầu';
             datePillBtn.classList.add('has-active-filter');
         } else if (dateCount > 1) {
-            datePillLabel.textContent = `Date (${dateCount})`;
+            datePillLabel.textContent = `Ngày bắt đầu (${dateCount})`;
             datePillBtn.classList.add('has-active-filter');
         } else {
-            datePillLabel.textContent = 'Date';
+            datePillLabel.textContent = 'Ngày bắt đầu';
             datePillBtn.classList.remove('has-active-filter');
         }
 
-        // Hiện/ẩn nút Reset filters
         const hasAnyFilter = Boolean(
             filterState.keyword ||
             filterState.location ||
@@ -590,7 +683,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resetFiltersBtn.style.display = hasAnyFilter ? 'inline-block' : 'none';
     }
 
-    // ===== Đóng tất cả dropdown =====
     function closeAllDropdowns() {
         filtersDropdownMenu.style.display = 'none';
         gameDropdownMenu.style.display = 'none';
@@ -604,7 +696,6 @@ document.addEventListener('DOMContentLoaded', () => {
         menuEl.style.display = isOpen ? 'none' : 'block';
     }
 
-    // ===== Sự kiện nhập từ khóa tìm kiếm =====
     let searchTimer;
     tournamentSearchInput.addEventListener('input', () => {
         filterState.keyword = tournamentSearchInput.value;
@@ -620,7 +711,6 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters();
     });
 
-    // ===== Sự kiện Location input & dropdown =====
     locationSearchInput.addEventListener('input', () => {
         filterState.location = locationSearchInput.value;
         clearTimeout(searchTimer);
@@ -651,7 +741,6 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters();
     });
 
-    // ===== Sự kiện 3 nút Pills: Filters, Game, Date =====
     filtersPillBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleDropdown(filtersDropdownMenu);
@@ -667,7 +756,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleDropdown(dateDropdownMenu);
     });
 
-    // Ngăn sự kiện click bên trong Popover làm đóng menu ngoài ý muốn
     filtersDropdownMenu.addEventListener('click', (e) => {
         e.stopPropagation();
     });
@@ -676,7 +764,6 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
     });
 
-    // ===== Xử lý Checkboxes & Clear / Done trong Filters (STATUS) =====
     function syncStatusStateFromDOM() {
         filterState.statuses = Array.from(statusCheckboxes)
             .filter(cb => cb.checked)
@@ -702,7 +789,6 @@ document.addEventListener('DOMContentLoaded', () => {
         closeAllDropdowns();
     });
 
-    // ===== Xử lý Checkboxes & Clear / Done trong Date (Start Date) =====
     function syncDateStateFromDOM() {
         filterState.dateRanges = Array.from(dateRangeCheckboxes)
             .filter(cb => cb.checked)
@@ -753,7 +839,6 @@ document.addEventListener('DOMContentLoaded', () => {
         closeAllDropdowns();
     });
 
-    // ===== Chọn mục trong Game Dropdown =====
     gameDropdownMenu.addEventListener('click', (e) => {
         e.stopPropagation();
         const item = e.target.closest('.dropdown-item');
@@ -767,7 +852,6 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters();
     });
 
-    // ===== Nút Reset tất cả bộ lọc =====
     resetFiltersBtn.addEventListener('click', () => {
         filterState.keyword = '';
         filterState.location = '';
@@ -798,41 +882,53 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters();
     });
 
-    // Click bên ngoài để đóng dropdown
     document.addEventListener('click', (e) => {
         if (!locationFieldWrapper.contains(e.target)) {
             locationDropdown.style.display = 'none';
         }
-        if (!e.target.closest('.pill-dropdown-wrapper')) {
+        if (
+            !e.target.closest('#filtersPillWrapper') &&
+            !e.target.closest('#gamePillWrapper') &&
+            !e.target.closest('#datePillWrapper')
+        ) {
             filtersDropdownMenu.style.display = 'none';
             gameDropdownMenu.style.display = 'none';
             dateDropdownMenu.style.display = 'none';
         }
     });
 
-    // Click vào thẻ giải đấu chuyển sang trang xem giải đấu
+    if (listContainer) {
         listContainer.addEventListener('click', (e) => {
-        const card = e.target.closest('.search-tournament-card');
-        if (!card) return;
-        const selected = allTournaments.find(item => String(item.id) === String(card.dataset.id));
-        if (selected) {
-            sessionStorage.setItem('btp_selected_view_tournament', JSON.stringify({
-                id: selected.id,
-                name: selected.name,
-                game: selected.game,
-                startDate: selected.startDate,
-                location: selected.location,
-                attendees: selected.attendees,
-                status: selected.status,
-                badgeLabel: selected.badgeLabel,
-                image: selected.image,
-                source: 'search'
-            }));
-        }
-        window.location.href = '/tournament/view';
-    });
+            const card = e.target.closest('.search-tournament-card');
+            if (!card) return;
+            const selected = allTournaments.find(item => String(item.id) === String(card.dataset.id));
+            if (selected) {
+                if (selected.storeId) {
+                    setActiveTournamentById(selected.storeId);
+                } else {
+                    setActiveTournamentById(selected.name);
+                }
 
-    // ===== Khởi tạo =====
-    renderList();
+                sessionStorage.setItem('btp_selected_view_tournament', JSON.stringify({
+                    id: selected.id,
+                    storeId: selected.storeId || null,
+                    name: selected.name,
+                    game: selected.game,
+                    startDate: selected.startDate,
+                    endDate: selected.endDate || selected.startDate,
+                    location: selected.location,
+                    attendees: selected.attendees,
+                    role: selected.role || null,
+                    status: selected.status,
+                    badgeLabel: selected.badgeLabel,
+                    image: selected.image,
+                    source: 'search'
+                }));
+            }
+            window.location.href = '/tournament/view';
+        });
+    }
+
+    applyFilters();
     loadApiTournaments();
 });

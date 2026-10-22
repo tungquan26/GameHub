@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app-layout :: layout('My Events - BTP Tournament', 'tournaments', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/app-layout :: layout('Giải đấu của tôi - BTP Tournament', 'tournaments', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/home/events.css}">
 </head>
@@ -12,21 +12,21 @@
                 <div class="ev-hero-pattern"></div>
                 <div class="ev-container ev-hero-inner">
                     <div class="ev-hero-left">
-                        <h1 class="ev-title">My Events</h1>
+                        <h1 class="ev-title">Giải đấu của tôi</h1>
                         <div class="ev-hero-actions">
                             <a th:href="@{/create}" class="ev-btn ev-btn-primary">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="17" height="17">
                                     <line x1="12" y1="5" x2="12" y2="19"/>
                                     <line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
-                                <span>Create Event</span>
+                                <span>Tạo giải đấu</span>
                             </a>
                             <a th:href="@{/search}" class="ev-btn ev-btn-secondary">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17">
                                     <circle cx="11" cy="11" r="8"/>
                                     <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                                 </svg>
-                                <span>Find Events</span>
+                                <span>Tìm giải đấu</span>
                             </a>
                         </div>
                     </div>
@@ -36,19 +36,19 @@
             <!-- ==================== 2. FILTER BAR & DANH SÁCH THẺ NGANG ==================== -->
             <section class="ev-body">
                 <div class="ev-container">
-                    <!-- Thanh công cụ: Lọc theo vai trò (All / Organizer / Player) & Tìm kiếm -->
+                    <!-- Thanh công cụ: Lọc theo vai trò (Tất cả / Ban tổ chức / Tuyển thủ) & Tìm kiếm -->
                     <div class="ev-toolbar">
                         <div class="ev-role-tabs" id="evRoleTabs">
                             <button type="button" class="ev-role-tab active" data-role="">
-                                All Events
+                                Tất cả giải đấu
                             </button>
                             <button type="button" class="ev-role-tab" data-role="Organizer">
                                 <span class="ev-dot ev-dot-organizer"></span>
-                                Organizer
+                                Ban tổ chức
                             </button>
                             <button type="button" class="ev-role-tab" data-role="Player">
                                 <span class="ev-dot ev-dot-player"></span>
-                                Player
+                                Tuyển thủ
                             </button>
                         </div>
 
@@ -60,7 +60,7 @@
                             <input type="text"
                                    id="evSearchInput"
                                    class="ev-search-input"
-                                   placeholder="Search your events..."
+                                   placeholder="Tìm kiếm giải đấu của bạn..."
                                    autocomplete="off">
                         </div>
                     </div>
@@ -78,9 +78,12 @@
                             <path d="M4 22h16"/>
                             <path d="M18 2H6v7a6 6 0 0012 0V2z"/>
                         </svg>
-                        <h3>Không tìm thấy sự kiện nào</h3>
+                        <h3>Không tìm thấy giải đấu nào</h3>
                         <p>Thử thay đổi bộ lọc vai trò hoặc từ khóa tìm kiếm của bạn.</p>
                     </div>
+
+                    <!-- Thanh phân trang dạng nút tròn (1 2 3 >) -->
+                    <div class="ev-pagination" id="evPagination"></div>
                 </div>
             </section>
         </div>

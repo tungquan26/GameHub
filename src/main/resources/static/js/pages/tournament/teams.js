@@ -1,5 +1,5 @@
 import { showToast } from '../../common/toast.js';
-import { escapeHtml } from '../../common/utils.js';
+import { escapeHtml, syncActiveTournamentToList } from '../../common/utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_KEY = 'btp_tournament_teams';
@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const teamMembersInput = document.getElementById('newTeamMembers');
     const errorMsg = document.getElementById('addTeamErrorMsg');
 
-    // Icon 2 người ở cột Members giống thiết kế
     const MEMBERS_SVG = `
         <svg class="team-members-icon" viewBox="0 0 24 24" fill="currentColor">
             <path d="M9 11a4 4 0 100-8 4 4 0 000 8zm0 2c-3.31 0-6 2.02-6 4.5V19h12v-1.5c0-2.48-2.69-4.5-6-4.5zm7.5-2a3 3 0 100-6 3 3 0 000 6zm0 2c-.73 0-1.41.13-2.01.35 1.21.96 2.01 2.27 2.01 3.9V19H21v-1.25c0-2.07-2.02-3.75-4.5-3.75z"/>
@@ -36,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveTeams(list) {
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        syncActiveTournamentToList();
     }
 
     let teamsList = loadTeams();
@@ -78,10 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
-    // Tìm kiếm realtime
     searchInput.addEventListener('input', renderTeams);
 
-    // Đóng / Mở Modal Add Team
     function openModal() {
         errorMsg.style.display = 'none';
         form.reset();
@@ -101,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modal) closeModal();
     });
 
-    // Lưu Team mới khi đăng ký
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         errorMsg.style.display = 'none';
@@ -110,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rawMembers = teamMembersInput.value.trim();
 
         if (!name || !rawMembers) {
-            errorMsg.textContent = 'Vui lòng nhập đầy đủ tên Team và danh sách thành viên.';
+            errorMsg.textContent = 'Vui lòng nhập đầy đủ tên đội tuyển và danh sách thành viên.';
             errorMsg.style.display = 'block';
             return;
         }
@@ -138,6 +135,5 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(`Đã thêm đội "${name}" vào danh sách.`);
     });
 
-    // Khởi tạo giao diện ban đầu
     renderTeams();
 });

@@ -1,4 +1,5 @@
 import { showToast } from '../../common/toast.js';
+import { syncActiveTournamentToList } from '../../common/utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_KEY = 'btp_tournament_game_info';
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!checkState()) return;
 
         saveBtn.disabled = true;
-        saveBtn.textContent = 'Saving...';
+        saveBtn.textContent = 'Đang lưu...';
 
         setTimeout(() => {
             savedState.game = gameSelect.value;
@@ -74,10 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
             savedState.format = formatSelect.value;
 
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
+            syncActiveTournamentToList();
 
-            saveBtn.textContent = 'Save changes';
+            saveBtn.textContent = 'Lưu thay đổi';
             checkState();
-            showToast('Game info saved successfully.');
+            showToast('Đã lưu thông tin game thành công.');
         }, 300);
     });
 });

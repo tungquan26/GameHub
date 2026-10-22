@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/tournament-layout :: layout('Tournament Home - BTP Tournament', 'Home', 'home', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/tournament-layout :: layout('Trang chủ giải đấu - BTP Tournament', 'Trang chủ', 'home', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/tournament/home.css}">
 </head>
@@ -11,7 +11,7 @@
             <div class="th-hero-section">
                 <!-- Ảnh bìa (Banner) -->
                 <div class="th-banner-box" id="homeBannerBox">
-                    <img id="homeBannerImg" src="" alt="Tournament Banner" class="th-banner-img" style="display: none;">
+                    <img id="homeBannerImg" src="" alt="Ảnh bìa giải đấu" class="th-banner-img" style="display: none;">
                     <div id="homeBannerFallback" class="th-banner-fallback"></div>
                 </div>
 
@@ -19,20 +19,20 @@
                 <div class="th-header-bar">
                     <div class="th-header-inner">
                         <div class="th-profile-box">
-                            <img id="homeProfileImg" src="" alt="Profile Avatar" class="th-profile-img" style="display: none;">
-                            <div id="homeProfileFallback" class="th-profile-fallback">N</div>
+                            <img id="homeProfileImg" src="" alt="Ảnh đại diện giải đấu" class="th-profile-img" style="display: none;">
+                            <div id="homeProfileFallback" class="th-profile-fallback">G</div>
                         </div>
 
                         <div class="th-identity-info">
-                            <span class="th-type-label">TOURNAMENT</span>
-                            <h1 class="th-tourney-title" id="homeTourneyName">Nguyễn Quân</h1>
+                            <span class="th-type-label">GIẢI ĐẤU</span>
+                            <h1 class="th-tourney-title" id="homeTourneyName">Giải đấu mới</h1>
                             <div class="th-meta-list">
                                 <!-- Ngày tháng -->
                                 <div class="th-meta-item">
                                     <svg viewBox="0 0 20 20" fill="currentColor" class="th-meta-icon">
                                         <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span id="homeDateRange">Oct 15th — 16th, 2026</span>
+                                    <span id="homeDateRange">15/10 — 16/10/2026</span>
                                 </div>
 
                                 <!-- Địa điểm -->
@@ -54,69 +54,69 @@
                 </div>
             </div>
 
-            <!-- ==================== CÁC SECTION NỘI DUNG BÊN DƯỚI (RENDER ĐỘNG THEO CẤU HÌNH HOMEPAGE EDITOR) ==================== -->
+            <!-- ==================== CÁC SECTION NỘI DUNG BÊN DƯỚI ==================== -->
             <div class="th-sections-container" id="thSectionsContainer">
                 <!-- Các Section, Column Layout và Widget được render tại đây bởi home.js -->
             </div>
 
-            <!-- Thanh nút + Add Section ở cuối trang khi đang ở chế độ Edit Page -->
+            <!-- Thanh nút + Thêm khu vực ở cuối trang khi đang ở chế độ Chỉnh sửa trang -->
             <div class="th-add-section-wrap" id="bottomAddSectionWrap" style="display: none;">
                 <button type="button" class="th-add-section-btn" id="bottomAddSectionBtn">
                     <svg viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
                     </svg>
-                    <span>Add Section</span>
+                    <span>Thêm khu vực</span>
                 </button>
             </div>
         </div>
 
-        <!-- ==================== HỘP HOMEPAGE GÓC DƯỚI PHẢI (CHUẨN START.GG) ==================== -->
+        <!-- ==================== HỘP QUẢN LÝ TRANG CHỦ GÓC DƯỚI PHẢI ==================== -->
         <div class="th-floating-editor" id="floatingHomepageBox">
-            <button type="button" class="th-floating-close" id="floatingToggleCollapseBtn" aria-label="Toggle collapse" title="Thu gọn / Mở rộng">
+            <button type="button" class="th-floating-close" id="floatingToggleCollapseBtn" aria-label="Thu gọn / Mở rộng" title="Thu gọn / Mở rộng">
                 <svg viewBox="0 0 20 20" fill="currentColor" id="floatingChevronIcon">
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                 </svg>
             </button>
 
             <div class="th-floating-info">
-                <h4 class="th-floating-title" id="floatingBoxTitle">Homepage</h4>
-                <p class="th-floating-sub" id="floatingStatsText">4 sections · 5 total widgets</p>
+                <h4 class="th-floating-title" id="floatingBoxTitle">Trang chủ</h4>
+                <p class="th-floating-sub" id="floatingStatsText">4 khu vực · 5 tiện ích</p>
             </div>
 
             <div class="th-floating-body" id="floatingBodyWrap">
-                <!-- Trạng thái mặc định: Nút Edit Page -->
+                <!-- Trạng thái mặc định: Nút Chỉnh sửa trang -->
                 <div id="floatingViewActions" class="th-floating-view-actions">
-                    <button type="button" class="th-floating-edit-btn" id="startEditPageBtn">Edit Page</button>
+                    <button type="button" class="th-floating-edit-btn" id="startEditPageBtn">Chỉnh sửa trang</button>
                 </div>
 
-                <!-- Trạng thái đang chỉnh sửa (Edit Mode) -->
+                <!-- Trạng thái đang chỉnh sửa -->
                 <div id="floatingEditActions" class="th-floating-edit-actions" style="display: none;">
                     <div class="th-floating-quick-tools">
                         <button type="button" class="th-floating-tool-btn" id="floatingAddSectionBtn">
                             <svg viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/>
                             </svg>
-                            <span>Add Section</span>
+                            <span>Thêm khu vực</span>
                         </button>
                         <button type="button" class="th-floating-tool-btn secondary" id="floatingResetLayoutBtn" title="Khôi phục bố cục mặc định">
-                            <span>Reset Default</span>
+                            <span>Khôi phục mặc định</span>
                         </button>
                     </div>
                     <div class="th-floating-save-bar">
-                        <button type="button" class="th-floating-cancel-btn" id="cancelEditPageBtn">Cancel</button>
-                        <button type="button" class="th-floating-save-btn" id="saveEditPageBtn">Save</button>
+                        <button type="button" class="th-floating-cancel-btn" id="cancelEditPageBtn">Hủy</button>
+                        <button type="button" class="th-floating-save-btn" id="saveEditPageBtn">Lưu</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== MODAL 1: CHỌN WIDGET ĐỂ THÊM VÀO CỘT ==================== -->
+        <!-- ==================== MODAL 1: CHỌN TIỆN ÍCH ĐỂ THÊM VÀO CỘT ==================== -->
         <div class="th-modal-backdrop" id="widgetPickerModal" style="display: none;">
             <div class="th-modal-card">
                 <div class="th-modal-header">
                     <div>
-                        <h3 class="th-modal-title">Add Widget</h3>
-                        <p class="th-modal-subtitle">Select a widget to add to this section column</p>
+                        <h3 class="th-modal-title">Thêm tiện ích</h3>
+                        <p class="th-modal-subtitle">Chọn tiện ích muốn thêm vào cột này</p>
                     </div>
                     <button type="button" class="th-modal-close" id="closeWidgetPickerBtn">&times;</button>
                 </div>
@@ -129,8 +129,8 @@
                                 </svg>
                             </div>
                             <div class="th-widget-option-info">
-                                <strong>Markdown / Text</strong>
-                                <span>Add custom text, announcements, or formatted Markdown content.</span>
+                                <strong>Văn bản / Markdown</strong>
+                                <span>Thêm đoạn văn giới thiệu, thông báo hoặc nội dung định dạng Markdown.</span>
                             </div>
                         </button>
 
@@ -141,8 +141,8 @@
                                 </svg>
                             </div>
                             <div class="th-widget-option-info">
-                                <strong>Image</strong>
-                                <span>Upload an image or paste an image URL with optional caption and link.</span>
+                                <strong>Hình ảnh</strong>
+                                <span>Tải ảnh lên hoặc dán đường dẫn URL hình ảnh kèm chú thích và liên kết.</span>
                             </div>
                         </button>
 
@@ -153,8 +153,8 @@
                                 </svg>
                             </div>
                             <div class="th-widget-option-info">
-                                <strong>Game Info &amp; Format</strong>
-                                <span>Display the tournament game, bracket format, and start time.</span>
+                                <strong>Thông tin bộ môn &amp; Thể thức</strong>
+                                <span>Hiển thị tựa game thi đấu, thể thức nhánh đấu và thời gian bắt đầu.</span>
                             </div>
                         </button>
 
@@ -165,8 +165,8 @@
                                 </svg>
                             </div>
                             <div class="th-widget-option-info">
-                                <strong>Location &amp; Map</strong>
-                                <span>Show venue address, directions button, and embedded Google Map.</span>
+                                <strong>Địa điểm &amp; Bản đồ</strong>
+                                <span>Hiển thị địa chỉ thi đấu, nút chỉ đường và bản đồ Google Maps.</span>
                             </div>
                         </button>
 
@@ -178,8 +178,8 @@
                                 </svg>
                             </div>
                             <div class="th-widget-option-info">
-                                <strong>Contact Info</strong>
-                                <span>Display tournament organizer Email or Discord link.</span>
+                                <strong>Thông tin liên hệ</strong>
+                                <span>Hiển thị Email hoặc liên kết Discord của ban tổ chức giải đấu.</span>
                             </div>
                         </button>
 
@@ -190,8 +190,8 @@
                                 </svg>
                             </div>
                             <div class="th-widget-option-info">
-                                <strong>Rules</strong>
-                                <span>Display tournament rules with expandable Show more / Show less.</span>
+                                <strong>Điều lệ</strong>
+                                <span>Hiển thị điều lệ giải đấu với chế độ Xem thêm / Thu gọn.</span>
                             </div>
                         </button>
                     </div>
@@ -199,84 +199,84 @@
             </div>
         </div>
 
-        <!-- ==================== MODAL 2: CHỈNH SỬA WIDGET MARKDOWN / TEXT ==================== -->
+        <!-- ==================== MODAL 2: CHỈNH SỬA TIỆN ÍCH MARKDOWN / VĂN BẢN ==================== -->
         <div class="th-modal-backdrop" id="markdownWidgetModal" style="display: none;">
             <div class="th-modal-card">
                 <div class="th-modal-header">
                     <div>
-                        <h3 class="th-modal-title">Edit Custom Text / Markdown Widget</h3>
-                        <p class="th-modal-subtitle">Customize widget heading and Markdown content</p>
+                        <h3 class="th-modal-title">Chỉnh sửa tiện ích Văn bản / Markdown</h3>
+                        <p class="th-modal-subtitle">Tùy chỉnh tiêu đề và nội dung Markdown</p>
                     </div>
                     <button type="button" class="th-modal-close" id="closeMarkdownModalBtn">&times;</button>
                 </div>
                 <div class="th-modal-body">
                     <div class="th-modal-field">
-                        <label for="mdWidgetTitleInput">Widget Title (Optional)</label>
-                        <input type="text" id="mdWidgetTitleInput" class="th-modal-input" placeholder="e.g. Overview, Schedule, Prizes...">
+                        <label for="mdWidgetTitleInput">Tiêu đề tiện ích (Không bắt buộc)</label>
+                        <input type="text" id="mdWidgetTitleInput" class="th-modal-input" placeholder="VD: Tổng quan, Lịch trình, Cơ cấu giải thưởng...">
                     </div>
                     <div class="th-modal-field">
-                        <label for="mdWidgetContentInput">Content (Supports Markdown)</label>
-                        <textarea id="mdWidgetContentInput" class="th-modal-textarea" rows="6" placeholder="Write content using Markdown..."></textarea>
+                        <label for="mdWidgetContentInput">Nội dung (Hỗ trợ Markdown)</label>
+                        <textarea id="mdWidgetContentInput" class="th-modal-textarea" rows="6" placeholder="Nhập nội dung bằng Markdown..."></textarea>
                     </div>
                 </div>
                 <div class="th-modal-footer">
-                    <button type="button" class="th-floating-cancel-btn" id="cancelMarkdownModalBtn">Cancel</button>
-                    <button type="button" class="th-floating-save-btn" id="saveMarkdownModalBtn">Apply</button>
+                    <button type="button" class="th-floating-cancel-btn" id="cancelMarkdownModalBtn">Hủy</button>
+                    <button type="button" class="th-floating-save-btn" id="saveMarkdownModalBtn">Áp dụng</button>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== MODAL 3: CHỈNH SỬA WIDGET ẢNH (IMAGE WIDGET) ==================== -->
+        <!-- ==================== MODAL 3: CHỈNH SỬA TIỆN ÍCH HÌNH ẢNH ==================== -->
         <div class="th-modal-backdrop" id="imageWidgetModal" style="display: none;">
             <div class="th-modal-card">
                 <div class="th-modal-header">
                     <div>
-                        <h3 class="th-modal-title">Edit Image Widget</h3>
-                        <p class="th-modal-subtitle">Upload an image from your device or paste an image URL</p>
+                        <h3 class="th-modal-title">Chỉnh sửa tiện ích Hình ảnh</h3>
+                        <p class="th-modal-subtitle">Tải ảnh từ thiết bị của bạn hoặc dán đường dẫn URL hình ảnh</p>
                     </div>
                     <button type="button" class="th-modal-close" id="closeImageModalBtn">&times;</button>
                 </div>
                 <div class="th-modal-body">
                     <div class="th-modal-field">
-                        <label for="imgWidgetTitleInput">Widget Title (Optional)</label>
-                        <input type="text" id="imgWidgetTitleInput" class="th-modal-input" placeholder="e.g. Tournament Poster, Sponsors, Prize Pool...">
+                        <label for="imgWidgetTitleInput">Tiêu đề tiện ích (Không bắt buộc)</label>
+                        <input type="text" id="imgWidgetTitleInput" class="th-modal-input" placeholder="VD: Poster giải đấu, Nhà tài trợ, Giải thưởng...">
                     </div>
 
                     <div class="th-modal-field">
-                        <label>Image Source</label>
+                        <label>Nguồn hình ảnh</label>
                         <div class="th-img-upload-zone" id="imgWidgetUploadZone">
                             <input type="file" id="imgWidgetFileInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden="hidden">
                             <div id="imgWidgetEmptyState" class="th-img-empty-state">
-                                <button type="button" class="th-img-upload-btn" id="selectImgWidgetFileBtn">Upload Image</button>
-                                <span>PNG, JPG, WEBP, or GIF (Max 4MB)</span>
+                                <button type="button" class="th-img-upload-btn" id="selectImgWidgetFileBtn">Tải ảnh lên</button>
+                                <span>PNG, JPG, WEBP hoặc GIF (Tối đa 4MB)</span>
                             </div>
                             <div id="imgWidgetPreviewState" class="th-img-preview-state" style="display: none;">
-                                <img id="imgWidgetPreviewTag" src="" alt="Preview">
-                                <button type="button" class="th-img-remove-btn" id="removeImgWidgetFileBtn">Remove Image</button>
+                                <img id="imgWidgetPreviewTag" src="" alt="Xem trước">
+                                <button type="button" class="th-img-remove-btn" id="removeImgWidgetFileBtn">Xóa ảnh</button>
                             </div>
                         </div>
                     </div>
 
                     <div class="th-modal-field">
-                        <label for="imgWidgetUrlInput">Or Image URL</label>
+                        <label for="imgWidgetUrlInput">Hoặc URL hình ảnh</label>
                         <input type="url" id="imgWidgetUrlInput" class="th-modal-input" placeholder="https://example.com/banner.png">
                     </div>
 
                     <div class="th-modal-field">
-                        <label for="imgWidgetCaptionInput">Caption (Optional)</label>
-                        <input type="text" id="imgWidgetCaptionInput" class="th-modal-input" placeholder="Short description below the image...">
+                        <label for="imgWidgetCaptionInput">Chú thích ảnh (Không bắt buộc)</label>
+                        <input type="text" id="imgWidgetCaptionInput" class="th-modal-input" placeholder="Mô tả ngắn bên dưới hình ảnh...">
                     </div>
 
                     <div class="th-modal-field">
-                        <label for="imgWidgetLinkInput">Click Link URL (Optional)</label>
+                        <label for="imgWidgetLinkInput">Liên kết khi nhấn vào ảnh (Không bắt buộc)</label>
                         <input type="url" id="imgWidgetLinkInput" class="th-modal-input" placeholder="https://...">
                     </div>
 
                     <p id="imgWidgetErrorMsg" class="th-img-error-msg" style="display: none;"></p>
                 </div>
                 <div class="th-modal-footer">
-                    <button type="button" class="th-floating-cancel-btn" id="cancelImageModalBtn">Cancel</button>
-                    <button type="button" class="th-floating-save-btn" id="saveImageModalBtn">Apply</button>
+                    <button type="button" class="th-floating-cancel-btn" id="cancelImageModalBtn">Hủy</button>
+                    <button type="button" class="th-floating-save-btn" id="saveImageModalBtn">Áp dụng</button>
                 </div>
             </div>
         </div>

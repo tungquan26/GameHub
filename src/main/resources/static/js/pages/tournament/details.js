@@ -1,6 +1,6 @@
 import { CONTACT_ICONS } from '../../common/icons.js';
 import { showToast } from '../../common/toast.js';
-import { renderMarkdownToHtml } from '../../common/utils.js';
+import { renderMarkdownToHtml, syncActiveTournamentToList } from '../../common/utils.js';
 import { syncSidebarIdentity } from '../../layouts/tournament-layout.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
 
     const savedDetailsState = {
-        name: parsedStored?.name || urlParams.get('name') || nameInput.value || 'Nguyễn Quân',
+        name: parsedStored?.name || urlParams.get('name') || nameInput.value || 'Giải đấu mới',
         startDate: parsedStored?.startDate || urlParams.get('startDate') || startDateInput.value || '2026-10-16T11:00',
         endDate: parsedStored?.endDate || urlParams.get('endDate') || endDateInput.value || '2026-10-18T00:30',
         venueAddress: parsedStored?.venueAddress || venueInput.value || '',
@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStored.venueLat = lat;
         currentStored.venueLon = lon;
         sessionStorage.setItem('btp_tournament_data', JSON.stringify(currentStored));
+        syncActiveTournamentToList();
     }
 
     function updateContactUI() {
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const svg = CONTACT_ICONS[type] || CONTACT_ICONS.EMAIL;
         contactTypeIcon.innerHTML = svg;
         contactValueIcon.innerHTML = svg;
-        contactValueInput.placeholder = type === 'EMAIL' ? 'hello@start.gg' : 'https://discord.gg/yourserver';
+        contactValueInput.placeholder = type === 'EMAIL' ? 'hello@btp.vn' : 'https://discord.gg/yourserver';
     }
 
     function initDetailsFields() {
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         venueSuggestions.querySelectorAll('.venue-suggestion-item').forEach(el => {
             el.addEventListener('mousedown', (e) => {
-                e.preventDefault(); // Giữ focus không bị đóng trước khi chọn
+                e.preventDefault();
                 const idx = Number(el.getAttribute('data-index'));
                 const chosen = items[idx];
                 if (!chosen) return;
@@ -146,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAddressSuggestions(query) {
         const cleanQuery = query.trim();
 
-        // Lọc gợi ý nhanh nội bộ
         const lowerQ = cleanQuery.toLowerCase();
         const localMatches = POPULAR_VENUES.filter(v =>
             !cleanQuery ||
@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Hiển thị tạm kết quả nội bộ hoặc trạng thái đang tìm
         if (localMatches.length > 0) {
             renderSuggestionsList(localMatches);
         } else {
@@ -200,7 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             });
 
-            // Gộp kết quả API và local (tránh trùng lặp)
             const merged = [...apiItems];
             localMatches.forEach(loc => {
                 if (!merged.some(m => m.fullAddress === loc.fullAddress)) {
@@ -230,14 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 280);
     });
 
-    // Ẩn dropdown gợi ý khi click ra ngoài
     document.addEventListener('click', (e) => {
         if (venueAutocompleteWrap && !venueAutocompleteWrap.contains(e.target)) {
             venueSuggestions.style.display = 'none';
         }
     });
 
-    // Nút Định vị GPS hiện tại
     locateMeBtn.addEventListener('click', () => {
         if (!navigator.geolocation) {
             showToast('Trình duyệt của bạn không hỗ trợ định vị GPS.');
@@ -286,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     });
 
-    // Kiểm tra thay đổi & tính hợp lệ của Card Details
     function checkDetailsState() {
         detailsErrorMsg.style.display = 'none';
 
@@ -305,25 +300,22 @@ document.addEventListener('DOMContentLoaded', () => {
             currentType !== savedDetailsState.contactType ||
             currentContact !== savedDetailsState.contact;
 
-        // Kiểm tra các trường bắt buộc
         if (!currentName || !currentStart || !currentEnd || !currentContact) {
             saveDetailsBtn.disabled = true;
             return false;
         }
 
-        // Kiểm tra ngày kết thúc sau ngày bắt đầu
         if (new Date(currentEnd) <= new Date(currentStart)) {
-            detailsErrorMsg.textContent = 'End Date must be after Start Date.';
+            detailsErrorMsg.textContent = 'Thời gian kết thúc phải sau thời gian bắt đầu.';
             detailsErrorMsg.style.display = 'block';
             saveDetailsBtn.disabled = true;
             return false;
         }
 
-        // Kiểm tra định dạng Email nếu chọn Email
         if (currentType === 'EMAIL') {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(currentContact)) {
-                detailsErrorMsg.textContent = 'Please enter a valid email address.';
+                detailsErrorMsg.textContent = 'Vui lòng nhập địa chỉ email hợp lệ.';
                 detailsErrorMsg.style.display = 'block';
                 saveDetailsBtn.disabled = true;
                 return false;
@@ -349,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!checkDetailsState()) return;
 
         saveDetailsBtn.disabled = true;
-        saveDetailsBtn.textContent = 'Saving...';
+        saveDetailsBtn.textContent = 'Đang lưu...';
 
         setTimeout(() => {
             savedDetailsState.name = nameInput.value.trim();
@@ -362,12 +354,13 @@ document.addEventListener('DOMContentLoaded', () => {
             savedDetailsState.contact = contactValueInput.value.trim();
 
             sessionStorage.setItem('btp_tournament_data', JSON.stringify(savedDetailsState));
+            syncActiveTournamentToList();
             syncSidebarIdentity(savedDetailsState.name, savedImagesState.profile, savedImagesState.banner);
             updateVenueMapPreview(savedDetailsState.venueAddress, savedDetailsState.venueLat, savedDetailsState.venueLon);
 
-            saveDetailsBtn.textContent = 'Save changes';
+            saveDetailsBtn.textContent = 'Lưu thay đổi';
             checkDetailsState();
-            showToast('Tournament details saved successfully.');
+            showToast('Đã lưu thông tin chi tiết giải đấu thành công.');
         }, 300);
     });
 
@@ -398,7 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentProfileData = savedImagesState.profile;
     let currentBannerData = savedImagesState.banner;
 
-    // Đồng bộ tên & ảnh lên Sidebar khi vừa tải trang
     syncSidebarIdentity(savedDetailsState.name, savedImagesState.profile, savedImagesState.banner);
 
     function updateImageBoxUI(type, dataUrl) {
@@ -439,9 +431,9 @@ document.addEventListener('DOMContentLoaded', () => {
         errorEl.style.display = 'none';
         if (!file) return;
 
-        const maxSizeBytes = 4 * 1024 * 1024; // 4 MB
+        const maxSizeBytes = 4 * 1024 * 1024;
         if (file.size > maxSizeBytes) {
-            errorEl.textContent = 'File size exceeds the maximum 4MB limit.';
+            errorEl.textContent = 'Dung lượng ảnh vượt quá giới hạn tối đa 4MB.';
             errorEl.style.display = 'block';
             return;
         }
@@ -455,12 +447,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const h = img.height;
                 if (type === 'profile') {
                     if (w < 280 || h < 280 || w > 4800 || h > 4800) {
-                        errorEl.textContent = `Image size (${w}x${h}) is outside the recommended 280x280 - 4800x4800 range.`;
+                        errorEl.textContent = `Kích thước ảnh (${w}x${h}) nằm ngoài khoảng khuyến nghị 280x280 - 4800x4800.`;
                         errorEl.style.display = 'block';
                     }
                 } else {
                     if (w < 1600 || h < 800 || w > 4800 || h > 2400) {
-                        errorEl.textContent = `Image size (${w}x${h}) is outside the recommended 1600x800 - 4800x2400 range.`;
+                        errorEl.textContent = `Kích thước ảnh (${w}x${h}) nằm ngoài khoảng khuyến nghị 1600x800 - 4800x2400.`;
                         errorEl.style.display = 'block';
                     }
                 }
@@ -471,7 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
     }
 
-    // Khởi tạo trạng thái ảnh ban đầu
     updateImageBoxUI('profile', savedImagesState.profile);
     updateImageBoxUI('banner', savedImagesState.banner);
 
@@ -500,19 +491,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveImagesBtn.addEventListener('click', () => {
         saveImagesBtn.disabled = true;
-        saveImagesBtn.textContent = 'Saving...';
+        saveImagesBtn.textContent = 'Đang lưu...';
 
         setTimeout(() => {
             savedImagesState.profile = currentProfileData;
             savedImagesState.banner = currentBannerData;
             sessionStorage.setItem('btp_tournament_profile_img', currentProfileData);
             sessionStorage.setItem('btp_tournament_banner_img', currentBannerData);
+            syncActiveTournamentToList();
 
             syncSidebarIdentity(savedDetailsState.name, savedImagesState.profile, savedImagesState.banner);
 
-            saveImagesBtn.textContent = 'Save changes';
+            saveImagesBtn.textContent = 'Lưu thay đổi';
             checkImagesDirty();
-            showToast('Tournament images saved successfully.');
+            showToast('Đã lưu hình ảnh giải đấu thành công.');
         }, 300);
     });
 
@@ -542,11 +534,11 @@ document.addEventListener('DOMContentLoaded', () => {
             rulesPreviewWrap.innerHTML = renderMarkdownToHtml(rulesInput.value);
             rulesEditorWrap.style.display = 'none';
             rulesPreviewWrap.style.display = 'block';
-            previewMarkdownBtn.textContent = 'Edit Markdown';
+            previewMarkdownBtn.textContent = 'Chỉnh sửa Markdown';
         } else {
             rulesPreviewWrap.style.display = 'none';
             rulesEditorWrap.style.display = 'block';
-            previewMarkdownBtn.textContent = 'Preview Markdown';
+            previewMarkdownBtn.textContent = 'Xem trước Markdown';
         }
     });
 
@@ -561,14 +553,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveRulesBtn.addEventListener('click', () => {
         saveRulesBtn.disabled = true;
-        saveRulesBtn.textContent = 'Saving...';
+        saveRulesBtn.textContent = 'Đang lưu...';
 
         setTimeout(() => {
             savedRulesText = rulesInput.value;
             sessionStorage.setItem('btp_tournament_rules', savedRulesText);
-            saveRulesBtn.textContent = 'Save changes';
+            syncActiveTournamentToList();
+            saveRulesBtn.textContent = 'Lưu thay đổi';
             checkRulesDirty();
-            showToast('Tournament rules saved successfully.');
+            showToast('Đã lưu điều lệ giải đấu thành công.');
         }, 300);
     });
 });

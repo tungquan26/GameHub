@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/tournament-layout :: layout('Teams - BTP Tournament', 'Teams', 'teams', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/tournament-layout :: layout('Đội tuyển - BTP Tournament', 'Đội tuyển', 'teams', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/tournament/teams.css}">
 </head>
 <body>
     <th:block th:fragment="pageContent">
-        <!-- Thanh công cụ phía trên: Tìm kiếm + Nút Add Team -->
+        <!-- Thanh công cụ phía trên: Tìm kiếm + Nút Thêm đội tuyển -->
         <div class="teams-toolbar">
             <div class="teams-search-wrap">
                 <svg class="teams-search-icon" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
                 </svg>
-                <input type="text" id="teamSearchInput" class="teams-search-input" placeholder="Search teams or members...">
+                <input type="text" id="teamSearchInput" class="teams-search-input" placeholder="Tìm kiếm đội tuyển hoặc thành viên...">
             </div>
 
             <button type="button" id="openAddTeamModalBtn" class="btn-add-team">
-                Add Team
+                Thêm đội tuyển
             </button>
         </div>
 
-        <!-- Khung hiển thị khi CHƯA có team nào (Giống ảnh 1) -->
+        <!-- Khung hiển thị khi CHƯA có team nào -->
         <div class="teams-empty-card" id="teamsEmptyState">
             <div class="teams-empty-illustration">
                 <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -37,14 +37,14 @@
                     <path d="M94 58L88 94H124L118 58H94Z" fill="#E2E8F0" stroke="#334155" stroke-width="2.5" stroke-linejoin="round"/>
                 </svg>
             </div>
-            <p class="teams-empty-text">No teams</p>
+            <p class="teams-empty-text">Chưa có đội tuyển nào</p>
         </div>
 
-        <!-- Bảng danh sách Team khi ĐÃ có team đăng ký (Giống ảnh 2: Chỉ giữ cột Team và Members) -->
+        <!-- Bảng danh sách Team khi ĐÃ có team đăng ký -->
         <div class="teams-table-card" id="teamsTableCard" style="display: none;">
             <div class="teams-table-header">
-                <div class="col-team">Team</div>
-                <div class="col-members">Members</div>
+                <div class="col-team">Đội tuyển</div>
+                <div class="col-members">Thành viên</div>
             </div>
             <div class="teams-table-body" id="teamsTableBody">
                 <!-- Các dòng team sẽ được render tự động bởi JS -->
@@ -55,21 +55,21 @@
         <div class="team-modal-backdrop" id="addTeamModal" style="display: none;">
             <div class="team-modal">
                 <div class="team-modal-header">
-                    <h3 class="team-modal-title">Add Team</h3>
+                    <h3 class="team-modal-title">Thêm đội tuyển</h3>
                     <button type="button" id="closeAddTeamModalBtn" class="team-modal-close">&times;</button>
                 </div>
                 <form id="addTeamForm" novalidate="novalidate">
                     <div class="team-modal-body">
                         <div class="field-group">
                             <div class="field-box">
-                                <label class="field-label" for="newTeamName">Team Name <span class="req">*</span></label>
-                                <input type="text" id="newTeamName" class="field-input" placeholder="e.g. T1 / Gen.G" required="required">
+                                <label class="field-label" for="newTeamName">Tên đội tuyển <span class="req">*</span></label>
+                                <input type="text" id="newTeamName" class="field-input" placeholder="VD: T1 / Gen.G" required="required">
                             </div>
                         </div>
 
                         <div class="field-group" style="margin-bottom: 0;">
                             <div class="field-box has-helper">
-                                <label class="field-label" for="newTeamMembers">Members <span class="req">*</span></label>
+                                <label class="field-label" for="newTeamMembers">Danh sách thành viên <span class="req">*</span></label>
                                 <input type="text" id="newTeamMembers" class="field-input" placeholder="Faker / Oner / Chovy (phân cách bằng dấu / hoặc dấu phẩy)" required="required">
                             </div>
                             <span class="timezone-text">Nhập tên các thành viên, cách nhau bởi dấu "/" hoặc dấu phẩy.</span>
@@ -78,8 +78,8 @@
                         <p id="addTeamErrorMsg" class="error-text" style="display: none;"></p>
                     </div>
                     <div class="team-modal-footer">
-                        <button type="button" id="cancelAddTeamBtn" class="btn-cancel-modal">Cancel</button>
-                        <button type="submit" class="btn-save">Save Team</button>
+                        <button type="button" id="cancelAddTeamBtn" class="btn-cancel-modal">Hủy</button>
+                        <button type="submit" class="btn-save">Lưu đội tuyển</button>
                     </div>
                 </form>
             </div>

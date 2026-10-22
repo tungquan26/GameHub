@@ -1,6 +1,12 @@
 // =====================================================
-// My Events Page Script — Horizontal List (Player / Organizer)
+// Trang Giải đấu của tôi — Danh sách ngang (Ban tổ chức / Tuyển thủ) + Phân trang
 // =====================================================
+
+import {
+    getCreatedTournaments,
+    setActiveTournamentById,
+    renderCirclePagination
+} from '../../common/utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const GAME_IMAGES = {
@@ -18,15 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
         'Super Smash Bros. Ultimate': '/images/game2.png'
     };
 
-    // ===== Dữ liệu mẫu giải đấu của người dùng (Organizer & Player) =====
+    const FORMAT_MAP = {
+        SINGLE_ELIMINATION: 'Loại trực tiếp đơn',
+        DOUBLE_ELIMINATION: 'Loại trực tiếp kép',
+        ROUND_ROBIN: 'Vòng tròn tính điểm',
+        SWISS: 'Hệ Thụy Sĩ'
+    };
+
+    // ===== Dữ liệu mẫu giải đấu của người dùng (Ban tổ chức & Tuyển thủ) =====
     const SAMPLE_USER_EVENTS = [
         {
             id: 201,
-            name: 'VCT Champions 2026 — Vietnam Qualifier',
-            dateLabel: 'Upcoming • Nov 15th — 20th, 2026',
+            name: 'VCT Champions 2026 — Vòng loại Việt Nam',
+            dateLabel: 'Sắp diễn ra • 15 - 20 Thg 11, 2026',
             startDate: '2026-11-15T09:00',
             endDate: '2026-11-20T21:00',
-            game: 'Valorant · Double Elimination',
+            game: 'Valorant · Loại trực tiếp kép',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 128,
             role: 'Player',
@@ -36,10 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 202,
             name: 'BTP University Esports Cup 2026',
-            dateLabel: 'Upcoming • Nov 22nd — 25th, 2026',
+            dateLabel: 'Sắp diễn ra • 22 - 25 Thg 11, 2026',
             startDate: '2026-11-22T09:00',
             endDate: '2026-11-25T21:00',
-            game: 'Liên Minh Huyền Thoại · Single Elimination',
+            game: 'Liên Minh Huyền Thoại · Loại trực tiếp đơn',
             location: 'Hà Nội, Việt Nam',
             attendees: 64,
             role: 'Organizer',
@@ -48,12 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             id: 203,
-            name: 'CS2 Major Vietnam — Community Cup',
-            dateLabel: 'Upcoming • Nov 28th, 2026',
+            name: 'CS2 Major Vietnam — Cúp Cộng Đồng',
+            dateLabel: 'Sắp diễn ra • 28 Thg 11, 2026',
             startDate: '2026-11-28T09:00',
             endDate: '2026-11-28T21:00',
-            game: 'CS2 · Swiss Stage',
-            location: 'Online',
+            game: 'CS2 · Hệ Thụy Sĩ',
+            location: 'Trực tuyến',
             attendees: 96,
             role: 'Player',
             status: 'open',
@@ -61,11 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             id: 204,
-            name: 'Street Fighter 6 — Saigon Showdown',
-            dateLabel: 'Upcoming • Dec 5th — 6th, 2026',
+            name: 'Street Fighter 6 — Đại Chiến Sài Gòn',
+            dateLabel: 'Sắp diễn ra • 05 - 06 Thg 12, 2026',
             startDate: '2026-12-05T09:00',
             endDate: '2026-12-06T21:00',
-            game: 'Street Fighter 6 · Double Elimination',
+            game: 'Street Fighter 6 · Loại trực tiếp kép',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 160,
             role: 'Player',
@@ -74,12 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             id: 205,
-            name: 'BTP Winter Showdown — Open Series',
-            dateLabel: 'Upcoming • Dec 12th — 14th, 2026',
+            name: 'BTP Winter Showdown — Giải Mở Rộng',
+            dateLabel: 'Sắp diễn ra • 12 - 14 Thg 12, 2026',
             startDate: '2026-12-12T09:00',
             endDate: '2026-12-14T21:00',
-            game: 'Teamfight Tactics · Round Robin',
-            location: 'Online',
+            game: 'Teamfight Tactics · Vòng tròn tính điểm',
+            location: 'Trực tuyến',
             attendees: 120,
             role: 'Organizer',
             status: 'open',
@@ -87,57 +100,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // ===== Lấy giải đấu từ sessionStorage =====
+    // ===== Lấy toàn bộ giải đấu từ sessionStorage =====
     function buildEventsList() {
         const dynamicEvents = [];
 
-        // 1. Giải đấu người dùng tạo ở /create -> Organizer
+        // 1. Tất cả giải đấu người dùng đã tạo ở /create -> Organizer
         try {
-            const rawCreated = sessionStorage.getItem('btp_tournament_data');
-            const created = rawCreated ? JSON.parse(rawCreated) : null;
-            const rawGameInfo = sessionStorage.getItem('btp_tournament_game_info');
-            const gameInfo = rawGameInfo ? JSON.parse(rawGameInfo) : {};
-            const profileImg = sessionStorage.getItem('btp_tournament_profile_img') || '';
+            const createdList = getCreatedTournaments();
+            createdList.forEach((entry, idx) => {
+                if (!entry) return;
+                const d = entry.details || entry;
+                const tourneyName = (entry.name || d.name || '').trim();
+                if (!tourneyName) return;
 
-            if (created && created.name) {
+                const gameInfo = entry.gameInfo || {};
+                const profileImg = entry.profileImg || '';
+                const startDate = entry.startDate || d.startDate || '';
+                const endDate = entry.endDate || d.endDate || '';
+                const venueAddress = (entry.venueAddress ?? d.venueAddress ?? '').trim();
+
                 const gameName = gameInfo.game || 'Liên Minh Huyền Thoại';
-                const formatMap = {
-                    SINGLE_ELIMINATION: 'Single Elimination',
-                    DOUBLE_ELIMINATION: 'Double Elimination',
-                    ROUND_ROBIN: 'Round Robin',
-                    SWISS: 'Swiss'
-                };
-                const formatName = formatMap[gameInfo.format] || 'Single Elimination';
+                const formatName = FORMAT_MAP[gameInfo.format] || 'Loại trực tiếp đơn';
 
                 dynamicEvents.push({
-                    id: 900,
-                    name: created.name,
-                    dateLabel: `Upcoming • ${formatShortDate(created.startDate, created.endDate)}`,
-                    startDate: created.startDate,
-                    endDate: created.endDate,
+                    id: entry.id || `created_${900 + idx}`,
+                    storeId: entry.id || tourneyName,
+                    name: tourneyName,
+                    dateLabel: `Sắp diễn ra • ${formatShortDate(startDate, endDate)}`,
+                    startDate,
+                    endDate,
                     game: `${gameName} · ${formatName}`,
-                    location: (created.venueAddress || '').trim() || 'Hà Nội, Việt Nam',
+                    location: venueAddress || 'Hà Nội, Việt Nam',
                     attendees: 64,
                     role: 'Organizer',
                     status: 'open',
                     image: profileImg || GAME_IMAGES[gameName] || '/images/logo.png'
                 });
-            }
+            });
         } catch {
             // fallback
         }
 
-        // 2. Giải đấu người dùng đã bấm Register Now ở /tournament/view -> Player
+        // 2. Giải đấu người dùng đã bấm Đăng ký tham gia ở /tournament/view -> Player
         try {
             const rawReg = sessionStorage.getItem('btp_registered_tournaments');
             const regList = rawReg ? JSON.parse(rawReg) : [];
             if (Array.isArray(regList)) {
                 regList.forEach((item, index) => {
-                    if (item && item.name && !dynamicEvents.some(e => e.name === item.name)) {
+                    if (item && item.name && !dynamicEvents.some(e => e.name.toLowerCase() === item.name.toLowerCase())) {
                         dynamicEvents.push({
                             id: 800 + index,
                             name: item.name,
-                            dateLabel: item.dateLabel || 'Upcoming • Oct 15th — 16th, 2026',
+                            dateLabel: item.dateLabel || `Sắp diễn ra • ${formatShortDate(item.startDate, item.endDate)}`,
                             startDate: item.startDate || '',
                             endDate: item.endDate || '',
                             game: item.game || 'Liên Minh Huyền Thoại',
@@ -168,29 +182,42 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatShortDate(startStr, endStr) {
         const s = new Date(startStr);
         const e = new Date(endStr);
-        if (Number.isNaN(s.getTime())) return 'Oct 15th — 16th, 2026';
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const suffix = (d) => (d > 3 && d < 21) ? 'th' : (d % 10 === 1 ? 'st' : (d % 10 === 2 ? 'nd' : (d % 10 === 3 ? 'rd' : 'th')));
-        const sText = `${months[s.getMonth()]} ${s.getDate()}${suffix(s.getDate())}`;
-        if (Number.isNaN(e.getTime())) return `${sText}, ${s.getFullYear()}`;
-        const eText = `${e.getDate()}${suffix(e.getDate())}, ${e.getFullYear()}`;
-        return `${sText} — ${eText}`;
+        if (Number.isNaN(s.getTime())) return '15 - 16 Thg 10, 2026';
+        const pad = (n) => String(n).padStart(2, '0');
+        const sDay = pad(s.getDate());
+        const sMonth = pad(s.getMonth() + 1);
+        const sYear = s.getFullYear();
+
+        if (Number.isNaN(e.getTime())) return `${sDay} Thg ${sMonth}, ${sYear}`;
+        const eDay = pad(e.getDate());
+        const eMonth = pad(e.getMonth() + 1);
+        const eYear = e.getFullYear();
+
+        if (sYear === eYear && sMonth === eMonth) {
+            if (sDay === eDay) return `${sDay} Thg ${sMonth}, ${sYear}`;
+            return `${sDay} - ${eDay} Thg ${sMonth}, ${sYear}`;
+        }
+        return `${sDay} Thg ${sMonth} - ${eDay} Thg ${eMonth}, ${eYear}`;
     }
 
     // ===== Trạng thái & DOM =====
     const allEvents = buildEventsList();
     let currentRoleFilter = ''; // '' | 'Organizer' | 'Player'
     let currentKeyword = '';
+    let currentPage = 1;
+    const ITEMS_PER_PAGE = 5;
 
     const listEl = document.getElementById('evTournamentList');
     const emptyEl = document.getElementById('evEmptyState');
+    const paginationEl = document.getElementById('evPagination');
     const roleTabsEl = document.getElementById('evRoleTabs');
     const searchInputEl = document.getElementById('evSearchInput');
 
-    // Tạo HTML cho 1 thẻ ngang kèm trạng thái Player hoặc Organizer ở bên cạnh
+    // Tạo HTML cho 1 thẻ ngang kèm trạng thái Tuyển thủ hoặc Ban tổ chức ở bên cạnh
     function createEventCardHTML(ev) {
         const isOrganizer = ev.role === 'Organizer';
         const badgeClass = isOrganizer ? 'ev-role-organizer' : 'ev-role-player';
+        const roleLabel = isOrganizer ? 'Ban tổ chức' : 'Tuyển thủ';
         const roleIcon = isOrganizer
             ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -221,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <svg viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/>
                                 </svg>
-                                <span>${ev.attendees} Attendees</span>
+                                <span>${ev.attendees} người tham dự</span>
                             </span>
                         </div>
                     </div>
@@ -230,10 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="ev-card-right">
                     <span class="ev-role-badge ${badgeClass}">
                         ${roleIcon}
-                        <span>${ev.role}</span>
+                        <span>${roleLabel}</span>
                     </span>
                     <span class="ev-view-hint">
-                        <span>View Tournament</span>
+                        <span>Xem giải đấu</span>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
                             <polyline points="9 18 15 12 9 6"/>
                         </svg>
@@ -259,12 +286,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (filtered.length === 0) {
             emptyEl.style.display = 'flex';
+            if (paginationEl) paginationEl.innerHTML = '';
             return;
         }
 
         emptyEl.style.display = 'none';
-        filtered.forEach(ev => {
+
+        const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+        const pagedItems = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+
+        pagedItems.forEach(ev => {
             listEl.insertAdjacentHTML('beforeend', createEventCardHTML(ev));
+        });
+
+        renderCirclePagination(paginationEl, currentPage, totalPages, (nextPage) => {
+            currentPage = nextPage;
+            renderEvents();
+            window.scrollTo({ top: 180, behavior: 'smooth' });
         });
     }
 
@@ -274,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = e.target.closest('.ev-role-tab');
             if (!btn) return;
             currentRoleFilter = btn.getAttribute('data-role') || '';
+            currentPage = 1;
             roleTabsEl.querySelectorAll('.ev-role-tab').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
             renderEvents();
@@ -284,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInputEl) {
         searchInputEl.addEventListener('input', () => {
             currentKeyword = searchInputEl.value;
+            currentPage = 1;
             renderEvents();
         });
     }
@@ -295,8 +338,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!card) return;
             const selected = allEvents.find(item => String(item.id) === String(card.dataset.id));
             if (selected) {
+                if (selected.storeId) {
+                    setActiveTournamentById(selected.storeId);
+                } else {
+                    setActiveTournamentById(selected.name);
+                }
+
                 sessionStorage.setItem('btp_selected_view_tournament', JSON.stringify({
                     id: selected.id,
+                    storeId: selected.storeId || null,
                     name: selected.name,
                     game: selected.game.split('·')[0].trim(),
                     startDate: selected.startDate,

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/tournament-layout :: layout('Tournament Settings - BTP Tournament', 'Details', 'details', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/tournament-layout :: layout('Chi tiết giải đấu - BTP Tournament', 'Chi tiết', 'details', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/tournament/details.css}">
 </head>
@@ -9,8 +9,8 @@
         <!-- ==================== 3.1. PHẦN DETAILS ==================== -->
         <div class="settings-card" id="detailsCard">
             <div class="card-header">
-                <h2 class="card-title">Tournament Details</h2>
-                <p class="card-subtitle">Name, date, and other basic info</p>
+                <h2 class="card-title">Chi tiết giải đấu</h2>
+                <p class="card-subtitle">Tên, thời gian tổ chức và các thông tin cơ bản</p>
             </div>
 
             <form id="detailsForm" novalidate="novalidate">
@@ -18,8 +18,8 @@
                     <!-- 1. Tournament Name -->
                     <div class="field-group">
                         <div class="field-box">
-                            <label class="field-label" for="tournamentName">Tournament Name <span class="req">*</span></label>
-                            <input type="text" id="tournamentName" class="field-input" placeholder="Enter tournament name" required="required">
+                            <label class="field-label" for="tournamentName">Tên giải đấu <span class="req">*</span></label>
+                            <input type="text" id="tournamentName" class="field-input" placeholder="Nhập tên giải đấu" required="required">
                         </div>
                     </div>
 
@@ -27,7 +27,7 @@
                     <div class="field-row">
                         <div class="field-group">
                             <div class="field-box has-helper">
-                                <label class="field-label" for="startDate">Start Date <span class="req">*</span></label>
+                                <label class="field-label" for="startDate">Thời gian bắt đầu <span class="req">*</span></label>
                                 <input type="datetime-local" id="startDate" class="field-input" required="required">
                             </div>
                             <span class="timezone-text">ICT (+07:00 GMT)</span>
@@ -35,7 +35,7 @@
 
                         <div class="field-group">
                             <div class="field-box has-helper">
-                                <label class="field-label" for="endDate">End Date <span class="req">*</span></label>
+                                <label class="field-label" for="endDate">Thời gian kết thúc <span class="req">*</span></label>
                                 <input type="datetime-local" id="endDate" class="field-input" required="required">
                             </div>
                             <span class="timezone-text">ICT (+07:00 GMT)</span>
@@ -45,7 +45,7 @@
                     <!-- 4. Venue Address (Có gợi ý địa điểm & định vị GPS) -->
                     <div class="field-group">
                         <div class="field-box venue-autocomplete-wrap" id="venueAutocompleteWrap">
-                            <label class="field-label" for="venueAddress">Venue Address</label>
+                            <label class="field-label" for="venueAddress">Địa điểm thi đấu</label>
                             <div class="input-with-icon venue-input-container">
                                 <span class="left-icon venue-pin-icon">
                                     <svg viewBox="0 0 20 20" fill="currentColor">
@@ -79,7 +79,7 @@
                     <div class="field-row last-row">
                         <div class="field-group">
                             <div class="field-box mb-0">
-                                <label class="field-label" for="contactType">Contact type <span class="req">*</span></label>
+                                <label class="field-label" for="contactType">Phương thức liên hệ <span class="req">*</span></label>
                                 <div class="input-with-icon select-wrapper">
                                     <span class="left-icon" id="contactTypeIcon"></span>
                                     <select id="contactType" class="field-input has-icon" required="required">
@@ -95,10 +95,10 @@
 
                         <div class="field-group">
                             <div class="field-box mb-0">
-                                <label class="field-label" for="contactValue">Contact <span class="req">*</span></label>
+                                <label class="field-label" for="contactValue">Thông tin liên hệ <span class="req">*</span></label>
                                 <div class="input-with-icon">
                                     <span class="left-icon" id="contactValueIcon"></span>
-                                    <input type="text" id="contactValue" class="field-input has-icon" placeholder="hello@start.gg" required="required">
+                                    <input type="text" id="contactValue" class="field-input has-icon" placeholder="hello@btp.vn" required="required">
                                 </div>
                             </div>
                         </div>
@@ -108,7 +108,7 @@
                 </div>
 
                 <div class="card-footer">
-                    <button type="submit" id="saveDetailsBtn" class="btn-save" disabled="disabled">Save changes</button>
+                    <button type="submit" id="saveDetailsBtn" class="btn-save" disabled="disabled">Lưu thay đổi</button>
                 </div>
             </form>
         </div>
@@ -116,64 +116,64 @@
         <!-- ==================== 3.2. PHẦN IMAGES ==================== -->
         <div class="settings-card" id="imagesCard">
             <div class="card-header">
-                <h2 class="card-title">Images</h2>
-                <p class="card-subtitle">Upload a profile and banner image.</p>
+                <h2 class="card-title">Hình ảnh giải đấu</h2>
+                <p class="card-subtitle">Tải lên ảnh đại diện và ảnh bìa cho giải đấu.</p>
             </div>
 
             <div class="card-body">
                 <div class="images-row">
                     <!-- Cột 1: Profile Image -->
                     <div class="image-col">
-                        <h3 class="image-label">Profile Image</h3>
+                        <h3 class="image-label">Ảnh đại diện giải đấu</h3>
                         <div class="image-upload-box" id="profileBox">
                             <input type="file" id="profileInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden="hidden">
 
                             <div class="upload-empty" id="profileEmpty">
                                 <button type="button" class="btn-select-image" id="selectProfileBtn">
-                                    Upload Image
+                                    Tải ảnh lên
                                 </button>
                             </div>
 
                             <div class="upload-preview" id="profilePreview" style="display: none;">
-                                <img id="profileImgTag" src="" alt="Profile preview" class="preview-img-square">
+                                <img id="profileImgTag" src="" alt="Xem trước ảnh đại diện" class="preview-img-square">
                                 <button type="button" class="btn-remove-file" id="removeProfileBtn">
                                     <svg viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span>Remove File</span>
+                                    <span>Xóa ảnh</span>
                                 </button>
                             </div>
                         </div>
                         <p class="image-guideline">
-                            Must be a square image at least 280x280 and no larger than 4800x4800. Max file size: 4MB.
+                            Khuyến nghị ảnh vuông kích thước từ 280x280 đến 4800x4800. Dung lượng tối đa: 4MB.
                         </p>
                         <p id="profileErrorMsg" class="error-text" style="display: none;"></p>
                     </div>
 
                     <!-- Cột 2: Banner Image -->
                     <div class="image-col">
-                        <h3 class="image-label">Banner Image</h3>
+                        <h3 class="image-label">Ảnh bìa (Banner)</h3>
                         <div class="image-upload-box" id="bannerBox">
                             <input type="file" id="bannerInput" accept="image/png, image/jpeg, image/webp, image/gif" hidden="hidden">
 
                             <div class="upload-empty" id="bannerEmpty">
                                 <button type="button" class="btn-select-image" id="selectBannerBtn">
-                                    Upload Image
+                                    Tải ảnh lên
                                 </button>
                             </div>
 
                             <div class="upload-preview" id="bannerPreview" style="display: none;">
-                                <img id="bannerImgTag" src="" alt="Banner preview" class="preview-img-banner">
+                                <img id="bannerImgTag" src="" alt="Xem trước ảnh bìa" class="preview-img-banner">
                                 <button type="button" class="btn-remove-file" id="removeBannerBtn">
                                     <svg viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clip-rule="evenodd"/>
                                     </svg>
-                                    <span>Remove File</span>
+                                    <span>Xóa ảnh</span>
                                 </button>
                             </div>
                         </div>
                         <p class="image-guideline">
-                            Must be at least 1600x800 and no larger than 4800x2400. Max file size: 4MB.
+                            Khuyến nghị ảnh ngang kích thước từ 1600x800 đến 4800x2400. Dung lượng tối đa: 4MB.
                         </p>
                         <p id="bannerErrorMsg" class="error-text" style="display: none;"></p>
                     </div>
@@ -181,32 +181,32 @@
             </div>
 
             <div class="card-footer">
-                <button type="button" id="saveImagesBtn" class="btn-save" disabled="disabled">Save changes</button>
+                <button type="button" id="saveImagesBtn" class="btn-save" disabled="disabled">Lưu thay đổi</button>
             </div>
         </div>
 
         <!-- ==================== 3.3. PHẦN RULES ==================== -->
         <div class="settings-card" id="rulesCard">
             <div class="card-header">
-                <h2 class="card-title">Rules</h2>
-                <p class="card-subtitle">List general tournament rules here</p>
+                <h2 class="card-title">Điều lệ giải đấu</h2>
+                <p class="card-subtitle">Nhập quy định và thể lệ chung của giải đấu tại đây</p>
             </div>
 
             <div class="card-body">
                 <div id="rulesEditorWrap">
-                    <textarea id="rulesInput" class="rules-textarea" rows="5" placeholder="Enter tournament rules using Markdown..."></textarea>
+                    <textarea id="rulesInput" class="rules-textarea" rows="5" placeholder="Nhập điều lệ giải đấu (hỗ trợ định dạng Markdown)..."></textarea>
                 </div>
 
                 <div id="rulesPreviewWrap" class="rules-preview-box" style="display: none;"></div>
 
                 <div class="rules-links-bar">
-                    <button type="button" id="previewMarkdownBtn" class="text-link-btn">Preview Markdown</button>
-                    <button type="button" id="helpFormattingBtn" class="text-link-btn">Help Formatting</button>
+                    <button type="button" id="previewMarkdownBtn" class="text-link-btn">Xem trước Markdown</button>
+                    <button type="button" id="helpFormattingBtn" class="text-link-btn">Hướng dẫn định dạng</button>
                 </div>
 
                 <div id="helpFormattingBox" class="help-formatting-box" style="display: none;">
                     <div class="help-formatting-header">
-                        <span>Markdown Formatting Guide</span>
+                        <span>Hướng dẫn định dạng Markdown</span>
                         <button type="button" id="closeHelpBtn" class="close-help-btn">&times;</button>
                     </div>
                     <table class="help-table">
@@ -218,7 +218,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Tiêu đề (Headings)</td>
+                                <td>Tiêu đề</td>
                                 <td><code># H1</code>, <code>## H2</code>, <code>### H3</code></td>
                             </tr>
                             <tr>
@@ -226,7 +226,7 @@
                                 <td><code>**In đậm**</code>, <code>*In nghiêng*</code></td>
                             </tr>
                             <tr>
-                                <td>Mã lệnh (Inline code)</td>
+                                <td>Mã lệnh</td>
                                 <td><code>`code`</code></td>
                             </tr>
                             <tr>
@@ -234,7 +234,7 @@
                                 <td><code>- Mục 1</code> hoặc <code>* Mục 1</code></td>
                             </tr>
                             <tr>
-                                <td>Bảng (Table)</td>
+                                <td>Bảng</td>
                                 <td><code>| Cột 1 | Cột 2 |</code><br><code>|---|---|</code><br><code>| Giá trị 1 | Giá trị 2 |</code></td>
                             </tr>
                         </tbody>
@@ -243,7 +243,7 @@
             </div>
 
             <div class="card-footer">
-                <button type="button" id="saveRulesBtn" class="btn-save" disabled="disabled">Save changes</button>
+                <button type="button" id="saveRulesBtn" class="btn-save" disabled="disabled">Lưu thay đổi</button>
             </div>
         </div>
     </th:block>

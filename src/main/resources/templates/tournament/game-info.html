@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/tournament-layout :: layout('Game Info - BTP Tournament', 'Game Info', 'game-info', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/tournament-layout :: layout('Thông tin game - BTP Tournament', 'Thông tin game', 'game-info', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/tournament/game-info.css}">
 </head>
@@ -8,8 +8,8 @@
     <th:block th:fragment="pageContent">
         <div class="settings-card" id="gameInfoCard">
             <div class="card-header">
-                <h2 class="card-title">GAME INFO</h2>
-                <p class="card-subtitle">Select the game, tournament stage type, and bracket format</p>
+                <h2 class="card-title">THÔNG TIN GAME</h2>
+                <p class="card-subtitle">Chọn tựa game, giai đoạn thi đấu và thể thức nhánh đấu</p>
             </div>
 
             <form id="gameInfoForm" novalidate="novalidate">
@@ -17,21 +17,21 @@
                     <!-- 1. Game (Dropdown chọn từ danh sách game hệ thống) -->
                     <div class="gi-row">
                         <div class="gi-row-label">
-                            Game <span class="req">*</span>
+                            Tựa game <span class="req">*</span>
                         </div>
                         <div class="gi-row-content">
                             <div class="input-with-icon select-wrapper gi-select-box">
                                 <select id="gameSelect" class="field-input" required="required">
-                                    <option value="" disabled="disabled">Select a game from system...</option>
-                                    <option value="Liên Minh Huyền Thoại">League of Legends</option>
+                                    <option value="" disabled="disabled">Chọn tựa game trong hệ thống...</option>
+                                    <option value="Liên Minh Huyền Thoại">Liên Minh Huyền Thoại</option>
                                     <option value="Valorant">Valorant</option>
-                                    <option value="Teamfight Tactics">Teamfight Tactics</option>
+                                    <option value="Teamfight Tactics">Đấu Trường Chân Lý (TFT)</option>
                                     <option value="CS2">Counter-Strike 2</option>
                                     <option value="Delta Force">Delta Force</option>
                                     <option value="The Isle">The Isle</option>
                                     <option value="PUBG">PUBG</option>
                                     <option value="Dota 2">Dota 2</option>
-                                    <option value="FIFA Online">FIFA Online</option>
+                                    <option value="FIFA Online">FC Online</option>
                                     <option value="Street Fighter 6">Street Fighter 6</option>
                                     <option value="Super Smash Bros">Super Smash Bros</option>
                                 </select>
@@ -47,20 +47,20 @@
                     <!-- 2. Type (Single Stage / Two Stage) -->
                     <div class="gi-row">
                         <div class="gi-row-label">
-                            Type
+                            Giai đoạn thi đấu
                         </div>
                         <div class="gi-row-content gi-radio-group">
                             <label class="gi-radio-label">
                                 <input type="radio" name="stageType" value="SINGLE_STAGE" checked="checked">
                                 <span class="gi-radio-custom"></span>
-                                <span class="gi-radio-text">Single Stage Tournament</span>
+                                <span class="gi-radio-text">Giải đấu 1 giai đoạn</span>
                             </label>
 
                             <label class="gi-radio-label">
                                 <input type="radio" name="stageType" value="TWO_STAGE">
                                 <span class="gi-radio-custom"></span>
                                 <span class="gi-radio-text">
-                                    Two Stage Tournament <span class="gi-radio-sub">— groups compete separately, winners proceed to a final stage (e.g. World Cup)</span>
+                                    Giải đấu 2 giai đoạn <span class="gi-radio-sub">— chia bảng đấu vòng loại trước, các đội đứng đầu vào vòng chung kết</span>
                                 </span>
                             </label>
                         </div>
@@ -68,18 +68,18 @@
 
                     <div class="gi-divider"></div>
 
-                    <!-- 3. Định dạng (Format + Break ties checkbox) -->
+                    <!-- 3. Định dạng -->
                     <div class="gi-row">
                         <div class="gi-row-label">
-                            Định dạng <span class="req">*</span>
+                            Thể thức nhánh đấu <span class="req">*</span>
                         </div>
                         <div class="gi-row-content">
                             <div class="input-with-icon select-wrapper gi-select-box">
                                 <select id="formatSelect" class="field-input" required="required">
-                                    <option value="SINGLE_ELIMINATION">Single Elimination</option>
-                                    <option value="DOUBLE_ELIMINATION">Double Elimination</option>
-                                    <option value="ROUND_ROBIN">Round Robin</option>
-                                    <option value="SWISS">Swiss</option>
+                                    <option value="SINGLE_ELIMINATION">Loại trực tiếp (Single Elimination)</option>
+                                    <option value="DOUBLE_ELIMINATION">Nhánh thắng - Nhánh thua (Double Elimination)</option>
+                                    <option value="ROUND_ROBIN">Vòng tròn tính điểm (Round Robin)</option>
+                                    <option value="SWISS">Thể thức Thụy Sĩ (Swiss)</option>
                                 </select>
                                 <svg class="select-chevron" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
@@ -92,7 +92,7 @@
                 </div>
 
                 <div class="card-footer">
-                    <button type="submit" id="saveGameInfoBtn" class="btn-save" disabled="disabled">Save changes</button>
+                    <button type="submit" id="saveGameInfoBtn" class="btn-save" disabled="disabled">Lưu thay đổi</button>
                 </div>
             </form>
         </div>

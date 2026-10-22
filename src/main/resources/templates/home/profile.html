@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app-layout :: layout('User Profile - BTP Tournament', 'profile', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/app-layout :: layout('Hồ sơ người dùng - BTP Tournament', 'profile', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/home/profile.css}">
     <link rel="stylesheet" th:href="@{/css/common/toast.css}">
@@ -38,7 +38,7 @@
                                         <line x1="8" y1="2" x2="8" y2="6"/>
                                         <line x1="3" y1="10" x2="21" y2="10"/>
                                     </svg>
-                                    <span id="publicProfileJoined">October 2026</span>
+                                    <span id="publicProfileJoined">Tháng 10, 2026</span>
                                 </span>
 
                                 <span class="pf-meta-item" id="publicProfileLocationWrap">
@@ -46,14 +46,14 @@
                                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                                         <circle cx="12" cy="10" r="3"/>
                                     </svg>
-                                    <span id="publicProfileLocation">Vietnam</span>
+                                    <span id="publicProfileLocation">Việt Nam</span>
                                 </span>
                             </div>
                         </div>
                     </div>
 
                     <div class="pf-header-right">
-                        <a th:href="@{/profile/settings(tab='profile')}" class="pf-more-btn" title="Profile Settings">
+                        <a th:href="@{/profile/settings(tab='profile')}" class="pf-more-btn" title="Cài đặt hồ sơ">
                             <svg viewBox="0 0 24 24" fill="currentColor">
                                 <circle cx="12" cy="5" r="2"/>
                                 <circle cx="12" cy="12" r="2"/>
@@ -64,29 +64,30 @@
                 </div>
             </header>
 
-            <!-- 3. NỘI DUNG CHÍNH (ĐÃ BỎ HỘP SOCIAL CONNECTIONS) -->
+            <!-- 3. NỘI DUNG CHÍNH -->
             <section class="pf-body-container">
-                <!-- HỘP 1: UPCOMING EVENTS -->
+                <!-- HỘP 1: GIẢI ĐẤU SẮP THAM GIA -->
                 <div class="pf-content-card">
                     <div class="pf-card-top">
-                        <h2 class="pf-card-heading">UPCOMING EVENTS</h2>
-                        <a th:href="@{/dashboard}" class="pf-card-link">View all</a>
+                        <h2 class="pf-card-heading">GIẢI ĐẤU SẮP THAM GIA</h2>
+                        <a th:href="@{/dashboard}" class="pf-card-link">Xem tất cả</a>
                     </div>
                     <div class="pf-upcoming-empty">
-                        <p class="pf-upcoming-text">No upcoming events</p>
-                        <a th:href="@{/dashboard}" class="pf-find-events-link">Find events</a>
+                        <p class="pf-upcoming-text">Chưa có giải đấu sắp tham gia</p>
+                        <a th:href="@{/search}" class="pf-find-events-link">Tìm giải đấu</a>
                     </div>
                 </div>
 
-                <!-- HỘP 2: TOURNAMENTS ORGANIZED -->
+                <!-- HỘP 2: GIẢI ĐẤU ĐÃ TỔ CHỨC -->
                 <div class="pf-content-card">
                     <div class="pf-card-top">
-                        <h2 class="pf-card-heading">TOURNAMENTS ORGANIZED</h2>
-                        <a th:href="@{/tournament/home}" class="pf-card-link">View all</a>
+                        <h2 class="pf-card-heading">GIẢI ĐẤU ĐÃ TỔ CHỨC</h2>
+                        <a th:href="@{/events}" class="pf-card-link">Xem tất cả</a>
                     </div>
                     <div class="pf-organized-list" id="organizedTournamentsList">
                         <!-- Được render tự động từ JS -->
                     </div>
+                    <div class="pf-pagination" id="organizedPagination"></div>
                 </div>
             </section>
         </div>

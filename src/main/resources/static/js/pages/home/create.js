@@ -1,3 +1,5 @@
+import { createNewTournamentInStore } from '../../common/utils.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('createForm');
     const nameInput = document.getElementById('tournamentName');
@@ -54,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         console.log('Thông tin giải đấu khởi tạo:', payload);
-        sessionStorage.setItem('btp_tournament_data', JSON.stringify(payload));
+        createNewTournamentInStore(payload);
         window.location.href = '/tournament/details';
     });
 });
