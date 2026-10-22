@@ -1,4 +1,4 @@
-// =====================================================
+﻿// =====================================================
 // Search Tournaments Script — Start.gg Style
 // =====================================================
 
@@ -811,9 +811,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Click vào thẻ giải đấu chuyển sang trang xem giải đấu
-    listContainer.addEventListener('click', (e) => {
+        listContainer.addEventListener('click', (e) => {
         const card = e.target.closest('.search-tournament-card');
         if (!card) return;
+        const selected = allTournaments.find(item => String(item.id) === String(card.dataset.id));
+        if (selected) {
+            sessionStorage.setItem('btp_selected_view_tournament', JSON.stringify({
+                id: selected.id,
+                name: selected.name,
+                game: selected.game,
+                startDate: selected.startDate,
+                location: selected.location,
+                attendees: selected.attendees,
+                status: selected.status,
+                badgeLabel: selected.badgeLabel,
+                image: selected.image,
+                source: 'search'
+            }));
+        }
         window.location.href = '/tournament/view';
     });
 

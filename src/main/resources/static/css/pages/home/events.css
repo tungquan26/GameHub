@@ -22,7 +22,7 @@
 .ev-hero {
     position: relative;
     background: linear-gradient(135deg, #0e3863 0%, #154678 50%, #1f5387 100%);
-    padding: 40px 0;
+    padding: 36px 0;
     overflow: hidden;
 }
 
@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 32px;
+    gap: 24px;
     flex-wrap: wrap;
 }
 
@@ -46,27 +46,11 @@
     max-width: 580px;
 }
 
-.ev-eyebrow {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #93c5fd;
-    margin-bottom: 8px;
-}
-
 .ev-title {
     font-size: 28px;
     font-weight: 800;
     color: #ffffff;
-    margin: 0 0 8px;
-}
-
-.ev-subtitle {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.5;
-    margin: 0 0 20px;
+    margin: 0 0 16px;
 }
 
 .ev-hero-actions {
@@ -107,54 +91,6 @@
 .ev-btn-secondary:hover {
     background-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
-}
-
-/* Thẻ thống kê bên phải */
-.ev-stats-card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    padding: 20px 26px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-.ev-stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.ev-stat-num {
-    font-size: 26px;
-    font-weight: 800;
-    color: #ffffff;
-    line-height: 1;
-}
-
-.ev-num-organizer {
-    color: #93c5fd;
-}
-
-.ev-num-player {
-    color: #6ee7b7;
-}
-
-.ev-stat-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.72);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.ev-stat-divider {
-    width: 1px;
-    height: 36px;
-    background-color: rgba(255, 255, 255, 0.16);
 }
 
 /* ==================== 2. TOOLBAR & FILTER ==================== */
@@ -295,7 +231,7 @@
     flex-shrink: 0;
     border-radius: 6px;
     overflow: hidden;
-    background-color: #f3f4f6;
+    background-color: #ffffff;
     border: 1px solid #eef0f4;
     display: flex;
     align-items: center;
@@ -305,7 +241,7 @@
 .ev-logo-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .ev-info {
@@ -438,11 +374,6 @@
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
-    .ev-stats-card {
-        width: 100%;
-        justify-content: space-around;
-    }
-
     .ev-search-box {
         width: 100%;
     }

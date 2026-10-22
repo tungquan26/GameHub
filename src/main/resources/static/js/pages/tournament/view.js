@@ -12,13 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'Valorant': '/images/game2.png',
         'Teamfight Tactics': '/images/game3.png',
         'CS2': '/images/game4.png',
+        'Counter-Strike 2': '/images/game4.png',
         'Delta Force': '/images/game5.png',
         'The Isle': '/images/game6.png',
         'PUBG': '/images/game1.png',
         'Dota 2': '/images/game2.png',
         'FIFA Online': '/images/game3.png',
         'Street Fighter 6': '/images/game1.png',
-        'Super Smash Bros': '/images/game2.png'
+        'Super Smash Bros': '/images/game2.png',
+        'Super Smash Bros. Ultimate': '/images/game2.png'
     };
 
     const FORMAT_LABELS = {
@@ -37,30 +39,119 @@ document.addEventListener('DOMContentLoaded', () => {
     const rawDetails = sessionStorage.getItem('btp_tournament_data');
     const details = rawDetails ? JSON.parse(rawDetails) : {};
 
-    const profileImg = sessionStorage.getItem('btp_tournament_profile_img') || '';
-    const bannerImg = sessionStorage.getItem('btp_tournament_banner_img') || '';
+    const rawSelectedView = sessionStorage.getItem('btp_selected_view_tournament');
+    const selectedView = rawSelectedView ? JSON.parse(rawSelectedView) : null;
+
+    const rawRegSettings = sessionStorage.getItem('btp_tournament_reg_settings');
+    const regSettings = rawRegSettings ? JSON.parse(rawRegSettings) : null;
 
     const rawGameInfo = sessionStorage.getItem('btp_tournament_game_info');
     const gameInfo = rawGameInfo ? JSON.parse(rawGameInfo) : {};
 
+    // Kiểm tra xem giải đấu đang xem có phải giải do chính người dùng tạo trong phiên này không
+    const isOwnCreatedTourney = Boolean(
+        !selectedView ||
+        (details.name && selectedView.name && details.name.trim().toLowerCase() === selectedView.name.trim().toLowerCase())
+    );
+
+    const profileImg = isOwnCreatedTourney
+        ? (sessionStorage.getItem('btp_tournament_profile_img') || '')
+        : (selectedView?.image || '');
+    const bannerImg = isOwnCreatedTourney
+        ? (sessionStorage.getItem('btp_tournament_banner_img') || '')
+        : '';
+
     const defaultRulesMarkdown = `# Game Tournament Management System — System Modules\n## 1. Module Authentication & User Management\n**Công dụng**\n- Quản lý tài khoản người dùng và phân quyền ban tổ chức.\n- Đảm bảo mọi thành viên tham gia tuân thủ đúng quy định chung của giải đấu.\n- Nghiêm cấm sử dụng phần mềm thứ 3 can thiệp vào trò chơi.`;
     const rulesMarkdown = sessionStorage.getItem('btp_tournament_rules') || defaultRulesMarkdown;
 
-    const tourneyName = details.name || 'Nguyễn Quân';
-    const startDate = details.startDate || '2026-10-15T00:00';
-    const endDate = details.endDate || '2026-10-16T23:59';
-    const venueAddress = (details.venueAddress || '').trim();
-    const venueLat = details.venueLat || null;
-    const venueLon = details.venueLon || null;
+    const tourneyName = (isOwnCreatedTourney ? details.name : selectedView?.name) || details.name || 'Nguyễn Quân';
+    const startDate = (isOwnCreatedTourney ? details.startDate : selectedView?.startDate) || details.startDate || '2026-10-15T00:00';
+    const endDate = (isOwnCreatedTourney ? details.endDate : selectedView?.endDate) || details.endDate || startDate;
+    const venueAddress = isOwnCreatedTourney
+        ? (details.venueAddress || '').trim()
+        : (selectedView?.location || '').trim();
+    const venueLat = isOwnCreatedTourney ? (details.venueLat || null) : null;
+    const venueLon = isOwnCreatedTourney ? (details.venueLon || null) : null;
     const contactType = (details.contactType === 'DISCORD' || details.contactType === 'Discord') ? 'DISCORD' : 'EMAIL';
     const contactValue = details.contact || 'quannguyen041026@gmail.com';
 
-    const selectedGame = gameInfo.game || 'Liên Minh Huyền Thoại';
+    const selectedGame = isOwnCreatedTourney
+        ? (gameInfo.game || 'Liên Minh Huyền Thoại')
+        : (selectedView?.game || gameInfo.game || 'Liên Minh Huyền Thoại');
     const selectedFormat = FORMAT_LABELS[gameInfo.format] || 'Single Elimination';
     const selectedStage = STAGE_LABELS[gameInfo.stageType] || 'Single Stage';
 
     // =========================================================================
-    // 2. RENDER HỘP BÊN TRÁI (PUBLIC TOURNAMENT SIDEBAR)
+    // 2. XÁC ĐỊNH TƯ CÁCH NGƯỜI DÙNG & TRẠNG THÁI GIẢI ĐẤU CHO NÚT BÊN TRÁI
+    // =========================================================================
+    const ORGANIZER_SAMPLE_NAMES = [
+        'btp university esports cup 2026',
+        'btp winter showdown — open series'
+    ];
+
+    function isUserRegisteredFor(nameToCheck) {
+        if (!nameToCheck) return false;
+        const normalized = nameToCheck.trim().toLowerCase();
+        if (selectedView?.role === 'Player' && selectedView?.name?.trim().toLowerCase() === normalized) {
+            return true;
+        }
+        try {
+            const rawList = sessionStorage.getItem('btp_registered_tournaments');
+            const regList = rawList ? JSON.parse(rawList) : [];
+            return Array.isArray(regList) && regList.some(item => (item.name || '').trim().toLowerCase() === normalized);
+        } catch {
+            return false;
+        }
+    }
+
+    function isUserOrganizerOf(nameToCheck) {
+        if (!nameToCheck) return false;
+        const normalized = nameToCheck.trim().toLowerCase();
+        if (selectedView?.role === 'Organizer' && selectedView?.name?.trim().toLowerCase() === normalized) {
+            return true;
+        }
+        if (details.name && details.name.trim().toLowerCase() === normalized) {
+            return true;
+        }
+        return ORGANIZER_SAMPLE_NAMES.includes(normalized);
+    }
+
+    // Xác định trạng thái giải đấu: 'OPEN_REGISTRATION' | 'REGISTRATION_NOT_STARTED' | 'REGISTRATION_CLOSED' | 'IN_PROGRESS' | 'COMPLETED'
+    function resolveTournamentStatus() {
+        const rawStatus = (selectedView?.status || '').toLowerCase();
+        const badgeLabel = (selectedView?.badgeLabel || '').toLowerCase();
+
+        if (rawStatus === 'completed' || badgeLabel === 'completed') {
+            return 'COMPLETED';
+        }
+        if (rawStatus === 'in_progress' || rawStatus === 'ongoing' || badgeLabel === 'in progress') {
+            return 'IN_PROGRESS';
+        }
+        if (rawStatus === 'closed' || rawStatus === 'registration_closed' || badgeLabel === 'registration closed') {
+            return 'REGISTRATION_CLOSED';
+        }
+        if (badgeLabel === 'upcoming') {
+            return 'REGISTRATION_NOT_STARTED';
+        }
+
+        // Nếu là giải đấu do người dùng tạo và đã cấu hình ngày đăng ký trong Registration Settings
+        if (isOwnCreatedTourney && regSettings?.registrationStartDate && regSettings?.registrationEndDate) {
+            const now = new Date();
+            const regStart = new Date(regSettings.registrationStartDate);
+            const regEnd = new Date(regSettings.registrationEndDate);
+            if (!Number.isNaN(regStart.getTime()) && now < regStart) {
+                return 'REGISTRATION_NOT_STARTED';
+            }
+            if (!Number.isNaN(regEnd.getTime()) && now > regEnd) {
+                return 'REGISTRATION_CLOSED';
+            }
+        }
+
+        return 'OPEN_REGISTRATION';
+    }
+
+    // =========================================================================
+    // 3. RENDER HỘP BÊN TRÁI (PUBLIC TOURNAMENT SIDEBAR)
     // =========================================================================
     const tvSidebarBanner = document.getElementById('tvSidebarBanner');
     const tvSidebarAvatarImg = document.getElementById('tvSidebarAvatarImg');
@@ -94,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tvSidebarLocation.textContent = venueAddress || 'Hà Nội, Việt Nam';
     }
 
-    // Hiển thị thông tin trò chơi từ Game Info theo đúng định dạng ảnh mẫu (không có chữ EVENTS)
+    // Hiển thị thông tin trò chơi từ Game Info theo đúng định dạng ảnh mẫu
     if (tvSidebarGameInfoList) {
         const eventDateText = formatFullSingleDate(startDate);
         const gameTitleLine = `[${selectedStage}] ${selectedGame} (${selectedFormat})`;
@@ -119,19 +210,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (tvRegisterNowBtn) {
-        tvRegisterNowBtn.addEventListener('click', () => {
+    // Cập nhật giao diện và hành vi cho nút #tvRegisterNowBtn dựa trên tư cách người dùng & trạng thái giải đấu
+    function updateActionButtonState() {
+        if (!tvRegisterNowBtn) return;
+
+        tvRegisterNowBtn.className = 'tv-register-btn';
+        tvRegisterNowBtn.disabled = false;
+        tvRegisterNowBtn.onclick = null;
+
+        const currentStatus = resolveTournamentStatus();
+        const isOrganizer = isUserOrganizerOf(tourneyName);
+        const isRegisteredPlayer = isUserRegisteredFor(tourneyName);
+
+        // 1. Giải đấu đã hoàn thành hoặc đang diễn ra -> ưu tiên hiển thị trạng thái giải đấu
+        if (currentStatus === 'COMPLETED') {
+            tvRegisterNowBtn.classList.add('is-status-completed');
+            tvRegisterNowBtn.disabled = true;
+            tvRegisterNowBtn.textContent = 'Completed';
+            return;
+        }
+
+        if (currentStatus === 'IN_PROGRESS') {
+            tvRegisterNowBtn.classList.add('is-status-ongoing');
+            tvRegisterNowBtn.disabled = true;
+            tvRegisterNowBtn.textContent = 'In Progress';
+            return;
+        }
+
+        // 2. Nếu người dùng đã thuộc giải đấu (Organizer hoặc Player đã đăng ký)
+        if (isOrganizer) {
+            tvRegisterNowBtn.classList.add('is-organizer');
+            tvRegisterNowBtn.textContent = 'Manage Tournament';
+            tvRegisterNowBtn.onclick = () => {
+                window.location.href = '/tournament/details';
+            };
+            return;
+        }
+
+        if (isRegisteredPlayer) {
+            tvRegisterNowBtn.classList.add('is-registered');
+            tvRegisterNowBtn.disabled = true;
+            tvRegisterNowBtn.textContent = '✓ Registered';
+            return;
+        }
+
+        // 3. Người dùng chưa thuộc giải đấu nhưng giải đấu ngoài thời gian đăng ký
+        if (currentStatus === 'REGISTRATION_CLOSED') {
+            tvRegisterNowBtn.classList.add('is-status-closed');
+            tvRegisterNowBtn.disabled = true;
+            tvRegisterNowBtn.textContent = 'Registration Closed';
+            return;
+        }
+
+        if (currentStatus === 'REGISTRATION_NOT_STARTED') {
+            tvRegisterNowBtn.classList.add('is-status-upcoming');
+            tvRegisterNowBtn.disabled = true;
+            tvRegisterNowBtn.textContent = 'Registration Not Open';
+            return;
+        }
+
+        // 4. Người dùng CHƯA thuộc giải đấu VÀ giải đấu ĐANG mở đăng ký -> Hiện Register Now
+        tvRegisterNowBtn.textContent = 'Register Now';
+        tvRegisterNowBtn.onclick = () => {
             try {
                 const rawList = sessionStorage.getItem('btp_registered_tournaments');
                 const regList = rawList ? JSON.parse(rawList) : [];
-                const exists = regList.some(item => item.name === tourneyName);
+                const exists = regList.some(item => (item.name || '').trim().toLowerCase() === tourneyName.trim().toLowerCase());
                 if (!exists) {
                     regList.unshift({
                         name: tourneyName,
                         dateLabel: `Upcoming • ${formatShortDateRange(startDate, endDate)}`,
+                        startDate,
+                        endDate,
                         game: selectedGame,
                         location: venueAddress || 'Hà Nội, Việt Nam',
-                        attendees: 64,
+                        attendees: (selectedView?.attendees || 64) + 1,
                         role: 'Player',
                         image: profileImg || GAME_IMAGES[selectedGame] || '/images/game1.png'
                     });
@@ -140,12 +293,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch {
                 // ignore storage errors
             }
-            showToast(`Đã gửi yêu cầu đăng ký tham gia giải đấu "${tourneyName}"!`, 'success');
-        });
+            updateActionButtonState();
+            showToast(`Đã đăng ký tham gia giải đấu "${tourneyName}" thành công!`, 'success');
+        };
     }
 
+    updateActionButtonState();
+
     // =========================================================================
-    // 3. RENDER PHẦN BÊN PHẢI (NỘI DUNG TRANG HOME CỦA TOURNAMENT)
+    // 4. RENDER PHẦN BÊN PHẢI (ĐỒNG BỘ 100% VỚI TRANG HOME CỦA GIẢI ĐẤU)
     // =========================================================================
     const homeBannerImg = document.getElementById('homeBannerImg');
     const homeBannerFallback = document.getElementById('homeBannerFallback');
@@ -178,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     homeContactLink.textContent = contactValue;
     homeContactLink.href = contactType === 'EMAIL' ? `mailto:${contactValue}` : contactValue;
 
-    // Render các Section & Widget từ btp_tournament_homepage_layout
+    // Render các Section & Widget từ btp_tournament_homepage_layout chuẩn class của home.css
     const STORAGE_KEY_LAYOUT = 'btp_tournament_homepage_layout';
     const DEFAULT_HOMEPAGE_LAYOUT = [
         {
@@ -260,218 +416,192 @@ document.addEventListener('DOMContentLoaded', () => {
     const sectionsContainer = document.getElementById('thSectionsContainer');
     const sections = loadSavedLayout();
 
-    function renderPublicSections() {
-        if (!sectionsContainer) return;
-        sectionsContainer.innerHTML = '';
+    function buildWidgetContentHtml(widget) {
+        const headingHtml = widget.title
+            ? `<h3 class="th-widget-title">${escapeHtml(widget.title)}</h3>`
+            : '';
 
-        sections.forEach(sec => {
-            const secEl = document.createElement('section');
-            secEl.className = 'th-section-block';
-
-            const titleHtml = sec.title
-                ? `<h2 class="th-section-heading">${escapeHtml(sec.title)}</h2>`
-                : '';
-
-            const gridClass = `th-columns-grid layout-${sec.layout || '1col'}`;
-            let colsHtml = '';
-
-            (sec.columns || [[]]).forEach(colWidgets => {
-                const widgetsInner = colWidgets
-                    .map(w => renderWidgetCard(w))
-                    .join('');
-                colsHtml += `<div class="th-column-slot">${widgetsInner}</div>`;
-            });
-
-            secEl.innerHTML = `
-                ${titleHtml}
-                <div class="${gridClass}">
-                    ${colsHtml}
+        if (widget.type === 'MARKDOWN') {
+            const mdHtml = renderMarkdownToHtml(widget.content || '');
+            return `
+                ${headingHtml}
+                <div class="th-card th-overview-card">
+                    ${mdHtml || '<p style="color:#94a3b8;">(Chưa có nội dung)</p>'}
                 </div>
             `;
+        }
 
-            sectionsContainer.appendChild(secEl);
+        if (widget.type === 'IMAGE') {
+            const imgSrc = (widget.imageUrl || '').trim();
+            const caption = (widget.caption || '').trim();
+            const linkUrl = (widget.linkUrl || '').trim();
+
+            if (!imgSrc) return '';
+
+            const imgTagHtml = `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(caption || widget.title || 'Tournament Image')}" class="th-image-widget-img">`;
+            const wrappedImgHtml = linkUrl
+                ? `<a href="${escapeHtml(linkUrl)}" target="_blank" rel="noopener" class="th-image-widget-link">${imgTagHtml}</a>`
+                : imgTagHtml;
+            const captionHtml = caption
+                ? `<div class="th-image-widget-caption">${escapeHtml(caption)}</div>`
+                : '';
+
+            return `
+                ${headingHtml}
+                <div class="th-card th-image-card">
+                    ${wrappedImgHtml}
+                    ${captionHtml}
+                </div>
+            `;
+        }
+
+        if (widget.type === 'GAME_INFO') {
+            const gamePosterUrl = GAME_IMAGES[selectedGame] || '/images/game1.png';
+            return `
+                ${headingHtml}
+                <div class="th-card th-game-card">
+                    <img src="${gamePosterUrl}" alt="${escapeHtml(selectedGame)}" class="th-game-poster">
+                    <div class="th-game-details">
+                        <div class="th-game-sub">${escapeHtml(selectedFormat)} · ${escapeHtml(selectedGame)}</div>
+                        <div class="th-game-time">
+                            <span class="th-blue-dot"></span>
+                            <span>${escapeHtml(formatFullTimestamp(startDate))}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (widget.type === 'LOCATION') {
+            if (venueAddress) {
+                const mapQuery = (venueLat && venueLon) ? `${venueLat},${venueLon}` : venueAddress;
+                const encodedVenue = encodeURIComponent(venueAddress);
+                const encodedMapQuery = encodeURIComponent(mapQuery);
+                const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedVenue}`;
+                const iframeSrc = `https://maps.google.com/maps?q=${encodedMapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+                return `
+                    ${headingHtml}
+                    <div class="th-card th-location-card">
+                        <div class="th-location-left">
+                            <div class="th-location-address">${escapeHtml(venueAddress)}</div>
+                            <div class="th-location-actions">
+                                <a href="${directionsUrl}" target="_blank" rel="noopener" class="th-loc-action-btn">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" class="th-loc-icon">
+                                        <path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/>
+                                    </svg>
+                                    <span>Directions</span>
+                                </a>
+                                <button type="button" class="th-loc-action-btn js-copy-location-btn" data-venue="${escapeHtml(venueAddress)}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="th-loc-icon">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                    </svg>
+                                    <span>Copy Link</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="th-location-map">
+                            <iframe src="${iframeSrc}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    ${headingHtml}
+                    <div class="th-card th-location-card">
+                        <div class="th-location-left">
+                            <div class="th-location-address">Chưa cập nhật địa điểm (Vui lòng nhập tại mục Details)</div>
+                        </div>
+                        <div class="th-location-map">
+                            <iframe src="https://maps.google.com/maps?q=Viet%20Nam&t=&z=5&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        if (widget.type === 'CONTACT') {
+            const cHref = contactType === 'EMAIL' ? `mailto:${contactValue}` : contactValue;
+            const cLabel = contactType === 'EMAIL' ? 'Email' : 'Discord';
+            return `
+                ${headingHtml}
+                <div class="th-card th-contact-card">
+                    <a href="${escapeHtml(cHref)}" class="th-contact-item">
+                        <div class="th-contact-icon-wrap">${contactIconSvg}</div>
+                        <span class="th-contact-label">${cLabel}</span>
+                    </a>
+                </div>
+            `;
+        }
+
+        if (widget.type === 'RULES') {
+            return `
+                ${headingHtml}
+                <div class="th-card th-rules-card">
+                    <div class="th-rules-body collapsed js-rules-body">
+                        ${renderMarkdownToHtml(rulesMarkdown)}
+                    </div>
+                    <button type="button" class="th-show-more-btn js-rules-toggle-btn">Show more</button>
+                </div>
+            `;
+        }
+
+        return '';
+    }
+
+    function renderPublicSections() {
+        if (!sectionsContainer) return;
+
+        sectionsContainer.innerHTML = sections.map(sec => {
+            const viewSectionTitle = (sec.title && sec.title.trim())
+                ? `<h2 class="th-section-title">${escapeHtml(sec.title)}</h2>`
+                : '';
+
+            const columnsHtml = (sec.columns || [[]]).map((colWidgets, colIdx) => {
+                const widgetsHtml = colWidgets.map(wid => `
+                    <div class="th-widget-wrap" data-widget-id="${wid.id}">
+                        ${buildWidgetContentHtml(wid)}
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="th-section-col" data-col-idx="${colIdx}">
+                        ${widgetsHtml}
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <section class="th-section" data-section-id="${sec.id}">
+                    ${viewSectionTitle}
+                    <div class="th-section-grid layout-${sec.layout || '1col'}">
+                        ${columnsHtml}
+                    </div>
+                </section>
+            `;
+        }).join('');
+
+        bindDynamicPublicEvents();
+    }
+
+    function bindDynamicPublicEvents() {
+        sectionsContainer.querySelectorAll('.js-copy-location-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const venue = btn.getAttribute('data-venue') || '';
+                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`;
+                navigator.clipboard?.writeText(mapUrl);
+                showToast('Location link copied to clipboard.');
+            });
         });
 
-        bindRulesShowMoreEvents();
-    }
-
-    function renderWidgetCard(widget) {
-        const innerBody = renderWidgetInnerContent(widget);
-        return `
-            <div class="th-widget-card">
-                ${innerBody}
-            </div>
-        `;
-    }
-
-    function renderWidgetInnerContent(widget) {
-        switch (widget.type) {
-            case 'MARKDOWN': {
-                const heading = widget.title
-                    ? `<h3 class="th-widget-subheading">${escapeHtml(widget.title)}</h3>`
-                    : '';
-                const mdHtml = renderMarkdownToHtml(widget.content || '');
-                return `
-                    <div class="th-widget-inner th-markdown-widget">
-                        ${heading}
-                        <div class="th-rules-markdown">${mdHtml}</div>
-                    </div>
-                `;
-            }
-
-            case 'IMAGE': {
-                const heading = widget.title
-                    ? `<h3 class="th-widget-subheading">${escapeHtml(widget.title)}</h3>`
-                    : '';
-                const imgUrl = (widget.imageUrl || '').trim();
-                const caption = (widget.caption || '').trim();
-                const linkUrl = (widget.linkUrl || '').trim();
-
-                if (!imgUrl) return '';
-
-                const imgElement = `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(caption || widget.title || 'Tournament Image')}" class="th-widget-image-el">`;
-                const wrappedImg = linkUrl
-                    ? `<a href="${escapeHtml(linkUrl)}" target="_blank" rel="noopener noreferrer" class="th-widget-image-link">${imgElement}</a>`
-                    : `<div class="th-widget-image-frame">${imgElement}</div>`;
-                const captionHtml = caption
-                    ? `<p class="th-widget-image-caption">${escapeHtml(caption)}</p>`
-                    : '';
-
-                return `
-                    <div class="th-widget-inner th-image-widget">
-                        ${heading}
-                        ${wrappedImg}
-                        ${captionHtml}
-                    </div>
-                `;
-            }
-
-            case 'GAME_INFO': {
-                const subHeading = widget.title
-                    ? `<h3 class="th-widget-subheading">${escapeHtml(widget.title)}</h3>`
-                    : '';
-                const gameCover = GAME_IMAGES[selectedGame] || '/images/game1.png';
-                const fullStartText = formatFullDateTime(startDate);
-                return `
-                    <div class="th-widget-inner">
-                        ${subHeading}
-                        <div class="th-game-card">
-                            <div class="th-game-info-col">
-                                <h3 class="th-event-name">${escapeHtml(selectedGame)}</h3>
-                                <div class="th-event-time">${escapeHtml(fullStartText)}</div>
-                                <div class="th-event-meta">
-                                    <span>${escapeHtml(selectedGame)}</span>
-                                    <span class="th-dot">&middot;</span>
-                                    <span>${escapeHtml(selectedFormat)}</span>
-                                </div>
-                            </div>
-                            <div class="th-game-cover-col">
-                                <img src="${escapeHtml(gameCover)}" alt="${escapeHtml(selectedGame)}" class="th-game-cover-img">
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            case 'LOCATION': {
-                const headingText = widget.title !== undefined ? widget.title : 'Location';
-                const headingHtml = headingText
-                    ? `<h3 class="th-widget-subheading">${escapeHtml(headingText)}</h3>`
-                    : '';
-
-                let mapSrc = 'https://maps.google.com/maps?q=Vietnam&t=&z=6&ie=UTF8&iwloc=&output=embed';
-                let directionsUrl = 'https://www.google.com/maps';
-
-                if (venueLat && venueLon) {
-                    mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(venueLat + ',' + venueLon)}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
-                    directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venueLat + ',' + venueLon)}`;
-                } else if (venueAddress) {
-                    mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(venueAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-                    directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venueAddress)}`;
-                }
-
-                return `
-                    <div class="th-widget-inner">
-                        ${headingHtml}
-                        <div class="th-location-card">
-                            <div class="th-location-top">
-                                <div class="th-location-text">
-                                    <strong>Venue Address</strong>
-                                    <p>${escapeHtml(venueAddress || 'Chưa cập nhật địa chỉ chi tiết trong mục Details.')}</p>
-                                </div>
-                                <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" class="th-directions-btn" title="Mở Google Maps chỉ đường">
-                                    <svg viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M21.71 11.29l-9-9a.996.996 0 00-1.41 0l-9 9a.996.996 0 000 1.41l9 9c.39.39 1.02.39 1.41 0l9-9a.996.996 0 000-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/>
-                                    </svg>
-                                </a>
-                            </div>
-                            <div class="th-map-frame-wrap">
-                                <iframe class="th-map-iframe" src="${mapSrc}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            case 'CONTACT': {
-                const headingText = widget.title !== undefined ? widget.title : 'Contact Info';
-                const headingHtml = headingText
-                    ? `<h3 class="th-widget-subheading">${escapeHtml(headingText)}</h3>`
-                    : '';
-                const hrefVal = contactType === 'EMAIL' ? `mailto:${contactValue}` : contactValue;
-                return `
-                    <div class="th-widget-inner">
-                        ${headingHtml}
-                        <div class="th-contact-card">
-                            <span class="th-contact-icon">${contactIconSvg}</span>
-                            <a href="${escapeHtml(hrefVal)}" class="th-contact-link">${escapeHtml(contactValue)}</a>
-                        </div>
-                    </div>
-                `;
-            }
-
-            case 'RULES': {
-                const subHeading = widget.title
-                    ? `<h3 class="th-widget-subheading">${escapeHtml(widget.title)}</h3>`
-                    : '';
-                const rulesHtml = renderMarkdownToHtml(rulesMarkdown);
-                return `
-                    <div class="th-widget-inner">
-                        ${subHeading}
-                        <div class="th-rules-card">
-                            <div class="th-rules-body is-collapsed" data-rules-body>
-                                <div class="th-rules-markdown">${rulesHtml}</div>
-                                <div class="th-rules-fade" data-rules-fade></div>
-                            </div>
-                            <button type="button" class="th-show-more-btn" data-rules-toggle>Show more</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            default:
-                return '';
-        }
-    }
-
-    function bindRulesShowMoreEvents() {
-        const toggles = sectionsContainer.querySelectorAll('[data-rules-toggle]');
-        toggles.forEach(btn => {
+        sectionsContainer.querySelectorAll('.js-rules-toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const card = btn.closest('.th-rules-card');
-                if (!card) return;
-                const body = card.querySelector('[data-rules-body]');
-                const fade = card.querySelector('[data-rules-fade]');
-                const isCollapsed = body.classList.contains('is-collapsed');
-                if (isCollapsed) {
-                    body.classList.remove('is-collapsed');
-                    if (fade) fade.style.display = 'none';
-                    btn.textContent = 'Show less';
-                } else {
-                    body.classList.add('is-collapsed');
-                    if (fade) fade.style.display = 'block';
-                    btn.textContent = 'Show more';
-                }
+                const body = card?.querySelector('.js-rules-body');
+                if (!body) return;
+                const isCollapsed = body.classList.toggle('collapsed');
+                btn.textContent = isCollapsed ? 'Show more' : 'Show less';
             });
         });
     }
@@ -479,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderPublicSections();
 
     // =========================================================================
-    // 4. CÁC HÀM ĐỊNH DẠNG NGÀY THÁNG CHUẨN START.GG
+    // 5. CÁC HÀM ĐỊNH DẠNG NGÀY THÁNG CHUẨN START.GG
     // =========================================================================
     function getOrdinalSuffix(day) {
         if (day > 3 && day < 21) return 'th';
@@ -531,15 +661,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${m} ${day} ${yr}`;
     }
 
-    function formatFullDateTime(dateStr) {
+    function formatFullTimestamp(dateStr) {
         const d = new Date(dateStr);
-        if (Number.isNaN(d.getTime())) return 'October 15, 2026 at 12:00 AM GMT+7';
-        return d.toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit'
-        }) + ' GMT+7';
+        if (Number.isNaN(d.getTime())) return 'October 15th 2026 at 12:00 AM ICT';
+
+        const fullMonths = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        const monthName = fullMonths[d.getMonth()];
+        const dayOrd = `${d.getDate()}${getOrdinalSuffix(d.getDate())}`;
+        const year = d.getFullYear();
+
+        let hours = d.getHours();
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+
+        return `${monthName} ${dayOrd} ${year} at ${hours}:${minutes} ${ampm} ICT`;
     }
 });

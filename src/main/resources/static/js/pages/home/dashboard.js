@@ -11,36 +11,44 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'VCT Champions 2026 — Vietnam Qualifier',
             game: 'Valorant',
             date: '15 - 20 Thg 11, 2026',
+            startDate: '2026-11-15T09:00',
+            endDate: '2026-11-20T21:00',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 128,
             status: 'open',
-            image: '/images/game1.png'
+            image: '/images/game2.png'
         },
         {
             id: 2,
             name: 'LCK Summer Split — Open Qualifiers',
             game: 'Liên Minh Huyền Thoại',
             date: '01 - 10 Thg 12, 2026',
+            startDate: '2026-12-01T09:00',
+            endDate: '2026-12-10T21:00',
             location: 'Online',
             attendees: 256,
             status: 'open',
-            image: '/images/game2.png'
+            image: '/images/game1.png'
         },
         {
             id: 3,
             name: 'CS2 Major Vietnam — Community Cup',
             game: 'CS2',
             date: '22 - 25 Thg 11, 2026',
+            startDate: '2026-11-22T09:00',
+            endDate: '2026-11-25T21:00',
             location: 'Hà Nội, Việt Nam',
             attendees: 64,
             status: 'closing',
-            image: '/images/game3.png'
+            image: '/images/game4.png'
         },
         {
             id: 4,
             name: 'PUBG Mobile Pro League VN Season 8',
             game: 'PUBG',
             date: '05 - 15 Thg 12, 2026',
+            startDate: '2026-12-05T09:00',
+            endDate: '2026-12-15T21:00',
             location: 'Online',
             attendees: 80,
             status: 'open',
@@ -51,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Dota 2 Southeast Asia Championship',
             game: 'Dota 2',
             date: '10 - 18 Thg 12, 2026',
+            startDate: '2026-12-10T09:00',
+            endDate: '2026-12-18T21:00',
             location: 'Bangkok, Thailand',
             attendees: 32,
             status: 'open',
@@ -61,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'FIFA Online 4 — Giải Vô Địch Quốc Gia',
             game: 'FIFA Online',
             date: '28 Thg 11 - 03 Thg 12, 2026',
+            startDate: '2026-11-28T09:00',
+            endDate: '2026-12-03T21:00',
             location: 'Đà Nẵng, Việt Nam',
             attendees: 48,
             status: 'closing',
@@ -71,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Street Fighter 6 — Saigon Showdown',
             game: 'Street Fighter 6',
             date: '12 - 13 Thg 11, 2026',
+            startDate: '2026-11-12T09:00',
+            endDate: '2026-11-13T21:00',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 96,
             status: 'closed',
@@ -81,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Super Smash Bros Ultimate — Campus League',
             game: 'Super Smash Bros',
             date: '20 - 21 Thg 11, 2026',
+            startDate: '2026-11-20T09:00',
+            endDate: '2026-11-21T21:00',
             location: 'Online',
             attendees: 160,
             status: 'open',
@@ -91,16 +107,20 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Valorant Rising Stars — Rookie Cup',
             game: 'Valorant',
             date: '25 - 28 Thg 11, 2026',
+            startDate: '2026-11-25T09:00',
+            endDate: '2026-11-28T21:00',
             location: 'Online',
             attendees: 200,
             status: 'open',
-            image: '/images/game3.png'
+            image: '/images/game2.png'
         },
         {
             id: 10,
             name: 'League of Legends — University Championship',
             game: 'Liên Minh Huyền Thoại',
             date: '02 - 08 Thg 12, 2026',
+            startDate: '2026-12-02T09:00',
+            endDate: '2026-12-08T21:00',
             location: 'Hà Nội, Việt Nam',
             attendees: 112,
             status: 'open',
@@ -111,20 +131,24 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'CS2 Community Night — Weekly #42',
             game: 'CS2',
             date: '18 Thg 11, 2026',
+            startDate: '2026-11-18T09:00',
+            endDate: '2026-11-18T21:00',
             location: 'Online',
             attendees: 20,
             status: 'closing',
-            image: '/images/game2.png'
+            image: '/images/game4.png'
         },
         {
             id: 12,
             name: 'Dota 2 Vietnam — The International Qualifier',
             game: 'Dota 2',
             date: '25 Thg 12 - 02 Thg 01, 2027',
+            startDate: '2026-12-25T09:00',
+            endDate: '2027-01-02T21:00',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 16,
             status: 'open',
-            image: '/images/game3.png'
+            image: '/images/game2.png'
         }
     ];
 
@@ -261,6 +285,21 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.addEventListener('click', (e) => {
             const card = e.target.closest('.tournament-card');
             if (!card) return;
+            const selected = SAMPLE_TOURNAMENTS.find(item => String(item.id) === String(card.dataset.id));
+            if (selected) {
+                sessionStorage.setItem('btp_selected_view_tournament', JSON.stringify({
+                    id: selected.id,
+                    name: selected.name,
+                    game: selected.game,
+                    startDate: selected.startDate,
+                    endDate: selected.endDate,
+                    location: selected.location,
+                    attendees: selected.attendees,
+                    status: selected.status, // 'open' | 'closing' | 'closed'
+                    image: selected.image,
+                    source: 'dashboard'
+                }));
+            }
             window.location.href = '/tournament/view';
         });
     }

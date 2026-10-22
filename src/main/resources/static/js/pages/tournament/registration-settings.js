@@ -14,24 +14,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const rawStored = sessionStorage.getItem(STORAGE_KEY);
     const parsedStored = rawStored ? JSON.parse(rawStored) : null;
 
-    const rawTourney = sessionStorage.getItem('btp_tournament_data');
-    const parsedTourney = rawTourney ? JSON.parse(rawTourney) : null;
+    const FIXED_MIN_TEAM_SIZE = 4;
+    const FIXED_MAX_TEAMS = 16;
 
     const savedState = {
-        registrationStartDate: parsedStored?.registrationStartDate || '2026-10-10T09:00',
-        registrationEndDate: parsedStored?.registrationEndDate || parsedTourney?.startDate || '2026-10-15T23:59',
+        registrationStartDate: parsedStored?.registrationStartDate || '',
+        registrationEndDate: parsedStored?.registrationEndDate || '',
         feeType: 'FREE',
-        minTeamSize: parsedStored?.minTeamSize ?? 5,
-        maxTeamSize: parsedStored?.maxTeamSize ?? 6,
-        maxTeams: parsedStored?.maxTeams ?? 16
+        minTeamSize: FIXED_MIN_TEAM_SIZE,
+        maxTeamSize: parsedStored?.maxTeamSize ?? '',
+        maxTeams: FIXED_MAX_TEAMS
     };
 
     function initFields() {
         regStartDateInput.value = savedState.registrationStartDate;
         regEndDateInput.value = savedState.registrationEndDate;
-        minTeamSizeInput.value = savedState.minTeamSize;
+        if (minTeamSizeInput) {
+            minTeamSizeInput.value = FIXED_MIN_TEAM_SIZE;
+        }
         maxTeamSizeInput.value = savedState.maxTeamSize;
-        maxTeamsInput.value = savedState.maxTeams;
+        if (maxTeamsInput) {
+            maxTeamsInput.value = FIXED_MAX_TEAMS;
+        }
     }
 
     initFields();
@@ -41,11 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const currentStartDate = regStartDateInput.value;
         const currentEndDate = regEndDateInput.value;
-        const currentMin = parseInt(minTeamSizeInput.value, 10);
-        const currentMax = parseInt(maxTeamSizeInput.value, 10);
-        const currentMaxTeams = parseInt(maxTeamsInput.value, 10);
+        const rawMax = maxTeamSizeInput.value.trim();
+        const currentMax = parseInt(rawMax, 10);
 
-        if (!currentStartDate || !currentEndDate || Number.isNaN(currentMin) || Number.isNaN(currentMax) || Number.isNaN(currentMaxTeams)) {
+        if (!currentStartDate || !currentEndDate || !rawMax || Number.isNaN(currentMax)) {
             saveBtn.disabled = true;
             return false;
         }
@@ -57,22 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
 
-        if (currentMin < 1) {
-            errorMsg.textContent = 'Minimum Team Size must be at least 1.';
-            errorMsg.style.display = 'block';
-            saveBtn.disabled = true;
-            return false;
-        }
-
-        if (currentMax < currentMin) {
-            errorMsg.textContent = 'Maximum Team Size must be greater than or equal to Minimum Team Size.';
-            errorMsg.style.display = 'block';
-            saveBtn.disabled = true;
-            return false;
-        }
-
-        if (currentMaxTeams < 2) {
-            errorMsg.textContent = 'Maximum Teams must be at least 2.';
+        if (currentMax < FIXED_MIN_TEAM_SIZE) {
+            errorMsg.textContent = `Maximum Team Size must be greater than or equal to Minimum Team Size (${FIXED_MIN_TEAM_SIZE}).`;
             errorMsg.style.display = 'block';
             saveBtn.disabled = true;
             return false;
@@ -81,15 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const isDirty =
             currentStartDate !== savedState.registrationStartDate ||
             currentEndDate !== savedState.registrationEndDate ||
-            currentMin !== Number(savedState.minTeamSize) ||
-            currentMax !== Number(savedState.maxTeamSize) ||
-            currentMaxTeams !== Number(savedState.maxTeams);
+            String(currentMax) !== String(savedState.maxTeamSize);
 
         saveBtn.disabled = !isDirty;
         return true;
     }
 
-    [regStartDateInput, regEndDateInput, minTeamSizeInput, maxTeamSizeInput, maxTeamsInput].forEach(el => {
+    [regStartDateInput, regEndDateInput, maxTeamSizeInput].forEach(el => {
         el.addEventListener('input', checkState);
         el.addEventListener('change', checkState);
     });
@@ -104,9 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             savedState.registrationStartDate = regStartDateInput.value;
             savedState.registrationEndDate = regEndDateInput.value;
-            savedState.minTeamSize = parseInt(minTeamSizeInput.value, 10);
+            savedState.minTeamSize = FIXED_MIN_TEAM_SIZE;
             savedState.maxTeamSize = parseInt(maxTeamSizeInput.value, 10);
-            savedState.maxTeams = parseInt(maxTeamsInput.value, 10);
+            savedState.maxTeams = FIXED_MAX_TEAMS;
 
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
 

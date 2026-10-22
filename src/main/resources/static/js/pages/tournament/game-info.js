@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameSelect = document.getElementById('gameSelect');
     const stageRadios = Array.from(document.querySelectorAll('input[name="stageType"]'));
     const formatSelect = document.getElementById('formatSelect');
-    const breakTiesCheckbox = document.getElementById('breakTiesCheckbox');
     const errorMsg = document.getElementById('gameInfoErrorMsg');
     const saveBtn = document.getElementById('saveGameInfoBtn');
 
@@ -17,8 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedState = {
         game: parsedStored?.game || 'Liên Minh Huyền Thoại',
         stageType: parsedStored?.stageType || 'SINGLE_STAGE',
-        format: parsedStored?.format || 'SINGLE_ELIMINATION',
-        breakTies: Boolean(parsedStored?.breakTies)
+        format: parsedStored?.format || 'SINGLE_ELIMINATION'
     };
 
     function getSelectedStageType() {
@@ -32,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
             r.checked = (r.value === savedState.stageType);
         });
         formatSelect.value = savedState.format;
-        breakTiesCheckbox.checked = savedState.breakTies;
     }
 
     initFields();
@@ -43,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentGame = gameSelect.value;
         const currentStage = getSelectedStageType();
         const currentFormat = formatSelect.value;
-        const currentBreakTies = breakTiesCheckbox.checked;
 
         if (!currentGame) {
             errorMsg.textContent = 'Vui lòng chọn một tựa game trong hệ thống.';
@@ -55,8 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isDirty =
             currentGame !== savedState.game ||
             currentStage !== savedState.stageType ||
-            currentFormat !== savedState.format ||
-            currentBreakTies !== savedState.breakTies;
+            currentFormat !== savedState.format;
 
         saveBtn.disabled = !isDirty;
         return true;
@@ -64,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     gameSelect.addEventListener('change', checkState);
     formatSelect.addEventListener('change', checkState);
-    breakTiesCheckbox.addEventListener('change', checkState);
     stageRadios.forEach(r => r.addEventListener('change', checkState));
 
     form.addEventListener('submit', (e) => {
@@ -78,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
             savedState.game = gameSelect.value;
             savedState.stageType = getSelectedStageType();
             savedState.format = formatSelect.value;
-            savedState.breakTies = breakTiesCheckbox.checked;
 
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
 

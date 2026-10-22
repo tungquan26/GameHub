@@ -24,55 +24,70 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 201,
             name: 'VCT Champions 2026 — Vietnam Qualifier',
             dateLabel: 'Upcoming • Nov 15th — 20th, 2026',
+            startDate: '2026-11-15T09:00',
+            endDate: '2026-11-20T21:00',
             game: 'Valorant · Double Elimination',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 128,
             role: 'Player',
+            status: 'open',
             image: '/images/game2.png'
         },
         {
             id: 202,
             name: 'BTP University Esports Cup 2026',
             dateLabel: 'Upcoming • Nov 22nd — 25th, 2026',
+            startDate: '2026-11-22T09:00',
+            endDate: '2026-11-25T21:00',
             game: 'Liên Minh Huyền Thoại · Single Elimination',
             location: 'Hà Nội, Việt Nam',
             attendees: 64,
             role: 'Organizer',
+            status: 'open',
             image: '/images/game1.png'
         },
         {
             id: 203,
             name: 'CS2 Major Vietnam — Community Cup',
             dateLabel: 'Upcoming • Nov 28th, 2026',
+            startDate: '2026-11-28T09:00',
+            endDate: '2026-11-28T21:00',
             game: 'CS2 · Swiss Stage',
             location: 'Online',
             attendees: 96,
             role: 'Player',
+            status: 'open',
             image: '/images/game4.png'
         },
         {
             id: 204,
             name: 'Street Fighter 6 — Saigon Showdown',
             dateLabel: 'Upcoming • Dec 5th — 6th, 2026',
+            startDate: '2026-12-05T09:00',
+            endDate: '2026-12-06T21:00',
             game: 'Street Fighter 6 · Double Elimination',
             location: 'Hồ Chí Minh, Việt Nam',
             attendees: 160,
             role: 'Player',
+            status: 'open',
             image: '/images/game3.png'
         },
         {
             id: 205,
             name: 'BTP Winter Showdown — Open Series',
             dateLabel: 'Upcoming • Dec 12th — 14th, 2026',
+            startDate: '2026-12-12T09:00',
+            endDate: '2026-12-14T21:00',
             game: 'Teamfight Tactics · Round Robin',
             location: 'Online',
             attendees: 120,
             role: 'Organizer',
+            status: 'open',
             image: '/images/game5.png'
         }
     ];
 
-    // ===== Lấy giải đấu từ sessionStorage (Phương án 1) =====
+    // ===== Lấy giải đấu từ sessionStorage =====
     function buildEventsList() {
         const dynamicEvents = [];
 
@@ -98,10 +113,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: 900,
                     name: created.name,
                     dateLabel: `Upcoming • ${formatShortDate(created.startDate, created.endDate)}`,
+                    startDate: created.startDate,
+                    endDate: created.endDate,
                     game: `${gameName} · ${formatName}`,
                     location: (created.venueAddress || '').trim() || 'Hà Nội, Việt Nam',
                     attendees: 64,
                     role: 'Organizer',
+                    status: 'open',
                     image: profileImg || GAME_IMAGES[gameName] || '/images/logo.png'
                 });
             }
@@ -120,10 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             id: 800 + index,
                             name: item.name,
                             dateLabel: item.dateLabel || 'Upcoming • Oct 15th — 16th, 2026',
+                            startDate: item.startDate || '',
+                            endDate: item.endDate || '',
                             game: item.game || 'Liên Minh Huyền Thoại',
                             location: item.location || 'Hà Nội, Việt Nam',
                             attendees: item.attendees || 64,
                             role: 'Player',
+                            status: 'open',
                             image: item.image || '/images/game1.png'
                         });
                     }
@@ -165,19 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyEl = document.getElementById('evEmptyState');
     const roleTabsEl = document.getElementById('evRoleTabs');
     const searchInputEl = document.getElementById('evSearchInput');
-
-    const totalCountEl = document.getElementById('evTotalCount');
-    const organizerCountEl = document.getElementById('evOrganizerCount');
-    const playerCountEl = document.getElementById('evPlayerCount');
-
-    // Cập nhật thống kê trên Header
-    function updateStats() {
-        const orgCount = allEvents.filter(e => e.role === 'Organizer').length;
-        const plyCount = allEvents.filter(e => e.role === 'Player').length;
-        if (totalCountEl) totalCountEl.textContent = allEvents.length;
-        if (organizerCountEl) organizerCountEl.textContent = orgCount;
-        if (playerCountEl) playerCountEl.textContent = plyCount;
-    }
 
     // Tạo HTML cho 1 thẻ ngang kèm trạng thái Player hoặc Organizer ở bên cạnh
     function createEventCardHTML(ev) {
@@ -260,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ===== Sự kiện lọc vai trò (Phương án A) =====
+    // ===== Sự kiện lọc vai trò =====
     if (roleTabsEl) {
         roleTabsEl.addEventListener('click', (e) => {
             const btn = e.target.closest('.ev-role-tab');
@@ -280,16 +288,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ===== Khi bấm vào thẻ giải đấu chuyển thẳng sang /tournament/view (Phương án Y) =====
+    // ===== Khi bấm vào thẻ giải đấu chuyển thẳng sang /tournament/view =====
     if (listEl) {
         listEl.addEventListener('click', (e) => {
             const card = e.target.closest('.ev-card');
             if (!card) return;
+            const selected = allEvents.find(item => String(item.id) === String(card.dataset.id));
+            if (selected) {
+                sessionStorage.setItem('btp_selected_view_tournament', JSON.stringify({
+                    id: selected.id,
+                    name: selected.name,
+                    game: selected.game.split('·')[0].trim(),
+                    startDate: selected.startDate,
+                    endDate: selected.endDate,
+                    location: selected.location,
+                    attendees: selected.attendees,
+                    role: selected.role, // 'Organizer' | 'Player'
+                    status: selected.status || 'open',
+                    image: selected.image,
+                    source: 'events'
+                }));
+            }
             window.location.href = '/tournament/view';
         });
     }
 
     // ===== Khởi tạo =====
-    updateStats();
     renderEvents();
 });

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/tournament-layout :: layout('Registration Settings - BTP Tournament', 'Registration Settings', 'registration-settings', ~{::link}, ~{::pageContent}, ~{::script})}">
+      th:replace="~{layouts/tournament-layout :: layout('Registration - BTP Tournament', 'Registration', 'registration-settings', ~{::link}, ~{::pageContent}, ~{::script})}">
 <head>
     <link rel="stylesheet" th:href="@{/css/pages/tournament/registration-settings.css}">
 </head>
@@ -8,7 +8,7 @@
     <th:block th:fragment="pageContent">
         <div class="settings-card" id="registrationSettingsCard">
             <div class="card-header">
-                <h2 class="card-title">Registration Settings</h2>
+                <h2 class="card-title">Registration</h2>
                 <p class="card-subtitle">Registration deadlines, fee, and team limits</p>
             </div>
 
@@ -59,19 +59,19 @@
                         <div class="reg-row-content team-size-list">
                             <div class="team-size-item">
                                 <label for="minTeamSize" class="team-size-label">Minimum Team Size:</label>
-                                <input type="number" id="minTeamSize" class="field-input team-size-input" min="1" max="20" value="5" required="required">
+                                <input type="number" id="minTeamSize" class="field-input team-size-input" value="4" readonly="readonly" disabled="disabled">
                             </div>
 
                             <div class="team-size-item">
                                 <label for="maxTeamSize" class="team-size-label">Maximum Team Size:</label>
-                                <input type="number" id="maxTeamSize" class="field-input team-size-input" min="1" max="20" value="6" required="required">
+                                <input type="number" id="maxTeamSize" class="field-input team-size-input" min="4" max="20" required="required">
                                 <span class="team-size-note">— allows for subs, alternates, coaches, etc.</span>
                             </div>
 
                             <div class="team-size-item">
                                 <label for="maxTeams" class="team-size-label">Maximum Teams:</label>
-                                <input type="number" id="maxTeams" class="field-input team-size-input" min="2" max="512" value="16" required="required">
-                                <span class="team-size-note">— maximum number of teams allowed to register.</span>
+                                <input type="number" id="maxTeams" class="field-input team-size-input" value="16" readonly="readonly" disabled="disabled">
+                                <span class="team-size-note">— fixed at 16 teams for tournament bracket.</span>
                             </div>
                         </div>
                     </div>

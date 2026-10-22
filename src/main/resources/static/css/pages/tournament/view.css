@@ -117,11 +117,51 @@
     font-family: inherit;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(44, 100, 216, 0.28);
-    transition: background-color 0.15s ease;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.tv-register-btn:hover {
+.tv-register-btn:hover:not(:disabled) {
     background-color: #1e50b8;
+}
+
+/* Các biến thể trạng thái của nút ở trang View */
+.tv-register-btn.is-registered {
+    background-color: #10b981;
+    color: #ffffff;
+    box-shadow: none;
+    cursor: default;
+}
+
+.tv-register-btn.is-organizer {
+    background-color: #1e293b;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+    cursor: pointer;
+}
+
+.tv-register-btn.is-organizer:hover:not(:disabled) {
+    background-color: #0f172a;
+}
+
+.tv-register-btn.is-status-ongoing {
+    background-color: #e11d48;
+    color: #ffffff;
+    box-shadow: none;
+    cursor: default;
+}
+
+.tv-register-btn.is-status-completed,
+.tv-register-btn.is-status-closed,
+.tv-register-btn.is-status-upcoming {
+    background-color: #e2e8f0;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    box-shadow: none;
+    cursor: default;
 }
 
 /* Ngày tháng & Địa điểm */

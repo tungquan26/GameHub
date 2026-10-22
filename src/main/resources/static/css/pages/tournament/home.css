@@ -1,4 +1,4 @@
-/* Ẩn thanh topbar mặc định của trang Settings để Banner tràn viền đẹp như ảnh mẫu */
+﻿/* Ẩn thanh topbar mặc định của trang Settings để Banner tràn viền đẹp như ảnh mẫu */
 body:has(.th-page-wrapper) .settings-topbar {
     display: none;
 }
@@ -186,12 +186,14 @@ body:has(.th-page-wrapper) .settings-container {
 }
 
 .th-game-poster {
-    width: 68px;
-    height: 92px;
-    object-fit: cover;
-    border-radius: 3px;
+    height: 112px;
+    width: auto;
+    max-width: 96px;
+    object-fit: contain;
+    border-radius: 4px;
     flex-shrink: 0;
-    background: #e2e8f0;
+    display: block;
+    background: transparent;
 }
 
 .th-game-details {
