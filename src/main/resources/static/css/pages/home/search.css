@@ -46,8 +46,6 @@
     color: #ffffff;
     font-size: 15px;
     font-weight: 700;
-    padding-bottom: 6px;
-    border-bottom: 2px solid #ffffff;
     user-select: none;
     cursor: default;
     letter-spacing: 0.2px;
@@ -72,16 +70,10 @@
 }
 
 .split-search-main {
-    flex: 1.55;
-    border-right: 1px solid #e2e5ec;
-}
-
-.split-search-location {
     flex: 1;
 }
 
-.split-search-icon,
-.split-location-icon {
+.split-search-icon {
     width: 16px;
     height: 16px;
     color: #6b7280;
@@ -115,43 +107,6 @@
 
 .split-clear-btn:hover {
     color: #374151;
-}
-
-.split-gps-btn {
-    border: none;
-    background: transparent;
-    color: #5b6472;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-    border-radius: 4px;
-    transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.split-gps-btn:hover {
-    background-color: #f3f4f6;
-    color: #111827;
-}
-
-.split-gps-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* Dropdown địa điểm */
-.location-dropdown {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
-    padding: 6px 0;
-    z-index: 120;
 }
 
 /* ==================== 2. FILTER PILLS ==================== */
@@ -387,6 +342,49 @@
 
 .custom-date-input:focus {
     border-color: #0284c7;
+}
+
+/* Nút "Bộ lọc" gộp & popover 3 mục */
+.pill-filter-icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 2px;
+}
+
+/* Popover Bộ lọc: 3 cột ngang */
+#filterDropdownMenu {
+    width: 720px;
+    max-width: calc(100vw - 32px);
+}
+
+.popover-body-scroll {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(230px, 1.2fr) minmax(180px, 1fr);
+    gap: 0;
+    padding: 18px 0;
+}
+
+.popover-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 20px;
+    min-width: 0;
+}
+
+/* Đường kẻ dọc giữa các cột */
+.popover-section + .popover-section {
+    border-left: 1px solid #e5e7eb;
+}
+
+/* Danh sách tựa game cuộn trong cột */
+.popover-check-list-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 6px;
 }
 
 /* Thanh nút Clear & Done dưới cùng Popover */
@@ -671,9 +669,23 @@
         height: 44px;
     }
 
-    .split-search-main {
-        border-right: none;
-        border-bottom: 1px solid #e2e5ec;
+    /* Popover Bộ lọc quay về 1 cột */
+    .popover-body-scroll {
+        grid-template-columns: 1fr;
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .popover-section + .popover-section {
+        border-left: none;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 16px;
+        margin-top: 16px;
+    }
+
+    .popover-check-list-scroll {
+        max-height: none;
+        overflow: visible;
     }
 
     .search-tournament-card {

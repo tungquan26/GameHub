@@ -325,9 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filterState = {
         keyword: '',
-        location: '',
         statuses: [],       // ['upcoming', 'in_progress', 'completed']
-        game: '',
+        games: [],          // chọn nhiều tựa game
         dateRanges: [],     // ['next_7_days', 'next_month', 'next_3_months', 'next_6_months', 'past_7_days', 'custom']
         customStartDate: '',
         customEndDate: ''
@@ -336,31 +335,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== DOM Elements =====
     const tournamentSearchInput = document.getElementById('tournamentSearchInput');
     const clearKeywordBtn = document.getElementById('clearKeywordBtn');
-    const locationSearchInput = document.getElementById('locationSearchInput');
-    const locationMenuToggleBtn = document.getElementById('locationMenuToggleBtn');
-    const locationDropdown = document.getElementById('locationDropdown');
-    const locationFieldWrapper = document.getElementById('locationFieldWrapper');
-
-    const filtersPillBtn = document.getElementById('filtersPillBtn');
-    const filtersPillLabel = document.getElementById('filtersPillLabel');
-    const filtersDropdownMenu = document.getElementById('filtersDropdownMenu');
-    const statusCheckboxes = filtersDropdownMenu.querySelectorAll('input[name="statusFilter"]');
-    const clearStatusFilterBtn = document.getElementById('clearStatusFilterBtn');
-    const doneStatusFilterBtn = document.getElementById('doneStatusFilterBtn');
-
-    const gamePillBtn = document.getElementById('gamePillBtn');
-    const gamePillLabel = document.getElementById('gamePillLabel');
-    const gameDropdownMenu = document.getElementById('gameDropdownMenu');
-
-    const datePillBtn = document.getElementById('datePillBtn');
-    const datePillLabel = document.getElementById('datePillLabel');
-    const dateDropdownMenu = document.getElementById('dateDropdownMenu');
-    const dateRangeCheckboxes = dateDropdownMenu.querySelectorAll('input[name="dateRangeFilter"]');
+    // Nút "Bộ lọc" gộp: Trạng thái, Tựa game, Ngày bắt đầu
+    const filterPillBtn = document.getElementById('filterPillBtn');
+    const filterPillLabel = document.getElementById('filterPillLabel');
+    const filterDropdownMenu = document.getElementById('filterDropdownMenu');
+    const statusCheckboxes = filterDropdownMenu.querySelectorAll('input[name="statusFilter"]');
+    const gameCheckboxes = filterDropdownMenu.querySelectorAll('input[name="gameFilter"]');
+    const dateRangeCheckboxes = filterDropdownMenu.querySelectorAll('input[name="dateRangeFilter"]');
     const customDatesBox = document.getElementById('customDatesBox');
     const customStartDateInput = document.getElementById('customStartDateInput');
     const customEndDateInput = document.getElementById('customEndDateInput');
-    const clearDateFilterBtn = document.getElementById('clearDateFilterBtn');
-    const doneDateFilterBtn = document.getElementById('doneDateFilterBtn');
+    const clearAllFilterBtn = document.getElementById('clearAllFilterBtn');
+    const doneFilterBtn = document.getElementById('doneFilterBtn');
 
     const resetFiltersBtn = document.getElementById('resetFiltersBtn');
     const listContainer = document.getElementById('searchTournamentList');
@@ -599,7 +585,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== Áp dụng bộ lọc =====
     function applyFilters() {
         const kw = filterState.keyword.trim().toLowerCase();
-        const loc = filterState.location.trim().toLowerCase();
 
         filteredTournaments = allTournaments.filter(t => {
             const matchesKeyword = !kw ||
@@ -607,17 +592,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 t.game.toLowerCase().includes(kw) ||
                 (t.gameDisplay && t.gameDisplay.toLowerCase().includes(kw));
 
-            const matchesLocation = !loc || t.location.toLowerCase().includes(loc);
-
             const matchesStatus =
                 filterState.statuses.length === 0 ||
                 filterState.statuses.includes(t.status);
 
-            const matchesGame = !filterState.game || t.game === filterState.game;
+            const matchesGame = filterState.games.length === 0 || filterState.games.includes(t.game);
 
             const matchesDate = matchesDateRangeFilter(t);
 
-            return matchesKeyword && matchesLocation && matchesStatus && matchesGame && matchesDate;
+            return matchesKeyword && matchesStatus && matchesGame && matchesDate;
         });
 
         currentPage = 1;
@@ -626,74 +609,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateFilterPillLabels() {
-        const statusCount = filterState.statuses.length;
-        const statusNameMap = {
-            upcoming: 'Sắp diễn ra',
-            in_progress: 'Đang diễn ra',
-            completed: 'Đã kết thúc'
-        };
+        // Đếm số nhóm bộ lọc đang bật (Trạng thái / Tựa game / Ngày bắt đầu)
+        const activeGroupCount =
+            (filterState.statuses.length > 0 ? 1 : 0) +
+            (filterState.games.length > 0 ? 1 : 0) +
+            (filterState.dateRanges.length > 0 ? 1 : 0);
 
-        if (statusCount === 1) {
-            filtersPillLabel.textContent = statusNameMap[filterState.statuses[0]] || 'Trạng thái (1)';
-            filtersPillBtn.classList.add('has-active-filter');
-        } else if (statusCount > 1) {
-            filtersPillLabel.textContent = `Trạng thái (${statusCount})`;
-            filtersPillBtn.classList.add('has-active-filter');
+        if (activeGroupCount > 0) {
+            filterPillLabel.textContent = `Bộ lọc (${activeGroupCount})`;
+            filterPillBtn.classList.add('has-active-filter');
         } else {
-            filtersPillLabel.textContent = 'Trạng thái';
-            filtersPillBtn.classList.remove('has-active-filter');
+            filterPillLabel.textContent = 'Bộ lọc';
+            filterPillBtn.classList.remove('has-active-filter');
         }
 
-        if (filterState.game) {
-            gamePillLabel.textContent = filterState.game;
-            gamePillBtn.classList.add('has-active-filter');
-        } else {
-            gamePillLabel.textContent = 'Tựa game';
-            gamePillBtn.classList.remove('has-active-filter');
-        }
-
-        const dateCount = filterState.dateRanges.length;
-        const dateLabelMap = {
-            next_7_days: '7 ngày tới',
-            next_month: 'Tháng tới',
-            next_3_months: '3 tháng tới',
-            next_6_months: '6 tháng tới',
-            past_7_days: '7 ngày qua',
-            custom: 'Tùy chọn ngày'
-        };
-
-        if (dateCount === 1) {
-            datePillLabel.textContent = dateLabelMap[filterState.dateRanges[0]] || 'Ngày bắt đầu';
-            datePillBtn.classList.add('has-active-filter');
-        } else if (dateCount > 1) {
-            datePillLabel.textContent = `Ngày bắt đầu (${dateCount})`;
-            datePillBtn.classList.add('has-active-filter');
-        } else {
-            datePillLabel.textContent = 'Ngày bắt đầu';
-            datePillBtn.classList.remove('has-active-filter');
-        }
-
-        const hasAnyFilter = Boolean(
-            filterState.keyword ||
-            filterState.location ||
-            filterState.statuses.length > 0 ||
-            filterState.game ||
-            filterState.dateRanges.length > 0
-        );
+        const hasAnyFilter = Boolean(filterState.keyword || activeGroupCount > 0);
         resetFiltersBtn.style.display = hasAnyFilter ? 'inline-block' : 'none';
     }
 
-    function closeAllDropdowns() {
-        filtersDropdownMenu.style.display = 'none';
-        gameDropdownMenu.style.display = 'none';
-        dateDropdownMenu.style.display = 'none';
-        locationDropdown.style.display = 'none';
+    function closeFilterDropdown() {
+        filterDropdownMenu.style.display = 'none';
     }
 
-    function toggleDropdown(menuEl) {
-        const isOpen = menuEl.style.display === 'block';
-        closeAllDropdowns();
-        menuEl.style.display = isOpen ? 'none' : 'block';
+    // Đưa toàn bộ UI bộ lọc về mặc định
+    function clearFilterControls() {
+        statusCheckboxes.forEach(cb => { cb.checked = false; });
+        dateRangeCheckboxes.forEach(cb => { cb.checked = false; });
+        gameCheckboxes.forEach(cb => { cb.checked = false; });
+        if (customStartDateInput) customStartDateInput.value = '';
+        if (customEndDateInput) customEndDateInput.value = '';
+        if (customDatesBox) customDatesBox.style.display = 'none';
+
+        filterState.statuses = [];
+        filterState.games = [];
+        filterState.dateRanges = [];
+        filterState.customStartDate = '';
+        filterState.customEndDate = '';
     }
 
     let searchTimer;
@@ -711,56 +662,13 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFilters();
     });
 
-    locationSearchInput.addEventListener('input', () => {
-        filterState.location = locationSearchInput.value;
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(applyFilters, 200);
-    });
-
-    locationSearchInput.addEventListener('focus', () => {
-        closeAllDropdowns();
-        locationDropdown.style.display = 'block';
-    });
-
-    locationMenuToggleBtn.addEventListener('click', (e) => {
+    filterPillBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        toggleDropdown(locationDropdown);
+        const isOpen = filterDropdownMenu.style.display === 'block';
+        filterDropdownMenu.style.display = isOpen ? 'none' : 'block';
     });
 
-    locationDropdown.addEventListener('click', (e) => {
-        const btn = e.target.closest('.dropdown-item');
-        if (!btn) return;
-        const selectedLoc = btn.getAttribute('data-location') || '';
-        filterState.location = selectedLoc;
-        locationSearchInput.value = selectedLoc;
-
-        locationDropdown.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
-
-        closeAllDropdowns();
-        applyFilters();
-    });
-
-    filtersPillBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown(filtersDropdownMenu);
-    });
-
-    gamePillBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown(gameDropdownMenu);
-    });
-
-    datePillBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown(dateDropdownMenu);
-    });
-
-    filtersDropdownMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-
-    dateDropdownMenu.addEventListener('click', (e) => {
+    filterDropdownMenu.addEventListener('click', (e) => {
         e.stopPropagation();
     });
 
@@ -777,16 +685,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    clearStatusFilterBtn.addEventListener('click', () => {
-        statusCheckboxes.forEach(cb => { cb.checked = false; });
-        filterState.statuses = [];
-        applyFilters();
-    });
+    function syncGameStateFromDOM() {
+        filterState.games = Array.from(gameCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+    }
 
-    doneStatusFilterBtn.addEventListener('click', () => {
-        syncStatusStateFromDOM();
-        applyFilters();
-        closeAllDropdowns();
+    gameCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            syncGameStateFromDOM();
+            applyFilters();
+        });
     });
 
     function syncDateStateFromDOM() {
@@ -822,78 +731,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    clearDateFilterBtn.addEventListener('click', () => {
-        dateRangeCheckboxes.forEach(cb => { cb.checked = false; });
-        if (customStartDateInput) customStartDateInput.value = '';
-        if (customEndDateInput) customEndDateInput.value = '';
-        if (customDatesBox) customDatesBox.style.display = 'none';
-        filterState.dateRanges = [];
-        filterState.customStartDate = '';
-        filterState.customEndDate = '';
+    clearAllFilterBtn.addEventListener('click', () => {
+        clearFilterControls();
         applyFilters();
     });
 
-    doneDateFilterBtn.addEventListener('click', () => {
+    doneFilterBtn.addEventListener('click', () => {
+        syncStatusStateFromDOM();
         syncDateStateFromDOM();
+        syncGameStateFromDOM();
         applyFilters();
-        closeAllDropdowns();
-    });
-
-    gameDropdownMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const item = e.target.closest('.dropdown-item');
-        if (!item) return;
-
-        filterState.game = item.getAttribute('data-game') || '';
-        gameDropdownMenu.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('active'));
-        item.classList.add('active');
-
-        closeAllDropdowns();
-        applyFilters();
+        closeFilterDropdown();
     });
 
     resetFiltersBtn.addEventListener('click', () => {
         filterState.keyword = '';
-        filterState.location = '';
-        filterState.statuses = [];
-        filterState.game = '';
-        filterState.dateRanges = [];
-        filterState.customStartDate = '';
-        filterState.customEndDate = '';
-
         tournamentSearchInput.value = '';
-        locationSearchInput.value = '';
         clearKeywordBtn.style.display = 'none';
 
-        statusCheckboxes.forEach(cb => { cb.checked = false; });
-        dateRangeCheckboxes.forEach(cb => { cb.checked = false; });
-        if (customStartDateInput) customStartDateInput.value = '';
-        if (customEndDateInput) customEndDateInput.value = '';
-        if (customDatesBox) customDatesBox.style.display = 'none';
-
-        document.querySelectorAll('#gameDropdownMenu .dropdown-item, .location-dropdown .dropdown-item').forEach(el => {
-            const isDefault =
-                el.getAttribute('data-location') === '' ||
-                el.getAttribute('data-game') === '';
-            el.classList.toggle('active', isDefault);
-        });
-
-        closeAllDropdowns();
+        clearFilterControls();
+        closeFilterDropdown();
         applyFilters();
     });
 
     document.addEventListener('click', (e) => {
-        if (!locationFieldWrapper.contains(e.target)) {
-            locationDropdown.style.display = 'none';
-        }
-        if (
-            !e.target.closest('#filtersPillWrapper') &&
-            !e.target.closest('#gamePillWrapper') &&
-            !e.target.closest('#datePillWrapper')
-        ) {
-            filtersDropdownMenu.style.display = 'none';
-            gameDropdownMenu.style.display = 'none';
-            dateDropdownMenu.style.display = 'none';
+        if (!e.target.closest('#filterPillWrapper')) {
+            closeFilterDropdown();
         }
     });
 

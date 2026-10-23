@@ -31,41 +31,6 @@
                                    autocomplete="off">
                             <button type="button" class="split-clear-btn" id="clearKeywordBtn" style="display: none;" aria-label="Xóa tìm kiếm">&times;</button>
                         </div>
-
-                        <!-- Ô địa điểm -->
-                        <div class="split-search-field split-search-location" id="locationFieldWrapper">
-                            <svg class="split-location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-                                <circle cx="12" cy="10" r="3"/>
-                            </svg>
-                            <input type="text"
-                                   id="locationSearchInput"
-                                   class="split-input"
-                                   placeholder="Tất cả địa điểm"
-                                   autocomplete="off">
-                            <button type="button" class="split-gps-btn" id="locationMenuToggleBtn" title="Chọn nhanh địa điểm">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="7"/>
-                                    <circle cx="12" cy="12" r="2"/>
-                                    <line x1="12" y1="2" x2="12" y2="5"/>
-                                    <line x1="12" y1="19" x2="12" y2="22"/>
-                                    <line x1="2" y1="12" x2="5" y2="12"/>
-                                    <line x1="19" y1="12" x2="22" y2="12"/>
-                                </svg>
-                            </button>
-
-                            <!-- Dropdown gợi ý địa điểm -->
-                            <div class="location-dropdown" id="locationDropdown" style="display: none;">
-                                <div class="dropdown-section-title">Địa điểm phổ biến</div>
-                                <button type="button" class="dropdown-item active" data-location="">Tất cả địa điểm</button>
-                                <button type="button" class="dropdown-item" data-location="Trực tuyến">Trực tuyến (Online)</button>
-                                <button type="button" class="dropdown-item" data-location="Việt Nam">Việt Nam (HCM / Hà Nội / Đà Nẵng)</button>
-                                <button type="button" class="dropdown-item" data-location="JP">Nhật Bản (JP)</button>
-                                <button type="button" class="dropdown-item" data-location="SE">Thụy Điển (SE)</button>
-                                <button type="button" class="dropdown-item" data-location="TH">Thái Lan (TH)</button>
-                                <button type="button" class="dropdown-item" data-location="SV">El Salvador (SV)</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -73,125 +38,161 @@
             <!-- ==================== BODY CONTENT ==================== -->
             <section class="search-body">
                 <div class="search-container">
-                    <!-- Hàng nút lọc Pills: Trạng thái, Tựa game, Ngày bắt đầu -->
+                    <!-- Hàng nút lọc: 1 nút "Bộ lọc" gộp Trạng thái, Tựa game, Ngày bắt đầu -->
                     <div class="filter-pills-row">
-                        <!-- Nút 1: Trạng thái -->
-                        <div class="pill-dropdown-wrapper" id="filtersPillWrapper">
-                            <button type="button" class="filter-pill-btn" id="filtersPillBtn">
-                                <span id="filtersPillLabel">Trạng thái</span>
+                        <div class="pill-dropdown-wrapper" id="filterPillWrapper">
+                            <button type="button" class="filter-pill-btn" id="filterPillBtn">
+                                <svg class="pill-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                                </svg>
+                                <span id="filterPillLabel">Bộ lọc</span>
                                 <svg class="pill-caret" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M7 10l5 5 5-5z"/>
                                 </svg>
                             </button>
-                            <div class="pill-dropdown-menu filter-popover-card" id="filtersDropdownMenu" style="display: none;">
-                                <div class="popover-body">
-                                    <div class="popover-section-title">TRẠNG THÁI GIẢI ĐẤU</div>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="statusFilter" value="upcoming">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">Sắp diễn ra</span>
-                                    </label>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="statusFilter" value="in_progress">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">Đang diễn ra</span>
-                                    </label>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="statusFilter" value="completed">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">Đã kết thúc</span>
-                                    </label>
-                                </div>
-                                <div class="popover-footer">
-                                    <button type="button" class="popover-btn-clear" id="clearStatusFilterBtn">Xóa</button>
-                                    <button type="button" class="popover-btn-done" id="doneStatusFilterBtn">Áp dụng</button>
-                                </div>
-                            </div>
-                        </div>
+                            <div class="pill-dropdown-menu filter-popover-card" id="filterDropdownMenu" style="display: none;">
+                                <div class="popover-body popover-body-scroll">
+                                    <!-- Mục 1: Trạng thái -->
+                                    <div class="popover-section">
+                                        <div class="popover-section-title">TRẠNG THÁI GIẢI ĐẤU</div>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="statusFilter" value="upcoming">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">Sắp diễn ra</span>
+                                        </label>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="statusFilter" value="in_progress">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">Đang diễn ra</span>
+                                        </label>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="statusFilter" value="completed">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">Đã kết thúc</span>
+                                        </label>
+                                    </div>
 
-                        <!-- Nút 2: Tựa game -->
-                        <div class="pill-dropdown-wrapper" id="gamePillWrapper">
-                            <button type="button" class="filter-pill-btn" id="gamePillBtn">
-                                <span id="gamePillLabel">Tựa game</span>
-                                <svg class="pill-caret" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M7 10l5 5 5-5z"/>
-                                </svg>
-                            </button>
-                            <div class="pill-dropdown-menu pill-dropdown-scroll" id="gameDropdownMenu" style="display: none;">
-                                <div class="dropdown-section-title">Chọn tựa game</div>
-                                <button type="button" class="dropdown-item active" data-game="">Tất cả tựa game</button>
-                                <button type="button" class="dropdown-item" data-game="Liên Minh Huyền Thoại">Liên Minh Huyền Thoại</button>
-                                <button type="button" class="dropdown-item" data-game="Valorant">Valorant</button>
-                                <button type="button" class="dropdown-item" data-game="Teamfight Tactics">Teamfight Tactics</button>
-                                <button type="button" class="dropdown-item" data-game="CS2">CS2</button>
-                                <button type="button" class="dropdown-item" data-game="Delta Force">Delta Force</button>
-                                <button type="button" class="dropdown-item" data-game="The Isle">The Isle</button>
-                                <button type="button" class="dropdown-item" data-game="PUBG">PUBG</button>
-                                <button type="button" class="dropdown-item" data-game="Dota 2">Dota 2</button>
-                                <button type="button" class="dropdown-item" data-game="FIFA Online">FIFA Online</button>
-                                <button type="button" class="dropdown-item" data-game="Street Fighter 6">Street Fighter 6</button>
-                                <button type="button" class="dropdown-item" data-game="Super Smash Bros. Ultimate">Super Smash Bros. Ultimate</button>
-                                <button type="button" class="dropdown-item" data-game="Avatar Legends: The Fighting Game">Avatar Legends: The Fighting Game</button>
-                                <button type="button" class="dropdown-item" data-game="2XKO">2XKO</button>
-                            </div>
-                        </div>
-
-                        <!-- Nút 3: Ngày bắt đầu -->
-                        <div class="pill-dropdown-wrapper" id="datePillWrapper">
-                            <button type="button" class="filter-pill-btn" id="datePillBtn">
-                                <span id="datePillLabel">Ngày bắt đầu</span>
-                                <svg class="pill-caret" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M7 10l5 5 5-5z"/>
-                                </svg>
-                            </button>
-                            <div class="pill-dropdown-menu filter-popover-card" id="dateDropdownMenu" style="display: none;">
-                                <div class="popover-header">Ngày bắt đầu</div>
-                                <div class="popover-body">
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="dateRangeFilter" value="next_7_days">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">7 ngày tới</span>
-                                    </label>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="dateRangeFilter" value="next_month">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">Tháng tới</span>
-                                    </label>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="dateRangeFilter" value="next_3_months">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">3 tháng tới</span>
-                                    </label>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="dateRangeFilter" value="next_6_months">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">6 tháng tới</span>
-                                    </label>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="dateRangeFilter" value="past_7_days">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">7 ngày qua</span>
-                                    </label>
-                                    <label class="popover-check-item">
-                                        <input type="checkbox" name="dateRangeFilter" value="custom">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="check-label-text">Tùy chọn ngày</span>
-                                    </label>
-
-                                    <div class="custom-dates-box" id="customDatesBox" style="display: none;">
-                                        <div class="custom-date-field">
-                                            <label for="customStartDateInput">Từ ngày</label>
-                                            <input type="date" id="customStartDateInput" class="custom-date-input">
+                                    <!-- Mục 2: Tựa game -->
+                                    <div class="popover-section">
+                                        <div class="popover-section-title">TỰA GAME</div>
+                                        <div class="popover-check-list-scroll">
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Liên Minh Huyền Thoại">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Liên Minh Huyền Thoại</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Valorant">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Valorant</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Teamfight Tactics">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Teamfight Tactics</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="CS2">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">CS2</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Delta Force">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Delta Force</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="The Isle">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">The Isle</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="PUBG">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">PUBG</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Dota 2">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Dota 2</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="FIFA Online">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">FIFA Online</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Street Fighter 6">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Street Fighter 6</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Super Smash Bros. Ultimate">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Super Smash Bros. Ultimate</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="Avatar Legends: The Fighting Game">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">Avatar Legends: The Fighting Game</span>
+                                            </label>
+                                            <label class="popover-check-item">
+                                                <input type="checkbox" name="gameFilter" value="2XKO">
+                                                <span class="custom-checkbox"></span>
+                                                <span class="check-label-text">2XKO</span>
+                                            </label>
                                         </div>
-                                        <div class="custom-date-field">
-                                            <label for="customEndDateInput">Đến ngày</label>
-                                            <input type="date" id="customEndDateInput" class="custom-date-input">
+                                    </div>
+
+                                    <!-- Mục 3: Ngày bắt đầu -->
+                                    <div class="popover-section">
+                                        <div class="popover-section-title">NGÀY BẮT ĐẦU</div>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="dateRangeFilter" value="next_7_days">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">7 ngày tới</span>
+                                        </label>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="dateRangeFilter" value="next_month">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">Tháng tới</span>
+                                        </label>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="dateRangeFilter" value="next_3_months">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">3 tháng tới</span>
+                                        </label>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="dateRangeFilter" value="next_6_months">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">6 tháng tới</span>
+                                        </label>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="dateRangeFilter" value="past_7_days">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">7 ngày qua</span>
+                                        </label>
+                                        <label class="popover-check-item">
+                                            <input type="checkbox" name="dateRangeFilter" value="custom">
+                                            <span class="custom-checkbox"></span>
+                                            <span class="check-label-text">Tùy chọn ngày</span>
+                                        </label>
+
+                                        <div class="custom-dates-box" id="customDatesBox" style="display: none;">
+                                            <div class="custom-date-field">
+                                                <label for="customStartDateInput">Từ ngày</label>
+                                                <input type="date" id="customStartDateInput" class="custom-date-input">
+                                            </div>
+                                            <div class="custom-date-field">
+                                                <label for="customEndDateInput">Đến ngày</label>
+                                                <input type="date" id="customEndDateInput" class="custom-date-input">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="popover-footer">
-                                    <button type="button" class="popover-btn-clear" id="clearDateFilterBtn">Xóa</button>
-                                    <button type="button" class="popover-btn-done" id="doneDateFilterBtn">Áp dụng</button>
+                                    <button type="button" class="popover-btn-clear" id="clearAllFilterBtn">Xóa</button>
+                                    <button type="button" class="popover-btn-done" id="doneFilterBtn">Áp dụng</button>
                                 </div>
                             </div>
                         </div>
@@ -214,7 +215,7 @@
                             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg>
                         <h3>Không tìm thấy giải đấu nào</h3>
-                        <p>Thử thay đổi từ khóa tìm kiếm, địa điểm hoặc các tùy chọn bộ lọc.</p>
+                        <p>Thử thay đổi từ khóa tìm kiếm hoặc các tùy chọn bộ lọc.</p>
                     </div>
 
                     <!-- Phân trang (Pagination) -->
