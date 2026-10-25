@@ -1,6 +1,6 @@
 package btpoop.statistics.service;
 
-import btpoop.user.model.PlayerStats;
+import btpoop.statistics.model.PlayerStats;
 
 public interface StatisticsService {
     /**

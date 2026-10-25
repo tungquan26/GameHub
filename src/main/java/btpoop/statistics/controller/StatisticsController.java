@@ -1,7 +1,7 @@
 package btpoop.statistics.controller;
 
+import btpoop.statistics.model.PlayerStats;
 import btpoop.statistics.service.StatisticsService;
-import btpoop.user.model.PlayerStats;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
