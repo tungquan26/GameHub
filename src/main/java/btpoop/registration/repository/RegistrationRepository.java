@@ -1,9 +1,14 @@
 package btpoop.registration.repository;
 
+import btpoop.enums.RegistrationStatus;
 import btpoop.registration.model.Registration;
 import btpoop.tournament.model.Tournament;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     long countByTournament(Tournament tournament);
+    List<Registration> findByTournamentAndStatus(Tournament tournament, RegistrationStatus status);
+    List<Registration> findByTournament_TournamentIdAndStatus(Long tournamentId, RegistrationStatus status);
 }

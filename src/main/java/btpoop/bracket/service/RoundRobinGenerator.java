@@ -1,4 +1,4 @@
-package btpoop.bracket.generator;
+package btpoop.bracket.service;
 
 import btpoop.bracket.model.Bracket;
 import btpoop.team.model.Team;

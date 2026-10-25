@@ -1,79 +1,109 @@
 package btpoop.match.service;
 
 import btpoop.enums.MatchStatus;
-import btpoop.match.model.MatchFinishedEvent;
-import btpoop.match.model.MatchScheduledEvent;
 import btpoop.match.model.Match;
+import btpoop.match.model.MatchFinishedEvent;
 import btpoop.match.model.MatchResult;
+import btpoop.match.model.MatchScheduledEvent;
 import btpoop.match.repository.MatchRepository;
 import btpoop.team.model.Team;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MatchServiceImpl implements MatchService {
 
-    // Công cụ phát sự kiện (Event)
     private final ApplicationEventPublisher eventPublisher;
-    
-    // Đã un-comment và inject thành công
     private final MatchRepository matchRepository;
 
     @Override
+    @Transactional
     public Match scheduleMatch(Long matchId, Team teamA, Team teamB, LocalDateTime time) {
-        // 1. Lấy trận đấu trống từ DB (đã được Bracket tạo ra từ trước)
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
         
-        // 2. Gán dữ liệu 2 đội và thời gian
         match.setTeamA(teamA);
         match.setTeamB(teamB);
         match.setScheduledTime(time);
-        match.setStatus(MatchStatus.SCHEDULED); // Đảm bảo trạng thái là Đã xếp lịch
+        match.setStatus(MatchStatus.SCHEDULED);
         
-        // 3. Lưu xuống Database
         Match savedMatch = matchRepository.save(match);
-        
-        // 🌟 Bắn sự kiện: "Đã xếp lịch xong" 
-        // Các Service khác chỉ cần lắng nghe sự kiện này
         eventPublisher.publishEvent(new MatchScheduledEvent(savedMatch.getMatchId()));
-
         return savedMatch;
     }
 
     @Override
-    public Match updateMatchResult(Long matchId, int scoreA, int scoreB) {
-        // 1. Lấy trận đấu từ DB
+    @Transactional
+    public Match scheduleMatch(Long matchId, LocalDateTime time, String location) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
 
-        // 2. Tính toán đội chiến thắng
-        Team winner = null;
-        if (scoreA > scoreB) {
-            winner = match.getTeamA();
-        } else if (scoreB > scoreA) {
-            winner = match.getTeamB();
-        } // Hòa thì winner = null (tùy vào logic giải quyết hòa sau này)
+        if (time != null) {
+            match.setScheduledTime(time);
+        }
+        if (location != null && !location.isBlank()) {
+            match.setLocation(location);
+        }
+        match.setStatus(MatchStatus.SCHEDULED);
 
-        // 3. Khởi tạo đối tượng MatchResult (được gán bằng @Embeddable)
+        Match savedMatch = matchRepository.save(match);
+        eventPublisher.publishEvent(new MatchScheduledEvent(savedMatch.getMatchId()));
+        return savedMatch;
+    }
+
+    @Override
+    @Transactional
+    public Match updateMatchResult(Long matchId, int scoreA, int scoreB) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
+
+        if (scoreA == scoreB) {
+            throw new IllegalArgumentException("Trận đấu theo thể thức loại trực tiếp không thể có kết quả hòa.");
+        }
+
+        Team winner = scoreA > scoreB ? match.getTeamA() : match.getTeamB();
+        if (winner == null) {
+            throw new IllegalStateException("Không thể xác định đội thắng vì thông tin đội chưa sẵn sàng.");
+        }
+
         MatchResult result = new MatchResult(scoreA, scoreB, winner);
         match.setResult(result);
-        match.setStatus(MatchStatus.COMPLETED); // Chuyển trạng thái sang kết thúc
+        match.setStatus(MatchStatus.COMPLETED);
         
-        // 4. Lưu xuống Database
         Match savedMatch = matchRepository.save(match);
 
-        // 🌟 Bắn sự kiện: "Trận đấu có kết quả"
-        // Lúc này:
-        // - BracketService sẽ nghe thấy để đưa đội thắng lên nhánh trên.
-        // - NotificationService sẽ nghe để gửi mail chúc mừng/chia buồn.
-        // - StatisticsService sẽ nghe để cộng điểm Elo.
-        eventPublisher.publishEvent(new MatchFinishedEvent(savedMatch.getMatchId(), winner));
+        // 🌟 Tự động đẩy đội thắng lên vòng tiếp theo trong nhánh đấu
+        if (savedMatch.getNextMatch() != null) {
+            Match next = savedMatch.getNextMatch();
+            if ("A".equalsIgnoreCase(savedMatch.getNextMatchSlot())) {
+                next.setTeamA(winner);
+            } else if ("B".equalsIgnoreCase(savedMatch.getNextMatchSlot())) {
+                next.setTeamB(winner);
+            }
+            matchRepository.save(next);
+        }
 
+        // Bắn sự kiện trận đấu kết thúc
+        eventPublisher.publishEvent(new MatchFinishedEvent(savedMatch.getMatchId(), winner));
         return savedMatch;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Match getMatchById(Long matchId) {
+        return matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Match> getMatchesByTournamentId(Long tournamentId) {
+        return matchRepository.findByTournament_TournamentIdOrderByRound_RoundNumberAscMatchOrderAsc(tournamentId);
     }
 }

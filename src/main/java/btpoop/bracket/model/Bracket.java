@@ -28,5 +28,6 @@ public class Bracket {
     private TournamentFormat format;
 
     @OneToMany(mappedBy = "bracket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("roundNumber ASC")
     private List<Round> rounds = new ArrayList<>();
 }

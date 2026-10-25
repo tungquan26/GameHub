@@ -4,6 +4,7 @@ import btpoop.enums.MatchStatus;
 import btpoop.team.model.Team;
 import btpoop.tournament.model.Tournament;
 import btpoop.bracket.model.Round;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,7 @@ public class Match {
 
     @ManyToOne
     @JoinColumn(name = "round_id")
+    @JsonIgnore
     private Round round;
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +56,25 @@ public class Match {
     @Column(nullable = false)
     private boolean notified1Hour = false;
 
+    @Column(nullable = false)
+    private int matchOrder = 0;
+
+    @ManyToOne
+    @JoinColumn(name = "next_match_id")
+    @JsonIgnore
+    private Match nextMatch;
+
+    @Column(length = 2)
+    private String nextMatchSlot;
+
     @Embedded
     private MatchResult result;
+
+    public Long getNextMatchId() {
+        return nextMatch != null ? nextMatch.getMatchId() : null;
+    }
+
+    public Long getRoundId() {
+        return round != null ? round.getRoundId() : null;
+    }
 }

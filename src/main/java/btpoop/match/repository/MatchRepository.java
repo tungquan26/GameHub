@@ -9,4 +9,5 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findByScheduledTimeBetweenAndNotified1WeekFalse(LocalDateTime start, LocalDateTime end);
     List<Match> findByScheduledTimeBetweenAndNotified1DayFalse(LocalDateTime start, LocalDateTime end);
     List<Match> findByScheduledTimeBetweenAndNotified1HourFalse(LocalDateTime start, LocalDateTime end);
+    List<Match> findByTournament_TournamentIdOrderByRound_RoundNumberAscMatchOrderAsc(Long tournamentId);
 }

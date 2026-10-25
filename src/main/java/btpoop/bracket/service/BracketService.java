@@ -7,4 +7,6 @@ public interface BracketService {
     List<Bracket> getAllBrackets();
     Bracket getBracketById(Long id);
     Bracket createBracket(Bracket bracket, Long tournamentId);
+    Bracket generateBracket(Long tournamentId);
+    Bracket getBracketByTournamentId(Long tournamentId);
 }

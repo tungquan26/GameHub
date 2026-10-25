@@ -29,4 +29,14 @@ public class BracketController {
     public ResponseEntity<Bracket> createBracket(@RequestBody Bracket bracket, @RequestParam Long tournamentId) {
         return ResponseEntity.ok(bracketService.createBracket(bracket, tournamentId));
     }
+
+    @PostMapping("/generate/{tournamentId}")
+    public ResponseEntity<Bracket> generateBracket(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok(bracketService.generateBracket(tournamentId));
+    }
+
+    @GetMapping("/tournament/{tournamentId}")
+    public ResponseEntity<Bracket> getBracketByTournamentId(@PathVariable Long tournamentId) {
+        return ResponseEntity.ok(bracketService.getBracketByTournamentId(tournamentId));
+    }
 }

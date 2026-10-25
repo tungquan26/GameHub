@@ -1,6 +1,7 @@
 package btpoop.bracket.model;
 
 import btpoop.match.model.Match;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class Round {
 
     @ManyToOne
     @JoinColumn(name = "bracket_id", nullable = false)
+    @JsonIgnore
     private Bracket bracket;
 
     @Column(nullable = false)
@@ -29,5 +31,6 @@ public class Round {
     private String name;
 
     @OneToMany(mappedBy = "round", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("matchOrder ASC")
     private List<Match> matches = new ArrayList<>();
 }

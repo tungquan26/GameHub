@@ -1,4 +1,4 @@
-package btpoop.bracket.generator;
+package btpoop.bracket.service;
 
 import btpoop.enums.TournamentFormat;
 import lombok.RequiredArgsConstructor;
