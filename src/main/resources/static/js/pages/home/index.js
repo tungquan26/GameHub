@@ -198,17 +198,33 @@ document.addEventListener("DOMContentLoaded", () => {
         startAutoPlay();
     }
 
-    // 3. HERO BANNER AUTO-PLAY SLIDER (Mỗi 5 giây - chuyển mượt mà)
+    // 3. HERO BANNER AUTO-PLAY SLIDER (Trượt từ phải sang trái - tốc độ chậm, mượt mà, không pause)
     const heroSlides = document.querySelectorAll('#heroSlider .slide');
     if (heroSlides.length > 0) {
         let currentHeroIndex = 0;
         const HERO_INTERVAL = 5000;
         let slideTimer = null;
 
-        function showHeroSlide(index) {
-            heroSlides[currentHeroIndex].classList.remove('active');
-            currentHeroIndex = index;
-            heroSlides[currentHeroIndex].classList.add('active');
+        function showHeroSlide(nextIndex) {
+            const currentSlide = heroSlides[currentHeroIndex];
+            const nextSlide = heroSlides[nextIndex];
+
+            // Slide hiện tại trượt mượt sang trái (-100%)
+            currentSlide.classList.remove('active');
+            currentSlide.classList.add('prev');
+
+            // Slide kế tiếp trượt vào từ bên phải (0)
+            nextSlide.classList.remove('prev');
+            nextSlide.classList.add('active');
+
+            // Dọn dẹp trạng thái các slide còn lại (để sẵn bên phải)
+            heroSlides.forEach((slide, idx) => {
+                if (idx !== currentHeroIndex && idx !== nextIndex) {
+                    slide.classList.remove('active', 'prev');
+                }
+            });
+
+            currentHeroIndex = nextIndex;
         }
 
         function nextHeroSlide() {
@@ -217,20 +233,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         function startHeroAutoPlay() {
-            stopHeroAutoPlay();
+            if (slideTimer) clearInterval(slideTimer);
             slideTimer = setInterval(nextHeroSlide, HERO_INTERVAL);
         }
 
-        function stopHeroAutoPlay() {
-            if (slideTimer) clearInterval(slideTimer);
-        }
-
-        const heroBanner = document.getElementById('hero-banner');
-        if (heroBanner) {
-            heroBanner.addEventListener('mouseenter', stopHeroAutoPlay);
-            heroBanner.addEventListener('mouseleave', startHeroAutoPlay);
-        }
-
+        // Tự động chạy liên tục, không dừng khi hover
         startHeroAutoPlay();
     }
 });

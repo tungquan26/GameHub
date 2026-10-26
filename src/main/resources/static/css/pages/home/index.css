@@ -64,37 +64,59 @@
     min-height: 550px;
     display: flex;
     overflow: hidden;
-    background: #33353a; 
-    border-top: 1px solid #45474d;
+    background: #111318; 
+    border-top: 1px solid #33353a;
     border-bottom: 2px solid #222327;
 }
 
-/* ---- Image Slider (Lùi vào trong tạo viền trên) ---- */
+/* ---- Image Slider (Full frame & trượt từ phải sang) ---- */
 .hero-slider {
     position: absolute;
-    top: 48px;
-    bottom: 65px; 
-    right: 0;
-    width: 65%;
-    height: auto;
-    z-index: 2;
-    /* Tạo lớp viền bóng cứng màu tối chạy dọc đáy */
-    box-shadow: -30px 22px 0px #27282c; 
-}
-
-.hero-slider .slide {
-    position: absolute; /*xếp chồng các ảnh lên nhau cùng 1 vị trí*/
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
     overflow: hidden;
+    box-shadow: none;
+}
+
+/* Lớp phủ mờ dần từ phải sang trái để chữ nổi bật ở bên trái */
+.hero-slider::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(17, 19, 24, 0.98) 0%, rgba(17, 19, 24, 0.9) 35%, rgba(17, 19, 24, 0.45) 70%, rgba(17, 19, 24, 0.1) 100%);
+    z-index: 3;
+    pointer-events: none;
+}
+
+.hero-slider .slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease, visibility 1.2s;
+    overflow: hidden;
+    will-change: transform, opacity;
 }
 
 .hero-slider .slide.active {
+    transform: translateX(0);
     opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+.hero-slider .slide.prev {
+    transform: translateX(-100%);
+    opacity: 0;
+    visibility: visible;
+    z-index: 1;
 }
 
 .hero-slider .slide img {
@@ -102,12 +124,6 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transform: scale(1);
-    transition: transform 7s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.hero-slider .slide.active img {
-    transform: scale(1.05);
 }
 
 /* Tâm điểm hành động từng môn thể thao */
@@ -128,46 +144,37 @@
 .slide.slide-boxing img {
     object-position: center 50% 30%;
 }
-/* ---- Tạo dải bậc thang chéo màu tối nằm giữa chữ và ảnh---- */
+
+/* ---- Dải bậc thang chéo cũ đã bỏ ---- */
 .hero::after {
-    content: '';
-    position: absolute;
-    top: 85px; 
-    bottom: 43px; 
-    left: 0;
-    width: 58%;
-    background: #27282c;
-    clip-path: polygon(0 0, 72.5% 0, 96.5% 100%, 0% 100%);
-    z-index: 3;
-    pointer-events: none;
+    display: none;
 }
 
-/* ---- Content Left (Lớp cắt chéo chính) ---- */
+/* ---- Content Left ---- */
 .hero-content {
     position: relative;
     z-index: 5;
-    width: 56%;
+    width: 55%;
+    max-width: 650px;
     height: 100%;
-    background: #33353a; /* Cùng màu với .hero để tiệp màu hoàn toàn */
-    /* Độ nghiêng vát sâu và chuẩn xác theo tỷ lệ  */
-    clip-path: polygon(0 0, 72% 0, 96% 100%, 0% 100%);
+    background: transparent;
     display: flex;
     align-items: center;
-    padding-left: 10%; 
+    padding-left: 8%; 
     padding-right: 4%;
     flex-shrink: 0;
 }
 
-/* Thanh gạch màu cam trên góc trái có vát chéo ở đuôi  */
+/* Thanh gạch màu cam trên góc trái */
 .hero-content::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    width: 195px;
-    height: 7px;
+    left: 8%;
+    width: 140px;
+    height: 6px;
     background: #f27a1a;
-    clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+    border-radius: 0 0 3px 3px;
     z-index: 6;
 }
 
@@ -197,6 +204,7 @@
 .hero-subheading .sub-white {
     color: #ffffff;
 }
+
 /* Chữ tiêu đề */
 .hero-heading {
     font-family: 'Oswald', sans-serif;
@@ -253,10 +261,11 @@
     cursor: pointer;
     transition: all 0.3s ease;
 }
+
 /* Khi rê chuột vào nút Sign Up */
 .btn-signup:hover {
-    background: #e0690b; /*chuyển sang màu cam sẫm hơn*/
-    transform: translateY(-2px); /*nhô lên 2px*/
+    background: #e0690b;
+    transform: translateY(-2px);
     color: #ffffff;
 }
 
@@ -483,47 +492,46 @@
 /* ---- Chuyển đổi bố cục khi thu nhỏ cửa sổ (chia đôi màn hình) hoặc trên Mobile ---- */
 @media (max-width: 1024px) {
     .hero {
-        flex-direction: column; /* Chuyển thành bố cục xếp dọc */
-        height: auto; /* Xóa chiều cao cố định 600px của desktop */
-        min-height: auto;
+        flex-direction: column;
+        height: auto;
+        min-height: 520px;
     }
 
-    /* 1. TẮT LỚP VÁT CHÉO ĐÈ LÊN ẢNH */
     .hero::after {
-        display: none !important; /* Ẩn hoàn toàn dải xám đen đang che mặt cầu thủ */
+        display: none !important;
     }
 
-    /* 2. ĐƯA ẢNH TRẢI DÀI 100% CHIỀU NGANG */
     .hero-slider {
-        position: relative; /* Trả về luồng hiển thị bình thường */
+        position: absolute;
         width: 100%;
-        height: 350px; /* Đặt chiều cao cố định cho ảnh khi ở chế độ này */
+        height: 100%;
         top: 0;
+        left: 0;
         bottom: 0;
-        box-shadow: none; /* Bỏ viền đen dưới đáy ảnh của bản desktop */
-        order: 1; /* Ưu tiên xếp ảnh hiển thị ở trên cùng */
+        box-shadow: none;
     }
 
-    /* 3. TRẢ KHỐI CHỮ VỀ HÌNH CHỮ NHẬT BÌNH THƯỜNG */
+    .hero-slider::after {
+        background: linear-gradient(180deg, rgba(17, 19, 24, 0.7) 0%, rgba(17, 19, 24, 0.95) 100%);
+    }
+
     .hero-content {
         position: relative;
         width: 100%;
-        clip-path: none; /* HỦY BỎ hiệu ứng cắt chéo */
-        padding: 40px 24px; /* Chỉnh lại lề cho gọn gàng */
-        order: 2; /* Chữ xếp dưới ảnh */
+        max-width: 100%;
+        clip-path: none;
+        padding: 50px 24px 40px;
     }
 
-    /* Đưa thanh màu cam về hình chữ nhật thẳng (bỏ vát đuôi) */
     .hero-content::before {
-        width: 120px;
-        clip-path: none; 
+        left: 24px;
+        width: 100px;
     }
 
     .hero-content-inner {
         max-width: 100%;
     }
 
-    /* Tinh chỉnh lại chữ cho vừa không gian hẹp */
     .hero-heading {
         font-size: 2.2rem;
     }
@@ -531,13 +539,13 @@
 
 /* Tinh chỉnh thêm cho màn hình điện thoại thật sự bé */
 @media (max-width: 480px) {
-    .hero-slider {
-        height: 250px;
+    .hero {
+        min-height: 480px;
     }
     .hero-heading {
         font-size: 1.8rem;
     }
     .btn-signup {
-        width: 100%; /* Nút đăng ký full viền trên mobile */
+        width: 100%;
     }
 }
