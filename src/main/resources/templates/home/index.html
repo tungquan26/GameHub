@@ -4,6 +4,7 @@
     <th:block th:replace="~{layouts/base :: commonHead('BTP-OOP Application')}" />
     <link rel="stylesheet" th:href="@{/css/common/base.css}">
     <link rel="stylesheet" th:href="@{/css/pages/home/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Top Navigation -->
@@ -20,9 +21,50 @@
     </nav>
 
     <!-- Hero / Khu vực đầu trang -->
-    <header class="hero">
-        <img th:src="@{/images/hero.png}" alt="Hero Banner" class="hero-image">
-    </header>
+    <section class="hero" id="hero-banner">
+        <!-- Image Slider (Full bleed background behind diagonal cut) -->
+        <div class="hero-slider" id="heroSlider">
+            <div class="slide slide-football active">
+                <img th:src="@{/images/fb.png}" alt="Football match action" loading="eager">
+            </div>
+            <div class="slide slide-tennis">
+                <img th:src="@{/images/tennis.png}" alt="Tennis match in progress" loading="lazy">
+            </div>
+            <div class="slide slide-basketball">
+                <img th:src="@{/images/basketball.png}" alt="Basketball game dunk" loading="lazy">
+            </div>
+            <div class="slide slide-volleyball">
+                <img th:src="@{/images/volleyball.png}" alt="Volleyball game" loading="lazy">
+            </div>
+            <div class="slide slide-boxing">
+                <img th:src="@{/images/boxing.png}" alt="Boxing game" loading="lazy">
+            </div>
+        </div>
+
+        <!-- Content Left (Diagonal Cut) -->
+        <div class="hero-content">
+            <div class="hero-content-inner">
+                <p class="hero-subheading">
+                    <span class="sub-orange">EVERY GAME.</span>
+                    <span class="sub-white">EVERY SPORT.</span>
+                </p>
+                <h1 class="hero-heading">
+                    <span>SIMPLIFIED</span>
+                    <span>TOURNAMENT</span>
+                    <span>MANAGEMENT</span>
+                </h1>
+                <p class="hero-description">
+                    Hàng triệu người trên thế giới tin dùng Tourney Pro để quản lý các giải đấu,
+                    tổ chức sự kiện, và duy trì sự gắn kết, cập nhật thông tin và tạo sân chơi
+                    chung cho cộng đồng game thủ. Hãy đón nhận thử thách từ Tourney Pro.
+                    <strong>BẮT ĐẦU CUỘC CHƠI NGAY THÔI!</strong>
+                </p>
+                <div class="hero-cta">
+                    <a th:href="@{/register}" class="btn-signup" id="btn-signup">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Trò chơi của chúng tôi -->
     <section class="our-games">

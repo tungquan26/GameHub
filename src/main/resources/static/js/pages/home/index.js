@@ -197,4 +197,40 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCarousel(true);
         startAutoPlay();
     }
+
+    // 3. HERO BANNER AUTO-PLAY SLIDER (Mỗi 5 giây - chuyển mượt mà)
+    const heroSlides = document.querySelectorAll('#heroSlider .slide');
+    if (heroSlides.length > 0) {
+        let currentHeroIndex = 0;
+        const HERO_INTERVAL = 5000;
+        let slideTimer = null;
+
+        function showHeroSlide(index) {
+            heroSlides[currentHeroIndex].classList.remove('active');
+            currentHeroIndex = index;
+            heroSlides[currentHeroIndex].classList.add('active');
+        }
+
+        function nextHeroSlide() {
+            const nextIndex = (currentHeroIndex + 1) % heroSlides.length;
+            showHeroSlide(nextIndex);
+        }
+
+        function startHeroAutoPlay() {
+            stopHeroAutoPlay();
+            slideTimer = setInterval(nextHeroSlide, HERO_INTERVAL);
+        }
+
+        function stopHeroAutoPlay() {
+            if (slideTimer) clearInterval(slideTimer);
+        }
+
+        const heroBanner = document.getElementById('hero-banner');
+        if (heroBanner) {
+            heroBanner.addEventListener('mouseenter', stopHeroAutoPlay);
+            heroBanner.addEventListener('mouseleave', startHeroAutoPlay);
+        }
+
+        startHeroAutoPlay();
+    }
 });
