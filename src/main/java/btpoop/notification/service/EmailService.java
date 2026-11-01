@@ -3,6 +3,8 @@ package btpoop.notification.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailAuthenticationException;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -20,18 +22,32 @@ public class EmailService {
     }
 
     public void sendEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        if (fromEmail != null && !fromEmail.isBlank()) {
-            message.setFrom(fromEmail);
+        try {
+            sendRequiredEmail(to, subject, text);
+        } catch (IllegalStateException e) {
+            // Thông báo trong ứng dụng vẫn được giữ nếu email nhắc lịch thất bại.
+            logger.error("Lỗi khi gửi email tới {}: {}", to, e.getMessage());
         }
+    }
+
+    public void sendRequiredEmail(String to, String subject, String text) {
+        if (fromEmail == null || fromEmail.isBlank()) {
+            throw new IllegalStateException("Máy chủ chưa cấu hình gửi email. Vui lòng liên hệ quản trị viên.");
+        }
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
         try {
             mailSender.send(message);
             logger.info("Đã gửi email xác nhận thành công tới {}", to);
-        } catch (Exception e) {
-            logger.error("Lỗi khi gửi email tới {}: {}", to, e.getMessage());
+        } catch (MailAuthenticationException e) {
+            logger.error("SMTP từ chối thông tin đăng nhập khi gửi email tới {}", to);
+            throw new IllegalStateException("Máy chủ không thể đăng nhập dịch vụ email. Vui lòng liên hệ quản trị viên.", e);
+        } catch (MailException e) {
+            logger.error("Không thể gửi email tới {} ({})", to, e.getClass().getSimpleName());
+            throw new IllegalStateException("Không thể gửi email lúc này. Vui lòng thử lại sau.", e);
         }
     }
 }

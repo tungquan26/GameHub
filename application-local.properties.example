@@ -1,0 +1,5 @@
+# Copy to application-local.properties beside pom.xml and enter local SMTP credentials.
+# This local file is loaded automatically when starting from the project root.
+# Environment variables SPRING_MAIL_USERNAME / SPRING_MAIL_PASSWORD take precedence.
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-app-password

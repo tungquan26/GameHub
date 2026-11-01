@@ -8,6 +8,7 @@ import btpoop.verification.model.VerificationType;
 import btpoop.verification.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ public class VerificationService {
     private final UserRepository userRepository;
     private final EmailService emailService;
 
+    @Transactional
     public void generateAndSendToken(String email, VerificationType type) {
         VerificationToken tokenEntity = tokenRepository.findByEmailAndType(email, type);
         LocalDateTime now = LocalDateTime.now();
@@ -62,7 +64,7 @@ public class VerificationService {
                 : "Mã khôi phục mật khẩu Game Hub";
         
         String text = "Mã xác nhận của bạn là: " + code + "\nMã này có hiệu lực trong 10 phút.";
-        emailService.sendEmail(email, subject, text);
+        emailService.sendRequiredEmail(email, subject, text);
     }
 
     public boolean verifyEmailActivation(String email, String code) {

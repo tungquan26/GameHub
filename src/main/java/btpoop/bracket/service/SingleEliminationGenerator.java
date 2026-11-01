@@ -7,6 +7,7 @@ import btpoop.match.model.Match;
 import btpoop.team.model.Team;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,10 @@ public class SingleEliminationGenerator implements BracketGenerator {
         List<Team> shuffledTeams = new ArrayList<>(teams);
         Collections.shuffle(shuffledTeams); // Bốc thăm ngẫu nhiên
 
+        LocalDateTime baseStartTime = (bracket.getTournament() != null && bracket.getTournament().getStartDate() != null)
+                ? bracket.getTournament().getStartDate()
+                : LocalDateTime.now().plusDays(1).withHour(14).withMinute(0).withSecond(0).withNano(0);
+
         int teamIndex = 0;
 
         for (int r = 1; r <= numRounds; r++) {
@@ -49,6 +54,7 @@ public class SingleEliminationGenerator implements BracketGenerator {
                 match.setTournament(bracket.getTournament());
                 match.setStatus(MatchStatus.SCHEDULED);
                 match.setMatchOrder(m);
+                match.setScheduledTime(baseStartTime.plusDays(r - 1).withHour(14).withMinute(0).plusHours(m * 2L));
 
                 // Chỉ điền đội vào vòng 1, các vòng sau trống chờ đội thắng đi tiếp
                 if (r == 1) {

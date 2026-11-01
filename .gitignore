@@ -1,7 +1,50 @@
-Database_Tables_Specification.md
-Model_Relationships.md
-target/
-target-ide/
-.vscode/
-bin/
+# Java / Maven build output
+/target/
+/target-ide/
+/bin/
+*.class
+hs_err_pid*
+replay_pid*
 
+# Frontend dependencies, build output and caches
+node_modules/
+dist/
+.vite/
+.npm-cache/
+coverage/
+.qa/
+
+# Local environment files; keep templates in Git
+.env
+.env.*
+!.env.example
+!.env.*.example
+/application-local.properties
+/src/main/resources/application-local.properties
+/src/main/resources/application-local.yml
+/src/main/resources/application-local.yaml
+
+# Runtime and package-manager logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local IDE and editor settings
+.vscode/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.factorypath
+*.swp
+*.swo
+*~
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -4,6 +4,7 @@ import btpoop.user.model.User;
 import btpoop.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import btpoop.verification.service.VerificationService;
 import btpoop.verification.model.VerificationType;
@@ -17,6 +18,7 @@ public class UserServiceImpl implements UserService {
     private final VerificationService verificationService;
 
     @Override
+    @Transactional
     public User register(User user) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
             throw new IllegalArgumentException("Username đã tồn tại!");
