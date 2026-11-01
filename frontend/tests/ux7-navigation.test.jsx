@@ -110,6 +110,17 @@ describe("UX-7: chuyển cảnh, cuộn và focus", () => {
     expect(animate).not.toHaveBeenCalled(); expect(screen.getByRole("heading", { name: "Tìm kiếm giải đấu" })).toHaveFocus();
   });
 
+  it("slide vẫn chạy 350ms khi CSS production rút gọn thời gian thành .35s", () => {
+    render(<MemoryRouter>
+      <style>{"[data-page-ready] { --dp-page-slide-duration: .35s; }"}</style>
+      <PageContent><h1>Production slide</h1></PageContent>
+    </MemoryRouter>);
+    expect(animate).toHaveBeenCalledWith(
+      [{ transform: "translateX(100%)" }, { transform: "translateX(0)" }],
+      { duration: 350, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    );
+  });
+
   it("lazy content dùng skeleton, giữ shell; khi tải xong mới slide nội dung 350ms", async () => {
     let resolve;
     const LazyPage = lazy(() => new Promise((done) => { resolve = done; }));

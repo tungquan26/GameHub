@@ -2,6 +2,7 @@ import { Suspense, useLayoutEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { pageViewKey } from "@/lib/page-navigation";
+import { motionDuration } from "@/lib/motion";
 import PageSkeleton from "./PageSkeleton";
 
 function ReadyContent({ children, viewKey }) {
@@ -13,7 +14,7 @@ function ReadyContent({ children, viewKey }) {
     if (!element?.animate) return;
     const tokens = getComputedStyle(element);
     const animation = element.animate([{ transform: "translateX(100%)" }, { transform: "translateX(0)" }], {
-      duration: parseFloat(tokens.getPropertyValue("--dp-page-slide-duration")) || 350,
+      duration: motionDuration(element, "--dp-page-slide-duration", 350),
       easing: tokens.getPropertyValue("--dp-page-slide-ease").trim() || "cubic-bezier(0.22, 1, 0.36, 1)",
     });
     return () => animation.cancel();
