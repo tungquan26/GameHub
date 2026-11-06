@@ -17,7 +17,7 @@ function Controls() {
   return <><span data-testid="api-status">{apiStatus}</span><span data-testid="location">{location.pathname}{location.search}{location.hash}</span><button onClick={() => navigate(-1)}>History back</button><button onClick={() => setProfile({ id: 8, tagName: "Captain" })}>Switch account</button><Link to="/dashboard">Open overview</Link><Link to="/events">Open events</Link><Link to="/profile">Open profile</Link></>;
 }
 function open(path, extra = {}) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile, tournaments: [], teams: [], ...extra }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile, tournaments: [], teams: [], ...extra }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Controls /></TourneyProvider></MemoryRouter>);
 }
 const current = () => screen.getByTestId("location").textContent;

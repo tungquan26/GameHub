@@ -25,7 +25,7 @@ describe("Quy tắc cài đặt giải đấu", () => {
     expect(() => cleanRegistration({ ...input, registrationEndDate: input.registrationStartDate })).toThrow("đóng đăng ký phải sau");
     expect(registrationValues(null)).toMatchObject({ minTeamSize: 4, maxTeams: 16, maxTeamSize: "" });
   });
-  it("bộ môn giới hạn 9 game, 4 thể thức và một giai đoạn", () => {
+  it("bộ môn giới hạn 8 game, 4 thể thức và một giai đoạn", () => {
     expect(cleanGame({ game: "CS2", stageType: "TWO_STAGES", format: "SWISS" })).toEqual({ game: "CS2", stageType: "SINGLE_STAGE", format: "SWISS" });
     expect(() => cleanGame({ game: "2XKO", format: "SINGLE_ELIMINATION" })).toThrow("tựa game");
     expect(() => cleanGame({ game: "CS2", format: "UNKNOWN" })).toThrow("thể thức");

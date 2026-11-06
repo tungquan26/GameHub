@@ -17,7 +17,7 @@ const entries = Array.from({ length: 12 }, (_, index) => ({ id: index + 1, name:
 let y, height, animate;
 function Probe() { const navigate = useNavigate(); return <><button onClick={() => navigate(-1)}>History back</button><button onClick={() => navigate(1)}>History forward</button></>; }
 function open(path, data = {}) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile, tournaments: entries, ...data }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile, tournaments: entries, ...data }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Probe /></TourneyProvider></MemoryRouter>);
 }
 async function scrolled(top) { y = top; await act(async () => { window.dispatchEvent(new Event("scroll")); }); }

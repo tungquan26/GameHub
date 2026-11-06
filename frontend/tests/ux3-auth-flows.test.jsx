@@ -16,7 +16,7 @@ function Probe() {
   return <><span data-testid="location">{location.pathname}{location.search}{location.hash}</span><button onClick={() => navigate(-1)}>History back</button></>;
 }
 function open(path, extra = {}, { strict = false, previous } = {}) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: null, tournaments: [], ...extra }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: null, tournaments: [], ...extra }));
   const content = <MemoryRouter initialEntries={previous ? [previous, path] : [path]} initialIndex={previous ? 1 : 0}><TourneyProvider><AppRoutes /><Probe /></TourneyProvider></MemoryRouter>;
   return render(strict ? <StrictMode>{content}</StrictMode> : content);
 }

@@ -1,6 +1,6 @@
 import { canonicalGame, gameDisplay, gameImage } from "@/lib/games";
 
-// Dữ liệu mẫu thống nhất với danh mục chín game; các ngày, vai trò và trạng thái được giữ lại.
+// Dữ liệu mẫu thống nhất với danh mục game hiện được hỗ trợ.
 const withGameArtwork = (entry) => ({ ...entry, game: canonicalGame(entry.game), gameDisplay: gameDisplay(entry.game), image: gameImage(entry.game) });
 
 export const DASHBOARD_SAMPLES = [
@@ -36,17 +36,6 @@ export const DASHBOARD_SAMPLES = [
         location: 'Hà Nội, Việt Nam',
         attendees: 64,
         status: 'closing',
-    },
-    {
-        id: 4,
-        name: 'PUBG Mobile Pro League VN Mùa 8',
-        game: 'PUBG Mobile',
-        date: '05 - 15 Thg 12, 2026',
-        startDate: '2026-12-05T09:00',
-        endDate: '2026-12-15T21:00',
-        location: 'Trực tuyến',
-        attendees: 80,
-        status: 'open',
     },
     {
         id: 5,
@@ -236,18 +225,6 @@ export const SEARCH_SAMPLES = [
         badgeClass: 'stc-badge-completed',
     },
     {
-        id: 4,
-        name: 'PUBG Mobile Pro League VN Mùa 8',
-        dateLabel: 'Sắp diễn ra • 15 Thg 12, 2026',
-        startDate: '2026-12-15',
-        game: 'PUBG Mobile',
-        location: 'Trực tuyến',
-        attendees: 80,
-        status: 'upcoming',
-        badgeLabel: 'Đang mở đăng ký',
-        badgeClass: 'stc-badge-open',
-    },
-    {
         id: 5,
         name: 'Giải Vô Địch Free Fire Đông Nam Á',
         dateLabel: 'Sắp diễn ra • 10 Thg 02, 2027',
@@ -425,14 +402,4 @@ export function createInitialTeams(currentUser) { return [
         recruiting: false,
         logo: ''
     },
-    {
-        id: 105,
-        name: 'Cerberus PUBG Squad',
-        game: 'PUBG Mobile',
-        captain: 'nhatminh',
-        members: ['nhatminh', 'anhkhoi', 'manhhung'],
-        pendingRequests: [],
-        recruiting: true,
-        logo: ''
-    }
 ]; }

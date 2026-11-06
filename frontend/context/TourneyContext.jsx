@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { tournamentApi } from "@/lib/api";
-import { browserStorage, loadState, mergeTournaments, parseState, profileData, STORE_KEY } from "@/lib/tourney-store";
+import { browserStorage, loadState, LOGIN_SESSION_KEY, mergeTournaments, parseState, profileData, readJson, STORE_KEY } from "@/lib/tourney-store";
 import { applyTeamAction, renameTeamMember } from "@/lib/teams";
 import { createInitialTeams } from "@/constants/fixtures";
 import { isUserRegistration, makeTournament, resolveTournamentImage } from "@/lib/tournaments";
@@ -12,8 +12,22 @@ import { userKey } from "@/lib/identity";
 
 const TourneyContext = createContext(null);
 
+function restoreLogin(state) {
+  const identity = userKey(state.profile);
+  const sessionIdentity = readJson(browserStorage("sessionStorage"), LOGIN_SESSION_KEY);
+  return identity && (state.rememberLogin || sessionIdentity === identity)
+    ? state : { ...state, profile: null, rememberLogin: false };
+}
+
 export function TourneyProvider({ children }) {
-  const [state, setState] = useState(() => loadState(browserStorage("localStorage"), browserStorage("sessionStorage")));
+  // Đọc cache ở tab khách không được ghi ngược trạng thái đăng xuất sang tab đã đăng nhập.
+  const externalState = useRef(null);
+  const [state, setState] = useState(() => {
+    const cached = loadState(browserStorage("localStorage"), browserStorage("sessionStorage"));
+    const restored = restoreLogin(cached);
+    if (cached.profile && !restored.profile) externalState.current = restored;
+    return restored;
+  });
   const stateRef = useRef(state);
   const commit = useCallback((update) => {
     const next = typeof update === "function" ? update(stateRef.current) : update;
@@ -29,8 +43,11 @@ export function TourneyProvider({ children }) {
     try {
       const storage = browserStorage("localStorage");
       if (!storage) throw new Error("Storage unavailable");
-      storage.setItem(STORE_KEY, JSON.stringify(state));
+      if (state !== externalState.current) storage.setItem(STORE_KEY, JSON.stringify(state));
       const session = browserStorage("sessionStorage");
+      const identity = userKey(state.profile);
+      if (identity) session?.setItem(LOGIN_SESSION_KEY, JSON.stringify(identity));
+      else session?.removeItem(LOGIN_SESSION_KEY);
       session?.setItem("btp_registered_tournaments", JSON.stringify(state.registeredTournaments));
       const active = state.tournaments.find((entry) => String(entry.id) === String(state.activeTournamentId));
       if (state.teams !== null) {
@@ -51,7 +68,11 @@ export function TourneyProvider({ children }) {
       if (event.storageArea !== browserStorage("localStorage") || event.key !== STORE_KEY) return;
       try {
         const next = parseState(JSON.parse(event.newValue));
-        if (next) commit(next);
+        if (next) {
+          const restored = restoreLogin(next);
+          externalState.current = next.profile && !restored.profile ? restored : null;
+          commit(restored);
+        }
       } catch { /* Bỏ qua dữ liệu lỗi từ tab khác. */ }
     };
     window.addEventListener("storage", handleStorage);
@@ -67,8 +88,8 @@ export function TourneyProvider({ children }) {
     });
   }, [commit]);
 
-  const setProfile = useCallback((profile) => {
-    commit((previous) => ({ ...previous, profile: profileData(profile) }));
+  const setProfile = useCallback((profile, { remember = false } = {}) => {
+    commit((previous) => ({ ...previous, profile: profileData(profile), rememberLogin: remember === true }));
   }, [commit]);
 
   const setPublicTournament = useCallback((tournament) => {
@@ -76,8 +97,8 @@ export function TourneyProvider({ children }) {
   }, [commit]);
 
   const clearProfile = useCallback(() => {
-    commit((previous) => ({ ...previous, profile: null }));
-    for (const [area, key] of [["sessionStorage", "btp_user_profile"], ["localStorage", "btp_profile_data_v1"]]) {
+    commit((previous) => ({ ...previous, profile: null, rememberLogin: false }));
+    for (const [area, key] of [["sessionStorage", LOGIN_SESSION_KEY], ["sessionStorage", "btp_user_profile"], ["localStorage", "btp_profile_data_v1"]]) {
       try { browserStorage(area)?.removeItem(key); } catch { /* Xóa state trong bộ nhớ vẫn có hiệu lực. */ }
     }
   }, [commit]);

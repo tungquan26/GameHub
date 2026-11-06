@@ -14,7 +14,7 @@ const OTHER = { ...ENTRY, id: "tourney_two", name: "Winter Cup" };
 const PUBLIC = { id: 71, name: "Public Cup", startDate: ENTRY.startDate, endDate: ENTRY.endDate, status: "open", contactType: "EMAIL", contact: "public@example.com", rules: "Public rules", homepageLayout: [{ id: "public", title: "Thông tin", layout: "1col", columns: [[{ id: "public-contact", type: "CONTACT", title: "" }, { id: "public-rules", type: "RULES", title: "" }]] }] };
 function Location() { const value = useLocation(); return <output data-testid="location">{value.pathname}{value.search}</output>; }
 function open(path, extra = {}) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: { id: 7, tagName: "Captain" }, tournaments: [ENTRY, OTHER], activeTournamentId: ENTRY.id, ...extra }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: { id: 7, tagName: "Captain" }, tournaments: [ENTRY, OTHER], activeTournamentId: ENTRY.id, ...extra }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Location /></TourneyProvider></MemoryRouter>);
 }
 const state = () => JSON.parse(localStorage.getItem(STORE_KEY));

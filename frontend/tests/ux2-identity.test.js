@@ -105,11 +105,11 @@ describe("UX-2: dữ liệu cá nhân dựa trên danh tính", () => {
   });
 
   it("rời đội chỉ xóa đúng ID khi thành viên trùng tên với đội trưởng", () => {
-    let teams = applyTeamAction([], alice, { type: "create", id: "members", values: { name: "Team", game: "PUBG", recruiting: true } });
+    let teams = applyTeamAction([], alice, { type: "create", id: "members", values: { name: "Team", game: "Free Fire", recruiting: true } });
     teams = applyTeamAction(teams, bob, { type: "join", id: "members" });
     teams = applyTeamAction(teams, alice, { type: "accept", id: "members", applicantKey: "id:8" });
     const left = applyTeamAction(teams, bob, { type: "leave", id: "members" });
-    expect(left[0]).toMatchObject({ game: "PUBG Mobile", captainKey: "id:7", members: ["Captain"], memberIdentities: { "id:7": "Captain" } });
+    expect(left[0]).toMatchObject({ game: "Free Fire", captainKey: "id:7", members: ["Captain"], memberIdentities: { "id:7": "Captain" } });
     expect(isMember(left[0], bob)).toBe(false);
     expect(isCaptain(left[0], alice)).toBe(true);
     expect(isMember(teams[0], bob)).toBe(true);

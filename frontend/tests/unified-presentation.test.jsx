@@ -13,7 +13,7 @@ const user = { id:7, username:"Captain" };
 const cup = { id:1, ownerId:7, name:"Created Cup", game:"TFT", attendees:918275, startDate:"2099-11-10T10:00", endDate:"2099-11-15T18:00", tournamentTeams:[] };
 const stored = () => JSON.parse(localStorage.getItem(STORE_KEY));
 function open(path, extra = {}) {
-  localStorage.setItem(STORE_KEY,JSON.stringify({version:1,profile:user,tournaments:[cup],activeTournamentId:1,teams:[],...extra}));
+  localStorage.setItem(STORE_KEY,JSON.stringify({version:1,rememberLogin:true,profile:user,tournaments:[cup],activeTournamentId:1,teams:[],...extra}));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><nav aria-label="Test navigation"><Link to="/dashboard">Overview</Link><Link to="/events">Events</Link><Link to="/profile">Profile</Link><Link to="/community">Teams</Link></nav></TourneyProvider></MemoryRouter>);
 }
 beforeEach(() => vi.stubGlobal("fetch",vi.fn(async () => new Response("[]",{headers:{"Content-Type":"application/json"}}))));

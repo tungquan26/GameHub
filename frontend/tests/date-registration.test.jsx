@@ -20,7 +20,7 @@ const cup = { id: 77, ownerId: 8, name: "November Cup", game: "Valorant", status
 const registration = (entry = cup, user = profile) => ({ ...entry, registrantKey: `id:${user.id}`, registrantId: user.id, role: "Player" });
 const saved = () => JSON.parse(localStorage.getItem(STORE_KEY));
 function seed(extra = {}) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile, tournaments: [cup], teams: [], registeredTournaments: [], ...extra }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile, tournaments: [cup], teams: [], registeredTournaments: [], ...extra }));
 }
 function open(path, extra = {}) {
   seed(extra);

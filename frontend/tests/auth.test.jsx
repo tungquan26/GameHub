@@ -55,17 +55,19 @@ describe("Đăng nhập và đăng ký", () => {
     expect(screen.getByLabelText("Tên người dùng", { exact: false })).toHaveValue("captain");
     expect(fetch.mock.calls[0][1]).toMatchObject({ method: "POST", body: "username=captain&password=wrong" });
   });
-  it("đăng nhập thành công, thay hồ sơ và không cache mật khẩu máy chủ", async () => {
+  it.each([false, true])("đăng nhập remember=%s, thay hồ sơ và không cache mật khẩu máy chủ", async (remember) => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response({ userId: 9, username: "captain", email: "new@example.com", password: "SERVER_HASH" }, 200, true)));
     localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: { id: 8, tagName: "Người khác", bio: "PRIVATE" }, tournaments: [] }));
     open("/login");
     const user = userEvent.setup();
     await user.type(screen.getByLabelText("Tên người dùng", { exact: false }), "captain");
     await user.type(screen.getByLabelText("Mật khẩu", { exact: false, selector: "input" }), "secret");
+    if (remember) await user.click(screen.getByLabelText("Lưu đăng nhập"));
     await user.click(screen.getByRole("button", { name: "Đăng nhập", exact: true }));
     await waitFor(() => expect(screen.getByTestId("location")).toHaveTextContent("/dashboard"));
     const saved = localStorage.getItem(STORE_KEY);
     expect(JSON.parse(saved).profile).toMatchObject({ id: 9, tagName: "captain", email: "new@example.com", bio: "" });
+    expect(JSON.parse(saved).rememberLogin).toBe(remember);
     expect(saved).not.toContain("SERVER_HASH"); expect(saved).not.toContain("PRIVATE");
   });
   it("đăng ký kiểm tra khớp mật khẩu và gửi JSON, giữ email trong URL xác thực", async () => {

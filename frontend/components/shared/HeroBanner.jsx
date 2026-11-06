@@ -9,17 +9,16 @@ import useReveal from "@/hooks/useReveal";
 export default function HeroBanner() {
   const { current, outgoing, preload, onLoad, onError } = useHeroSlides(SLIDES.length);
   const entrance = useReveal({ mode: "hero" });
-  return <section ref={entrance} aria-label="Giới thiệu Tourney Pro" aria-roledescription="carousel" className="relative isolate overflow-hidden border-b border-dp-hairline">
-    <div data-reveal data-reveal-kind="hero-art" data-reveal-delay="0" className="relative h-44 overflow-hidden sm:h-56 lg:absolute lg:inset-0 lg:-z-20 lg:h-auto">
+  return <section ref={entrance} aria-label="Giới thiệu Tourney Pro" aria-roledescription="carousel" className="relative isolate flex min-h-svh overflow-hidden border-b border-dp-hairline">
+    <div data-reveal data-reveal-kind="hero-art" data-reveal-delay="0" className="absolute inset-0 -z-20 overflow-hidden">
       {SLIDES.map((item, index) => [current, outgoing, preload].includes(index) && <img key={index} src={item.image} alt={item.alt} aria-hidden={current !== index}
         data-current={current === index} data-outgoing={outgoing === index} data-entering={current === index && outgoing !== null}
         onLoad={(event) => onLoad(index, event.currentTarget)} onError={() => onError(index)}
         loading="eager" fetchPriority={current === index ? "high" : "auto"}
         style={{ objectPosition: item.position }} className="hero-slide absolute inset-0 size-full object-cover" />)}
-      <div className="pointer-events-none absolute inset-0 z-3 bg-gradient-to-t from-dp-ground/50 to-transparent lg:hidden" />
     </div>
-    <div className="hero-shade pointer-events-none absolute inset-0 -z-10 hidden lg:block" />
-    <div className="home-hero-content dp-container flex flex-col justify-center py-8 sm:py-10 lg:min-h-[520px] lg:py-12">
+    <div className="hero-shade pointer-events-none absolute inset-0 -z-10" />
+    <div className="home-hero-content dp-container flex flex-1 flex-col justify-center py-12">
       <h1 className="max-w-2xl text-[clamp(2.25rem,5.2vw,4.75rem)] leading-[0.98] font-semibold tracking-[-0.05em] uppercase">
         {["SIMPLIFIED", "TOURNAMENT", "MANAGEMENT"].map((line, index) => <span key={line} data-reveal data-reveal-delay={index * 80} className={index === 2 ? "block text-dp-live" : "block"}>{line}</span>)}
       </h1>

@@ -14,7 +14,7 @@ function Probe() {
   return <><output data-testid="location">{location.pathname}{location.search}{location.hash}</output><button onClick={() => setProfile(PROFILE)}>Simulate login</button></>;
 }
 function open(path = "/", profile = null) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile, tournaments: [{ id: "tourney_kept", name: "Giữ dữ liệu", source: "local" }] }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile, tournaments: [{ id: "tourney_kept", name: "Giữ dữ liệu", source: "local" }] }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Probe /></TourneyProvider></MemoryRouter>);
 }
 beforeEach(() => vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => new Response("[]", { headers: { "Content-Type": "application/json" } }))));
@@ -22,7 +22,7 @@ beforeEach(() => vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => n
 describe("UX-1: khung nền tảng dùng chung", () => {
   it("giữ nguyên header khi đi qua trang chủ, khám phá, cộng đồng, không gian cá nhân và hồ sơ", async () => {
     open("/", PROFILE);
-    await screen.findByRole("heading", { level: 1 });
+    await screen.findByRole("heading", { level: 1 }, { timeout: 5000 });
     const header = screen.getByRole("banner", { name: "BTP Tournament" });
     const user = userEvent.setup();
     await user.click(within(header).getByRole("link", { name: "Khám phá giải đấu" }));

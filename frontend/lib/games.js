@@ -13,7 +13,7 @@ export function gameDisplay(value, formatLabel = "") {
   const suffix = typeof value === "string" ? value.split("·").slice(1).map((part) => part.trim()).filter(Boolean).join(" · ") : "";
   return [gameLabel(value), suffix || formatLabel].filter(Boolean).join(" · ");
 }
-// Các số cũ là danh tính game cũ, không phải vị trí trong mảng chín game hiện tại.
+// Các số cũ là danh tính game cũ, không phải vị trí trong danh mục hiện tại.
 const LEGACY_GAMES = { 1: "Liên Minh Huyền Thoại", 2: "Valorant", 3: "Teamfight Tactics", 4: "CS2", 5: "Delta Force" };
 export function gameForArtwork(value) {
   const source = String(value || "").split(/[?#]/)[0];

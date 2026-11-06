@@ -9,7 +9,7 @@ import { STORE_KEY } from "@/lib/tourney-store";
 const PROFILE = { id: 7, tagName: "Captain", userCode: "BTP007", email: "private@example.com", country: "Việt Nam", city: "Hà Nội", displayCityMode: "Hiển thị thành phố", birthday: "2002-01-10" };
 function Location() { const location = useLocation(); return <span data-testid="location">{location.pathname}{location.search}</span>; }
 function open(path, tournaments = []) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: PROFILE, tournaments }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: PROFILE, tournaments }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Location /></TourneyProvider></MemoryRouter>);
 }
 

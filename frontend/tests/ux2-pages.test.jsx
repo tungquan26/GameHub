@@ -15,7 +15,7 @@ function Controls() {
   return <><button onClick={() => setProfile(bob)}>Switch account</button><Link to="/tournament/view?id=902">Another tournament</Link></>;
 }
 function open(path, extra = {}) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: alice, tournaments: [], ...extra }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: alice, tournaments: [], ...extra }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Controls /></TourneyProvider></MemoryRouter>);
 }
 const state = () => JSON.parse(localStorage.getItem(STORE_KEY));
@@ -114,7 +114,7 @@ describe("UX-2: mở giải độc lập và dữ liệu cá nhân", () => {
   it("khách xem đội mẫu mà không nhận đội mẫu thành đội của mình", async () => {
     open("/community", { profile: null });
     const discovery = await screen.findByRole("region", { name: "Khám phá Đội tuyển Cộng đồng" });
-    expect(await within(discovery).findAllByRole("article")).toHaveLength(5);
+    expect(await within(discovery).findAllByRole("article")).toHaveLength(4);
     expect(within(discovery).queryByText("Đội mẫu")).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Đội tuyển của tôi" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Chỉnh sửa Team" })).not.toBeInTheDocument();

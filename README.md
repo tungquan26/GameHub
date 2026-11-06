@@ -30,6 +30,14 @@ Khi sửa React, khởi động lại bằng lệnh Maven trên để build giao
 Bấm Run trực tiếp lớp `BtpApplication` trong IDE không chạy quy trình build frontend;
 hãy dùng lệnh Maven để bảo đảm giao diện luôn được cập nhật.
 
+Mặc định đăng nhập chỉ được giữ trong tab hiện tại (kể cả khi nhấn F5).
+Chọn **Lưu đăng nhập** nếu muốn giữ tài khoản khi đóng tab rồi mở lại.
+Hồ sơ từ phiên bản cũ không tự đăng nhập; dữ liệu giải đấu vẫn được giữ.
+
+Mục **Trò chơi của chúng tôi** dùng video nền trong `frontend/assets/game-backgrounds/`,
+đặt tên theo slug game (ví dụ `valorant.mp4`). Video tự phát không tiếng và lặp lại;
+danh sách game cuộn dọc ở bên phải và chuyển mỗi 8 giây. Sau khi thay video, chạy lại Maven để cập nhật bản build.
+
 ## Cấu hình gửi email
 
 Để gửi OTP và thông báo, sao chép `application-local.properties.example` thành

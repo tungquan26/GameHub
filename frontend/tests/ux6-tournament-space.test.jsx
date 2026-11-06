@@ -17,7 +17,7 @@ const state = () => JSON.parse(localStorage.getItem(STORE_KEY));
 const storedCup = () => state().tournaments.find((entry) => entry.id === cup.id);
 const reply = (data) => new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
 function open(path, extra = {}, previous) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: { id: 7, username: "Captain" }, tournaments: [cup, other], activeTournamentId: other.id, ...extra }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: { id: 7, username: "Captain" }, tournaments: [cup, other], activeTournamentId: other.id, ...extra }));
   const router = createMemoryRouter([{ path: "*", element: <TourneyProvider><AppRoutes /></TourneyProvider> }], { initialEntries: previous ? [previous, path] : [path], initialIndex: previous ? 1 : 0 });
   const result = render(<RouterProvider router={router} />);
   return { ...result, router };

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AppRoutes } from "@/App";
 import { TourneyProvider } from "@/context/TourneyContext";
 import { STORE_KEY } from "@/lib/tourney-store";
+import { ORGANIZER_GAMES } from "@/constants/games";
 
 const ENTRY = {
   ownerId: 7,
@@ -18,7 +19,7 @@ const OTHER = { ...ENTRY, id: "tourney_two", name: "Other Cup", details: { ...EN
 function Location() { const value = useLocation(); return <span data-testid="location">{value.pathname}{value.search}</span>; }
 function open(path, extra = {}) {
   localStorage.setItem(STORE_KEY, JSON.stringify({
-    version: 1, profile: { id: 7, tagName: "Captain" }, tournaments: [ENTRY, OTHER], activeTournamentId: ENTRY.id, ...extra,
+    version: 1, rememberLogin: true, profile: { id: 7, tagName: "Captain" }, tournaments: [ENTRY, OTHER], activeTournamentId: ENTRY.id, ...extra,
   }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Location /></TourneyProvider></MemoryRouter>);
 }
@@ -131,13 +132,13 @@ describe("Phiên 4: Đăng ký, Bộ môn và Đội tuyển", () => {
     fireEvent.change(maximum, { target: { value: "" } }); fireEvent.change(maximum, { target: { value: "20" } });
     expect(save).toBeDisabled();
   });
-  it("chọn 9 game/4 thể thức, lưu SWISS và đồng bộ về Dashboard", async () => {
+  it("chọn 8 game/4 thể thức, lưu SWISS và đồng bộ về Dashboard", async () => {
     open("/tournament/game-info", { publicTournament: { id: ENTRY.id, name: ENTRY.name, game: "Valorant" } });
     await screen.findByRole("heading", { level: 1, name: "Thông tin game" }, { timeout: 5000 });
     const card = region("THÔNG TIN GAME");
     const game = within(card).getByLabelText(/Tựa game/);
     const format = within(card).getByLabelText(/Thể thức nhánh đấu/);
-    expect(within(game).getAllByRole("option")).toHaveLength(10);
+    expect(within(game).getAllByRole("option")).toHaveLength(ORGANIZER_GAMES.length + 1);
     expect(within(format).getAllByRole("option")).toHaveLength(4);
     expect(within(card).getByRole("radio", { name: "Giải đấu 1 giai đoạn" })).toBeChecked();
     const user = userEvent.setup();

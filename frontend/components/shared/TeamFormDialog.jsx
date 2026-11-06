@@ -43,7 +43,7 @@ export default function TeamFormDialog({ team, onClose, onSave, restoreFocus }) 
           <option value="" disabled>-- Chọn tựa game --</option>
           {TEAM_GAMES.map((game) => <option key={game} value={game}>{gameLabel(game)}</option>)}
         </NativeSelect>}</FormField>
-        {form.game && !getGame(form.game) && <p className="text-xs leading-6 text-dp-meta">Bộ môn cũ: {form.game}. Hãy chọn một trong 9 game hiện được hỗ trợ trước khi lưu.</p>}
+        {form.game && !getGame(form.game) && <p className="text-xs leading-6 text-dp-meta">Bộ môn cũ: {form.game}. Hãy chọn một trong {TEAM_GAMES.length} game hiện được hỗ trợ trước khi lưu.</p>}
         <FormField label="Trạng Thái Đội Hình">{(id) => <NativeSelect id={id} value={String(form.recruiting)} onChange={(event) => change("recruiting", event.target.value === "true")}>
           <option value="true">Đang mở tuyển thành viên</option><option value="false">Đã chốt đội hình</option>
         </NativeSelect>}</FormField>

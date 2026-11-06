@@ -31,21 +31,21 @@ describe("Landing", () => {
       expect(screen.getByRole("img", { name: HERO_SLIDES[(index + 1) % HERO_SLIDES.length].alt })).toBeInTheDocument();
     }
   });
-  it("carousel có đúng 9 game truy cập được và bàn phím cuộn vòng; footer cuộn lên đầu", () => {
+  it("carousel có đúng 8 game chọn được và bàn phím cuộn vòng; footer cuộn lên đầu", () => {
     const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     openLanding();
-    expect(screen.getAllByRole("link", { name: /^Khám phá giải đấu .+/ })).toHaveLength(9);
-    const carousel = screen.getByRole("region", { name: "Carousel 9 trò chơi" });
-    fireEvent.keyDown(carousel, { key: "ArrowRight" });
-    expect(screen.getByRole("link", { name: "Khám phá giải đấu Đấu Trường Chân Lý" })).toHaveFocus();
-    for (let index = 0; index < 6; index++) fireEvent.keyDown(carousel, { key: "ArrowRight" });
-    expect(screen.getByRole("link", { name: "Khám phá giải đấu Liên Minh Huyền Thoại: Tốc Chiến" })).toHaveFocus();
+    expect(screen.getAllByRole("button", { name: /^Chọn / })).toHaveLength(8);
+    const carousel = screen.getByRole("region", { name: "Carousel 8 trò chơi" });
+    fireEvent.keyDown(carousel, { key: "ArrowDown" });
+    expect(screen.getByRole("button", { name: "Chọn Đấu Trường Chân Lý" })).toHaveFocus();
+    for (let index = 0; index < 5; index++) fireEvent.keyDown(carousel, { key: "ArrowDown" });
+    expect(screen.getByRole("button", { name: "Chọn Liên Minh Huyền Thoại: Tốc Chiến" })).toHaveFocus();
     expect(screen.queryByRole("button", { name: "Trò chơi tiếp theo" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Trò chơi trước" })).not.toBeInTheDocument();
-    fireEvent.keyDown(carousel, { key: "ArrowRight" });
-    expect(screen.getByRole("link", { name: "Khám phá giải đấu Liên Minh Huyền Thoại" })).toHaveFocus();
-    fireEvent.keyDown(carousel, { key: "ArrowLeft" });
-    expect(screen.getByRole("link", { name: "Khám phá giải đấu Liên Minh Huyền Thoại: Tốc Chiến" })).toHaveFocus();
+    fireEvent.keyDown(carousel, { key: "ArrowDown" });
+    expect(screen.getByRole("button", { name: "Chọn Liên Minh Huyền Thoại" })).toHaveFocus();
+    fireEvent.keyDown(carousel, { key: "ArrowUp" });
+    expect(screen.getByRole("button", { name: "Chọn Liên Minh Huyền Thoại: Tốc Chiến" })).toHaveFocus();
     fireEvent.click(screen.getByRole("button", { name: "TỚI ĐẦU TRANG" }));
     expect(scroll).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
   });

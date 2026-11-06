@@ -1,17 +1,17 @@
 ﻿import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { LANDING_GAMES } from "@/constants/games";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
-import { discoveryPath } from "@/lib/tournament-search";
 import useReveal from "@/hooks/useReveal";
+import GameBackdrop from "./GameBackdrop";
 
 const COUNT = LANDING_GAMES.length;
-const DWELL = 3000;
+const DWELL = 8000;
 const DURATION = 450;
 const modulo = (value) => ((value % COUNT) + COUNT) % COUNT;
 
 export default function GameCarousel() {
+  const section = useRef(null);
   const track = useRef(null);
   useReveal({ mode: "posters", targetRef: track });
   const drag = useRef(null);
@@ -25,8 +25,12 @@ export default function GameCarousel() {
   const settleTimer = useRef(null);
   const mounted = useRef(false);
   const actions = useRef({});
-  const paused = useRef({ focused: false, hidden: document.hidden });
+  const pointerFocus = useRef(false);
+  const paused = useRef({ focused: false, hidden: document.hidden, outside: typeof IntersectionObserver !== "undefined" });
+  const [playing, setPlaying] = useState(!paused.current.hidden && !paused.current.outside);
+  const [copies, setCopies] = useState(3);
   const [index, setIndex] = useState(1);
+  const [selectedCard, setSelectedCard] = useState(COUNT + 1);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const reduced = useRef(reducedMotion);
   reduced.current = reducedMotion;
@@ -40,35 +44,38 @@ export default function GameCarousel() {
   const select = useCallback((next) => {
     active.current = modulo(next);
     setIndex(active.current);
+    if (!geometry.current) setSelectedCard(COUNT + active.current);
   }, []);
 
   const scheduleNext = useCallback(() => {
     clearAuto();
-    if (!mounted.current || reduced.current || paused.current.focused || paused.current.hidden || drag.current || settleTimer.current != null) return;
+    if (!mounted.current || reduced.current || paused.current.focused || paused.current.hidden || paused.current.outside || drag.current || settleTimer.current != null) return;
     timer.current = setTimeout(() => actions.current.move(1), DWELL);
   }, [clearAuto]);
 
-  const place = useCallback((left) => {
+  const place = useCallback((offset, updateSelection = true) => {
     const element = track.current;
     const size = geometry.current;
     if (!element || !size) return;
     // Shift a whole catalogue to keep the same pixels on screen at either seam.
-    const shift = -Math.floor((left - size.start) / size.loop) * size.loop;
-    const next = left + shift;
-    if (shift && drag.current) drag.current.left += shift;
+    const shift = -Math.floor((offset - size.start) / size.loop) * size.loop;
+    const next = offset + shift;
+    if (shift && drag.current) drag.current.offset += shift;
     if (shift && animation.current) {
       animation.current.from += shift;
       animation.current.to += shift;
     }
     position.current = next;
-    element.scrollLeft = next;
-    select(Math.floor((next + size.viewport / 2 - size.origin - size.width / 2) / size.stride + 0.5));
+    element.scrollTop = next;
+    if (updateSelection) select(Math.floor((next + size.anchor - size.origin - size.extent / 2) / size.stride + 0.5));
+    const physical = (next + size.anchor - size.origin - size.extent / 2) / size.stride;
+    setSelectedCard(active.current + Math.round((physical - active.current) / COUNT) * COUNT);
   }, [select]);
 
   const animateTo = useCallback((to, next, instant = false) => {
     clearAuto(); stopAnimation();
     select(next);
-    if (!geometry.current || instant || reduced.current || paused.current.hidden || Math.abs(to - position.current) < 1) {
+    if (!geometry.current || instant || reduced.current || paused.current.hidden || paused.current.outside || Math.abs(to - position.current) < 1) {
       place(to);
       scheduleNext();
       return;
@@ -78,7 +85,7 @@ export default function GameCarousel() {
       const transition = animation.current;
       if (!transition) return;
       const progress = Math.min((time - transition.started) / DURATION, 1);
-      place(transition.from + (transition.to - transition.from) * (1 - (1 - progress) ** 3));
+      place(transition.from + (transition.to - transition.from) * (1 - (1 - progress) ** 3), false);
       if (progress < 1) frame.current = requestAnimationFrame(tick);
       else { animation.current = null; frame.current = null; scheduleNext(); }
     }
@@ -91,8 +98,8 @@ export default function GameCarousel() {
     const size = geometry.current;
     if (size) {
       const from = animation.current?.to ?? position.current;
-      const physical = Math.floor((from - size.origin + size.viewport / 2 - size.width / 2) / size.stride + 0.5) + direction;
-      animateTo(size.origin + physical * size.stride + size.width / 2 - size.viewport / 2, next);
+      const physical = Math.floor((from - size.origin + size.anchor - size.extent / 2) / size.stride + 0.5) + direction;
+      animateTo(size.origin + physical * size.stride + size.extent / 2 - size.anchor, next);
     } else { select(next); scheduleNext(); }
     if (focus) track.current?.children[COUNT + next]?.focus({ preventScroll: true });
   }, [animateTo, scheduleNext, select]);
@@ -101,8 +108,8 @@ export default function GameCarousel() {
     clearTimeout(settleTimer.current); settleTimer.current = null;
     const size = geometry.current;
     if (!size) { scheduleNext(); return; }
-    const physical = Math.floor((position.current - size.origin + size.viewport / 2 - size.width / 2) / size.stride + 0.5);
-    animateTo(size.origin + physical * size.stride + size.width / 2 - size.viewport / 2, physical, instant);
+    const physical = Math.floor((position.current - size.origin + size.anchor - size.extent / 2) / size.stride + 0.5);
+    animateTo(size.origin + physical * size.stride + size.extent / 2 - size.anchor, physical, instant);
   }, [animateTo, scheduleNext]);
   actions.current = { move, snap };
 
@@ -120,18 +127,20 @@ export default function GameCarousel() {
     function measure() {
       const first = element.children[0];
       const bounds = first.getBoundingClientRect();
-      const stride = element.children[1].getBoundingClientRect().left - bounds.left || element.children[1].offsetLeft - first.offsetLeft;
-      if (!stride || !element.clientWidth) return;
-      const width = bounds.width || first.offsetWidth;
-      const origin = bounds.width ? bounds.left - element.getBoundingClientRect().left + element.scrollLeft : first.offsetLeft;
-      const viewport = element.clientWidth;
+      const stride = element.children[1].getBoundingClientRect().top - bounds.top || element.children[1].offsetTop - first.offsetTop;
+      if (!stride || !element.clientHeight) return;
+      const extent = bounds.height || first.offsetHeight;
+      const origin = bounds.height ? bounds.top - element.getBoundingClientRect().top + element.scrollTop : first.offsetTop;
+      const viewport = element.clientHeight;
+      const anchor = viewport / 2;
       const loop = COUNT * stride;
-      geometry.current = { width, origin, viewport, stride, loop, start: origin + loop + width / 2 - viewport / 2 };
+      setCopies(Math.max(3, Math.ceil(viewport / loop) + 2));
+      geometry.current = { extent, origin, viewport, anchor, stride, loop, start: origin + loop + extent / 2 - anchor };
       stopAnimation();
-      place(origin + (COUNT + active.current) * stride + width / 2 - viewport / 2);
+      place(origin + (COUNT + active.current) * stride + extent / 2 - anchor);
       if (drag.current) {
-        drag.current.start = drag.current.lastX;
-        drag.current.left = position.current;
+        drag.current.start = drag.current.lastY;
+        drag.current.offset = position.current;
       }
       scheduleNext();
     }
@@ -140,19 +149,26 @@ export default function GameCarousel() {
     observer?.observe(element);
     window.addEventListener("resize", measure);
     return () => { observer?.disconnect(); window.removeEventListener("resize", measure); };
-  }, [place, scheduleNext, stopAnimation]);
+  }, [copies, place, scheduleNext, stopAnimation]);
 
   useEffect(() => {
     mounted.current = true;
     function visibility() {
       paused.current.hidden = document.hidden;
+      setPlaying(!paused.current.hidden && !paused.current.outside);
       clearAuto(); stopAnimation();
       actions.current.snap(true);
     }
+    const observer = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(([entry]) => {
+      paused.current.outside = !entry.isIntersecting || entry.intersectionRatio < 0.01;
+      visibility();
+    }, { threshold: 0.01 });
+    observer?.observe(section.current);
     actions.current.snap(true);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       mounted.current = false;
+      observer?.disconnect();
       clearAuto(); stopAnimation(); clearTimeout(settleTimer.current); settleTimer.current = null;
       document.removeEventListener("visibilitychange", visibility);
     };
@@ -162,81 +178,99 @@ export default function GameCarousel() {
     if (!drag.current) return;
     const manual = drag.current.manual;
     drag.current = null;
+    pointerFocus.current = false;
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (manual) snap(); else settle();
   }
 
-  return <section aria-labelledby="games-title" className="border-b border-dp-hairline py-10 sm:py-12"
+  function choose(next) {
+    clearTimeout(settleTimer.current); settleTimer.current = null;
+    const size = geometry.current;
+    if (size) {
+      const physical = COUNT + next;
+      const target = size.origin + physical * size.stride + size.extent / 2 - size.anchor;
+      const nearest = target + Math.round(((animation.current?.to ?? position.current) - target) / size.loop) * size.loop;
+      animateTo(nearest, next);
+    } else { select(next); scheduleNext(); }
+  }
+
+  return <section ref={section} aria-labelledby="games-title" className="game-showcase"
     onFocusCapture={() => {
-      if (!drag.current) { paused.current.focused = true; clearAuto(); }
+      if (!drag.current && !pointerFocus.current) { paused.current.focused = true; clearAuto(); }
     }}
     onBlurCapture={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget)) { paused.current.focused = false; scheduleNext(); }
     }}>
-    <div className="dp-container mb-8">
+    <GameBackdrop game={LANDING_GAMES[index]} playing={playing} reducedMotion={reducedMotion} />
+    <div className="game-showcase-shade" aria-hidden="true" />
+    <div className="game-showcase-heading">
       <h2 id="games-title" className="home-section-title">TRÒ CHƠI CỦA CHÚNG TÔI</h2>
-      <p className="mt-3 text-sm leading-6 text-dp-read">Chọn game để khám phá giải đấu. Kéo hoặc dùng phím mũi tên để xem thêm.</p>
     </div>
     <div ref={track} role="region" aria-roledescription="carousel" aria-label={`Carousel ${COUNT} trò chơi`} tabIndex={0}
       className="game-carousel"
       onDragStart={(event) => event.preventDefault()}
       onFocusCapture={(event) => {
-        if (drag.current) return;
+        if (drag.current || pointerFocus.current) return;
         const item = event.target.closest("[data-game-index]");
         if (!item || item.getAttribute("aria-hidden") === "true") return;
         const next = Number(item.dataset.gameIndex);
         if (next !== active.current) {
           stopAnimation(); select(next);
           const size = geometry.current;
-          if (size) place(size.origin + (COUNT + next) * size.stride + size.width / 2 - size.viewport / 2);
+          if (size) place(size.origin + (COUNT + next) * size.stride + size.extent / 2 - size.anchor);
         }
       }}
       onPointerDown={(event) => {
         dragged.current = false;
+        pointerFocus.current = true;
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
         clearAuto(); stopAnimation(); clearTimeout(settleTimer.current); settleTimer.current = null;
         paused.current.focused = false;
-        drag.current = { start: event.clientX, lastX: event.clientX, top: event.clientY, left: position.current, manual: event.pointerType !== "touch" };
+        drag.current = { start: event.clientY, lastY: event.clientY, cross: event.clientX, offset: position.current, manual: event.pointerType !== "touch" };
       }}
       onPointerMove={(event) => {
         if (!drag.current) return;
-        drag.current.lastX = event.clientX;
-        const distance = event.clientX - drag.current.start;
-        if (Math.abs(distance) > 5 || Math.abs(event.clientY - drag.current.top) > 5) {
+        drag.current.lastY = event.clientY;
+        const distance = event.clientY - drag.current.start;
+        if (Math.abs(distance) > 5 || Math.abs(event.clientX - drag.current.cross) > 5) {
           dragged.current = true;
           if (drag.current.manual) {
             event.currentTarget.setPointerCapture?.(event.pointerId);
-            place(drag.current.left - distance);
+            place(drag.current.offset - distance);
           }
         }
       }}
       onPointerUp={finishDrag}
-      onPointerCancel={() => { drag.current = null; dragged.current = false; settle(); }}
+      onPointerCancel={() => { drag.current = null; dragged.current = false; pointerFocus.current = false; settle(); }}
       onLostPointerCapture={finishDrag}
       onPointerLeave={(event) => { if (!event.currentTarget.hasPointerCapture?.(event.pointerId)) finishDrag(event); }}
       onClickCapture={(event) => {
         if (dragged.current && event.detail !== 0) { event.preventDefault(); event.stopPropagation(); }
         dragged.current = false;
+        pointerFocus.current = false;
       }}
       onScroll={(event) => {
         // Ignore our own scroll events, including browser subpixel rounding.
-        if (Math.abs(event.currentTarget.scrollLeft - position.current) > 1) {
-          stopAnimation(); place(event.currentTarget.scrollLeft); settle();
+        if (Math.abs(event.currentTarget.scrollTop - position.current) > 1) {
+          stopAnimation(); place(event.currentTarget.scrollTop); settle();
         }
       }}
       onWheel={() => { stopAnimation(); settle(); }}
       onKeyDown={(event) => {
-        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-          event.preventDefault(); dragged.current = false; move(event.key === "ArrowRight" ? 1 : -1, true);
+        pointerFocus.current = false;
+        paused.current.focused = true; clearAuto();
+        if (["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(event.key)) {
+          event.preventDefault(); dragged.current = false; move(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1, true);
         }
       }}>
-      {[0, 1, 2].flatMap((copy) => LANDING_GAMES.map((game, next) => <Link key={`${copy}-${game.id}`}
-        to={discoveryPath({ game: game.id })} draggable={false} data-game-index={next}
-        aria-label={`Khám phá giải đấu ${game.name}`} aria-hidden={copy !== 1 ? true : undefined} tabIndex={copy === 1 ? 0 : -1}
+      {Array.from({ length: copies }, (_, copy) => LANDING_GAMES.map((game, next) => <button key={`${copy}-${game.id}`}
+        type="button" draggable={false} data-game-index={next} onClick={() => choose(next)}
+        aria-label={`Chọn ${game.name}`} aria-pressed={index === next} aria-hidden={copy !== 1 ? true : undefined} tabIndex={copy === 1 ? 0 : -1}
         onMouseDown={copy !== 1 ? (event) => event.preventDefault() : undefined}
-        className={cn("game-carousel-card", index === next && "is-active")}>
-        <img src={game.image} alt="" draggable={false} decoding="async" />
-      </Link>))}
+        className={cn("game-carousel-card", index === next && selectedCard === copy * COUNT + next && "is-active")}>
+        <span className="game-carousel-art"><img src={game.image} alt="" draggable={false} decoding="async" /></span>
+        <span className="game-carousel-name">{game.name}</span>
+      </button>))}
     </div>
   </section>;
 }

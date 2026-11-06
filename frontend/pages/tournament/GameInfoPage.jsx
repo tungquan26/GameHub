@@ -23,7 +23,7 @@ function GameEditor({ entry }) {
       <option value="" disabled>-- Chọn tựa game --</option>
       {ORGANIZER_GAMES.map((game) => <option key={game.id} value={game.id}>{game.name}</option>)}
     </NativeSelect>}</FormField>
-    {draft.value.game && !getGame(draft.value.game) && <p className="text-xs leading-6 text-dp-meta">Bộ môn cũ: {draft.value.game}. Hãy chọn một trong 9 game hiện được hỗ trợ.</p>}
+    {draft.value.game && !getGame(draft.value.game) && <p className="text-xs leading-6 text-dp-meta">Bộ môn cũ: {draft.value.game}. Hãy chọn một trong {ORGANIZER_GAMES.length} game hiện được hỗ trợ.</p>}
     <fieldset className="border-y border-dp-hairline py-5"><legend className="mb-3 text-xs font-medium text-dp-read">Giai đoạn thi đấu</legend>
       <label htmlFor={stageId} className="flex items-center gap-3 text-sm"><input id={stageId} type="radio" name="stageType" value="SINGLE_STAGE" checked readOnly className="size-4 accent-dp-live" />Giải đấu 1 giai đoạn</label>
     </fieldset>

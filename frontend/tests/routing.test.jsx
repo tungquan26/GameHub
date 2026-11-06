@@ -8,7 +8,7 @@ import { TourneyProvider } from "@/context/TourneyContext";
 import { STORE_KEY } from "@/lib/tourney-store";
 import { requiresAuthentication } from "@/lib/navigation";
 
-function signIn() { localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: { id: 7, username: "Captain" }, tournaments: [] })); }
+function signIn() { localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: { id: 7, username: "Captain" }, tournaments: [] })); }
 
 function LocationProbe() {
   const location = useLocation();
@@ -57,7 +57,7 @@ describe("Routes và layouts", () => {
   });
 
   it("menu tài khoản điều hướng đúng tab cài đặt", async () => {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: { id: 7, username: "Captain" }, tournaments: [] }));
+    localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: { id: 7, username: "Captain" }, tournaments: [] }));
     openRoute("/dashboard");
     await userEvent.click(screen.getByRole("button", { name: "Tài khoản", exact: true }));
     await userEvent.click(screen.getByRole("menuitem", { name: "Cài đặt tài khoản" }));

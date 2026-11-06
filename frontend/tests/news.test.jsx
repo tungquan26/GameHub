@@ -16,7 +16,7 @@ function Controls() {
   return <><button onClick={() => setProfile({ id: 8, username: "Player" })}>Switch account</button><button onClick={clearProfile}>Log out</button></>;
 }
 function open(user = profile) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: user, tournaments: [], teams: [] }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: user, tournaments: [], teams: [] }));
   return render(<MemoryRouter initialEntries={["/news"]}><TourneyProvider><NewsPage /><Controls /></TourneyProvider></MemoryRouter>);
 }
 beforeEach(() => vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => response([]))));

@@ -20,7 +20,8 @@ export default function useReveal({ enabled = true, mode = "section", targetRef 
       const bounds = element.getBoundingClientRect();
       return [...element.querySelectorAll(".game-carousel-card")].filter((item) => {
         const rect = item.getBoundingClientRect();
-        return rect.width > 0 && rect.right > bounds.left + 1 && rect.left < bounds.right - 1;
+        return rect.width > 0 && rect.right > bounds.left + 1 && rect.left < bounds.right - 1
+          && rect.bottom > bounds.top + 1 && rect.top < bounds.bottom - 1;
       });
     }
     function show() {

@@ -30,7 +30,7 @@ export default function LoginPage() {
         if (error.status === 401) throw new Error("Tên người dùng hoặc mật khẩu không chính xác.");
         throw error;
       }
-      setProfile(profileFromLogin(user, currentUser));
+      setProfile(profileFromLogin(user, currentUser), { remember });
       navigate(returnToFrom(location, "/dashboard"), { replace: true });
     });
   }

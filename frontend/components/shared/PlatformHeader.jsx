@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Compass, LayoutDashboard, Menu, Newspaper, Trophy, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, LayoutDashboard, Menu, Trophy } from "lucide-react";
 import { useTourney } from "@/context/TourneyContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -14,18 +14,18 @@ import useNavIndicator from "@/hooks/useNavIndicator";
 import logo from "@/assets/logo_bieutuong.png";
 
 const LINKS = [
-  { to: "/search", label: "Khám phá giải đấu", icon: Compass },
-  { to: "/community", label: "Cộng đồng", icon: Users },
-  { to: "/news", label: "Tin tức", icon: Newspaper },
+  { to: "/search", label: "Khám phá giải đấu" },
+  { to: "/community", label: "Cộng đồng" },
+  { to: "/news", label: "Tin tức" },
 ];
 
 function Navigation({ mobile = false, onNavigate }) {
   const { pathname } = useLocation();
   const indicator = useNavIndicator(pathname, mobile);
   return <nav ref={indicator} aria-label={mobile ? "Điều hướng mobile" : "Điều hướng chính"} className={mobile ? "flex flex-col items-start gap-4" : "relative hidden items-center gap-6 lg:flex"}>
-    {LINKS.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} onClick={() => onNavigate?.(to)}
-      className={({ isActive }) => cn("flex items-center gap-2 border-b-2 border-transparent py-2.5 text-[13px] font-semibold whitespace-nowrap uppercase text-dp-read transition-colors hover:text-dp-bright", mobile && "py-3", isActive && "text-dp-bright", isActive && mobile && "border-dp-live")}>
-      <Icon aria-hidden="true" className={cn("size-4 shrink-0", !mobile && "hidden xl:block")} />{label}
+    {LINKS.map(({ to, label }) => <NavLink key={to} to={to} onClick={() => onNavigate?.(to)}
+      className={({ isActive }) => cn("flex items-center border-b-2 border-transparent py-2.5 text-[13px] font-semibold whitespace-nowrap uppercase text-dp-read transition-colors hover:text-dp-bright", mobile && "py-3", isActive && "text-dp-bright", isActive && mobile && "border-dp-live")}>
+      {label}
     </NavLink>)}
     {!mobile && <span data-nav-indicator aria-hidden="true" className="nav-indicator" />}
   </nav>;
@@ -36,7 +36,6 @@ export default function PlatformHeader({ auth = false }) {
   const { currentUser } = useTourney();
   const authenticated = Boolean(userKey(currentUser));
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(() => window.scrollY > 8);
   const home = !auth && location.pathname === "/";
   const menuOrigin = useRef(pageViewKey(location));
   const menuLeaving = useRef(false);
@@ -49,20 +48,13 @@ export default function PlatformHeader({ auth = false }) {
   const personal = ["/dashboard", "/events"].includes(location.pathname);
   useEffect(() => { setMenuOpen(false); }, [location.pathname, location.search, location.hash]);
   useEffect(() => {
-    if (!home) return;
-    const update = () => setScrolled(window.scrollY > 8);
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, [home]);
-  useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
     const closeOnDesktop = (event) => { if (event.matches) setMenuOpen(false); };
     media.addEventListener("change", closeOnDesktop);
     return () => media.removeEventListener("change", closeOnDesktop);
   }, []);
 
-  return <header aria-label="BTP Tournament" data-platform-header data-home={home} data-transparent={home && !scrolled && !menuOpen} className="platform-header sticky top-0 z-40 shrink-0 border-b border-dp-hairline bg-dp-ground/95 backdrop-blur-md">
+  return <header aria-label="BTP Tournament" data-platform-header data-home={home} data-transparent={home && !menuOpen} className={cn("platform-header top-0 z-40 shrink-0 border-b border-dp-hairline bg-dp-ground/95 backdrop-blur-md", home ? "relative" : "sticky")}>
     <div className="dp-container flex h-[var(--dp-header-height)] items-center gap-3 sm:gap-5 lg:gap-8">
       <Link to="/" aria-label="Trang chủ BTP Tournament" className="flex min-w-0 shrink-0 items-center gap-2.5" onClick={closeMenu}>
         <img src={logo} alt="" className="size-8 shrink-0 object-contain" />

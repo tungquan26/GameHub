@@ -65,7 +65,7 @@ export function validateTeam(values) {
   if (!values.name.trim()) throw new Error("Vui lòng nhập Tên Đội Tuyển.");
   if (!values.game) throw new Error("Vui lòng chọn Tựa Game Thi Đấu Chính.");
   const game = getGame(values.game);
-  if (!game) throw new Error("Vui lòng chọn một trong 9 tựa game hiện được hỗ trợ.");
+  if (!game) throw new Error(`Vui lòng chọn một trong ${SUPPORTED_GAMES.length} tựa game hiện được hỗ trợ.`);
   return {
     name: values.name.trim(),
     game: game.id,

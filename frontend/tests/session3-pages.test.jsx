@@ -11,7 +11,7 @@ const PROFILE = { id: 7, tagName: "Captain", email: "captain@example.com" };
 function location() { const value = useLocation(); return <span data-testid="location">{value.pathname}{value.search}</span>; }
 const Location = location;
 function open(path, extra = {}) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, profile: PROFILE, tournaments: [], ...extra }));
+  localStorage.setItem(STORE_KEY, JSON.stringify({ version: 1, rememberLogin: true, profile: PROFILE, tournaments: [], ...extra }));
   return render(<MemoryRouter initialEntries={[path]}><TourneyProvider><AppRoutes /><Location /></TourneyProvider></MemoryRouter>);
 }
 function saved() { return JSON.parse(localStorage.getItem(STORE_KEY)); }
@@ -56,7 +56,7 @@ describe("Search", () => {
     expect(saved().tournaments[0].id).toBe(701);
     await user.click(screen.getByRole("button", { name: "Bộ lọc", exact: true }));
     const popover = screen.getByRole("dialog", { name: "Bộ lọc giải đấu" });
-    expect(within(within(popover).getByRole("group", { name: "TỰA GAME" })).getAllByRole("checkbox")).toHaveLength(9);
+    expect(within(within(popover).getByRole("group", { name: "TỰA GAME" })).getAllByRole("checkbox")).toHaveLength(8);
     await user.click(within(popover).getByLabelText("Đang diễn ra"));
     await user.click(within(popover).getByLabelText("Counter-Strike 2"));
     await user.click(within(popover).getByLabelText("Tùy chọn ngày"));
@@ -132,7 +132,7 @@ describe("Events và Create", () => {
 
 const TEAM_A = { id: 1, name: "Alpha", game: "Valorant", captain: "Captain", captainKey: "id:7", memberIdentities: { "id:7": "Captain", "id:8": "Member" }, requestIdentities: { "id:9": "Applicant", "id:10": "Rejected" }, members: ["Captain", "Member"], pendingRequests: ["Applicant", "Rejected"], recruiting: true, logo: "" };
 const TEAM_B = { id: 2, name: "Beta", game: "CS2", captain: "Other", captainKey: "id:8", members: ["Other"], pendingRequests: [], recruiting: true, logo: "" };
-const TEAM_C = { id: 3, name: "Closed", game: "PUBG", captain: "Other", captainKey: "id:8", members: ["Other"], pendingRequests: [], recruiting: false, logo: "" };
+const TEAM_C = { id: 3, name: "Closed", game: "Free Fire", captain: "Other", captainKey: "id:8", members: ["Other"], pendingRequests: [], recruiting: false, logo: "" };
 const TEAM_D = { id: 4, name: "MemberTeam", game: "CS2", captain: "Other", captainKey: "id:8", memberIdentities: { "id:8": "Other", "id:7": "Captain" }, members: ["Other", "Captain"], pendingRequests: [], recruiting: true, logo: "" };
 async function community(teams = [TEAM_A, TEAM_B, TEAM_C, TEAM_D]) {
   const result = open("/community", { teams });

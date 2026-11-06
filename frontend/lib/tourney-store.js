@@ -5,6 +5,7 @@ import { sanitizeBracket, validBracket } from "./bracket";
 import { findSample } from "@/constants/tournament-catalog";
 
 export const STORE_KEY = "btp_react_state_v1";
+export const LOGIN_SESSION_KEY = "btp_login_session_v1";
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const hasId = (value) => isRecord(value) && ["string", "number"].includes(typeof value.id);
 
@@ -43,6 +44,7 @@ export function parseState(value, { cleanBrackets = true } = {}) {
   const state = {
     version: 1,
     profile: profileData(value.profile),
+    rememberLogin: value.rememberLogin === true,
     tournaments: value.tournaments.filter(hasId),
     activeTournamentId: ["string", "number"].includes(typeof value.activeTournamentId) ? value.activeTournamentId : null,
     publicTournament: isRecord(value.publicTournament) ? value.publicTournament : null,

@@ -63,12 +63,20 @@ describe("UX-4: trang chủ dẫn vào khám phá", () => {
     expect(screen.getByRole("link", { name: /Xem tất cả/ })).toHaveAttribute("href", "/search?status=in_progress");
   });
 
-  it("9 game có link dùng slug; chọn game, xem giải rồi Back giữ danh sách", async () => {
+  it("8 game đổi nền tại chỗ, không mở trang tìm kiếm", async () => {
     open("/");
-    const carousel = await screen.findByRole("region", { name: "Carousel 9 trò chơi" });
-    for (const game of SUPPORTED_GAMES) expect(within(carousel).getByRole("link", { name: `Khám phá giải đấu ${game.name}` })).toHaveAttribute("href", `/search?game=${game.slug}`);
+    const carousel = await screen.findByRole("region", { name: "Carousel 8 trò chơi" });
+    for (const game of SUPPORTED_GAMES) expect(within(carousel).getByRole("button", { name: `Chọn ${game.name}` })).not.toHaveAttribute("href");
     const user = userEvent.setup();
-    await user.click(within(carousel).getByRole("link", { name: "Khám phá giải đấu Valorant" }));
+    await user.click(within(carousel).getByRole("button", { name: "Chọn Free Fire" }));
+    expect(current()).toBe("/");
+    expect(within(carousel).getByRole("button", { name: "Chọn Free Fire" })).toHaveAttribute("aria-pressed", "true");
+    expect(document.querySelector('[data-game-background][data-current="true"]')).toHaveAttribute("data-game-background", "freefire");
+  });
+
+  it("xem giải rồi Back giữ danh sách đã lọc theo game", async () => {
+    open("/search?game=valorant");
+    const user = userEvent.setup();
     await screen.findByRole("heading", { name: "Tìm kiếm giải đấu" });
     expect(current()).toBe("/search?game=valorant");
     const before = cardNames();
@@ -81,30 +89,30 @@ describe("UX-4: trang chủ dẫn vào khám phá", () => {
     expect(cardNames()).toEqual(before);
   });
 
-  it.each(["mouse", "touch"])("kéo bằng %s không mở link; click/Enter tiếp theo vẫn dùng được", async (pointerType) => {
+  it.each(["mouse", "touch"])("kéo bằng %s không kích hoạt nút; click/Enter tiếp theo chọn game tại chỗ", async (pointerType) => {
     vi.stubGlobal("PointerEvent", class extends MouseEvent { constructor(type, options) { super(type, options); this.pointerType = options.pointerType; this.pointerId = options.pointerId; } });
     open("/");
-    const carousel = await screen.findByRole("region", { name: "Carousel 9 trò chơi" });
-    const link = within(carousel).getByRole("link", { name: "Khám phá giải đấu Valorant" });
-    fireEvent.pointerDown(link, { pointerType, pointerId: 1, button: 0, clientX: 300, clientY: 100 });
+    const carousel = await screen.findByRole("region", { name: "Carousel 8 trò chơi" });
+    const link = within(carousel).getByRole("button", { name: "Chọn Free Fire" });
+    fireEvent.pointerDown(link, { pointerType, pointerId: 1, button: 0, clientX: 100, clientY: 300 });
     fireEvent.pointerMove(carousel, { pointerType, pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(carousel, { pointerType, pointerId: 1 });
     fireEvent.click(link, { detail: 1 });
     expect(current()).toBe("/");
     const user = userEvent.setup();
     if (pointerType === "mouse") await user.click(link); else { link.focus(); await user.keyboard("{Enter}"); }
-    await screen.findByRole("heading", { name: "Tìm kiếm giải đấu" });
-    expect(current()).toBe("/search?game=valorant");
+    expect(current()).toBe("/");
+    expect(link).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("mũi tên đưa focus tới game để Enter mở đúng danh sách", async () => {
+  it("mũi tên và Enter chọn game và nền tương ứng, không chuyển trang", async () => {
     open("/");
-    const carousel = await screen.findByRole("region", { name: "Carousel 9 trò chơi" });
-    fireEvent.keyDown(carousel, { key: "ArrowRight" });
-    expect(within(carousel).getByRole("link", { name: "Khám phá giải đấu Đấu Trường Chân Lý" })).toHaveFocus();
+    const carousel = await screen.findByRole("region", { name: "Carousel 8 trò chơi" });
+    fireEvent.keyDown(carousel, { key: "ArrowDown" });
+    expect(within(carousel).getByRole("button", { name: "Chọn Đấu Trường Chân Lý" })).toHaveFocus();
     await userEvent.keyboard("{Enter}");
-    await screen.findByRole("heading", { name: "Tìm kiếm giải đấu" });
-    expect(current()).toBe("/search?game=teamfighttactics");
+    expect(current()).toBe("/");
+    expect(document.querySelector('[data-game-background][data-current="true"]')).toHaveAttribute("data-game-background", "teamfighttactics");
   });
 });
 
