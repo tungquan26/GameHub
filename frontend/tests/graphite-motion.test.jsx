@@ -36,7 +36,7 @@ afterEach(() => {
 });
 function openHero() { return render(<MemoryRouter><HeroBanner /></MemoryRouter>); }
 
-describe('Hero tải ảnh và hòa ảnh', () => {
+describe('Hero tải ảnh và chuyển slide', () => {
   it('chờ giải mã ảnh mới, giữ ảnh cũ đủ 500ms và tiếp tục nhịp 5 giây', async () => {
     openHero();
     let decode;

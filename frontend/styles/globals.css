@@ -71,7 +71,7 @@
   --dp-card-duration: 200ms;
   --dp-reveal-duration: 450ms;
   --dp-hero-duration: 650ms;
-  --dp-hero-crossfade-duration: 500ms;
+  --dp-hero-slide-duration: 500ms;
   --dp-page-slide-duration: 350ms;
   --dp-page-slide-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -211,11 +211,16 @@
   .dp-interactive-card:hover { transform: translateY(-4px); background-color: var(--dp-color-hover); border-color: var(--dp-color-hairline-2); }
 }
 .hero-shade { background: linear-gradient(180deg, color-mix(in srgb, var(--dp-color-ground) 65%, transparent), color-mix(in srgb, var(--dp-color-ground) 90%, transparent)); }
-.hero-slide { opacity: 0; z-index: 0; }
-.hero-slide[data-current="true"] { opacity: 1; z-index: 2; }
-.hero-slide[data-outgoing="true"] { opacity: 1; z-index: 1; }
-.hero-slide[data-entering="true"] { animation: hero-crossfade var(--dp-hero-crossfade-duration) ease-out both; }
-@keyframes hero-crossfade { from { opacity: 0; } to { opacity: 1; } }
+.hero-slide { opacity: 0; z-index: 0; transform: translateX(100%); }
+.hero-slide[data-current="true"] { opacity: 1; z-index: 2; transform: translateX(0); }
+.hero-slide[data-outgoing="true"] {
+  opacity: 1;
+  z-index: 1;
+  animation: hero-slide-out var(--dp-hero-slide-duration) ease-out both;
+}
+.hero-slide[data-entering="true"] { animation: hero-slide-in var(--dp-hero-slide-duration) ease-out both; }
+@keyframes hero-slide-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes hero-slide-out { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 .nav-indicator { position: absolute; pointer-events: none; bottom: 0; left: 0; height: 2px; width: 0; opacity: 0; background: var(--dp-color-live); }
 
 .home-section-title {
@@ -469,5 +474,5 @@
   .dp-button, .dp-btn-primary, .dp-btn-secondary, .dp-interactive-card { transition: none; }
   .dp-button[data-variant="default"]:not([data-size="icon"]):active:not(:disabled):not([aria-disabled="true"]), .dp-btn-primary:active:not(:disabled), .dp-interactive-card:hover { transform: none; }
   .dp-button .lucide-arrow-right, .dp-motion-link .lucide-arrow-right { translate: none !important; transition: none; }
-  .hero-slide[data-entering="true"] { animation: none; }
+  .hero-slide[data-entering="true"], .hero-slide[data-outgoing="true"] { animation: none; }
 }
