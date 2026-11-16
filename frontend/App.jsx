@@ -6,6 +6,7 @@ import PlatformLayout from "@/components/layouts/PlatformLayout";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import TournamentSpaceLayout from "@/components/layouts/TournamentSpaceLayout";
 import NavigationExperience from "@/components/shared/NavigationExperience";
+import PageTransition from "@/components/shared/PageTransition";
 import PageContent from "@/components/shared/PageContent";
 import RequireAuth from "@/components/shared/RequireAuth";
 import { Button } from "@/components/ui/button";
@@ -67,24 +68,28 @@ export function AppRoutes() {
     <UnsavedChangesProvider>
       <NavigationExperience>
       <StorageNotice />
-      <Routes>
-        <Route element={<AuthLayout />}>{pages("auth")}</Route>
-        <Route element={<PlatformLayout />}>
-          {pages("landing")}
-          {pages("app")}
-          <Route element={<TournamentSpaceLayout />}>{pages("tournament")}{pages("public")}</Route>
-          <Route path="*" element={
-            <PageContent><div className="dp-container flex min-h-[60vh] flex-col items-start justify-center gap-5 py-10">
-              <span className="font-mono text-sm text-dp-live">404</span>
-              <h1 className="text-3xl font-semibold uppercase">Không tìm thấy trang</h1>
-              <p className="text-dp-read">Đường dẫn bạn truy cập không tồn tại.</p>
-              <Button asChild><Link to="/">Về trang chủ<ArrowRight /></Link></Button>
-            </div></PageContent>
-          } />
-        </Route>
-        <Route path="/tournament" element={<RedirectTo to="/tournament/home" />} />
-        {["login", "register", "verify"].map((page) => <Route key={page} path={`/auth/${page}`} element={<RedirectTo to={`/${page}`} />} />)}
-      </Routes>
+      <PageTransition>
+        {(displayLocation) => (
+          <Routes location={displayLocation}>
+            <Route element={<AuthLayout />}>{pages("auth")}</Route>
+            <Route element={<PlatformLayout />}>
+              {pages("landing")}
+              {pages("app")}
+              <Route element={<TournamentSpaceLayout />}>{pages("tournament")}{pages("public")}</Route>
+              <Route path="*" element={
+                <PageContent><div className="dp-container flex min-h-[60vh] flex-col items-start justify-center gap-5 py-10">
+                  <span className="font-mono text-sm text-dp-live">404</span>
+                  <h1 className="text-3xl font-semibold uppercase">Không tìm thấy trang</h1>
+                  <p className="text-dp-read">Đường dẫn bạn truy cập không tồn tại.</p>
+                  <Button asChild><Link to="/">Về trang chủ<ArrowRight /></Link></Button>
+                </div></PageContent>
+              } />
+            </Route>
+            <Route path="/tournament" element={<RedirectTo to="/tournament/home" />} />
+            {["login", "register", "verify"].map((page) => <Route key={page} path={`/auth/${page}`} element={<RedirectTo to={`/${page}`} />} />)}
+          </Routes>
+        )}
+      </PageTransition>
       </NavigationExperience>
     </UnsavedChangesProvider>
   );

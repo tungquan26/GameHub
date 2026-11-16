@@ -475,4 +475,46 @@
   .dp-button[data-variant="default"]:not([data-size="icon"]):active:not(:disabled):not([aria-disabled="true"]), .dp-btn-primary:active:not(:disabled), .dp-interactive-card:hover { transform: none; }
   .dp-button .lucide-arrow-right, .dp-motion-link .lucide-arrow-right { translate: none !important; transition: none; }
   .hero-slide[data-entering="true"], .hero-slide[data-outgoing="true"] { animation: none; }
+  .pt-wipe { display: none !important; }
 }
+
+/* Page Transition Wipe */
+.pt-container {
+  position: relative;
+  overflow-x: clip;
+  min-height: 100vh;
+}
+
+.pt-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pt-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pt-container[data-phase="cover"] .pt-wipe {
+  pointer-events: auto;
+}
+
+.pt-wipe-layer {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-101%);
+  will-change: transform;
+}
+
+.pt-wipe-cyan {
+  background-color: var(--dp-color-live);
+}
+
+.pt-wipe-ground {
+  background-color: var(--dp-color-ground);
+}
+

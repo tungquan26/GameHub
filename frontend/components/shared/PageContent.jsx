@@ -1,25 +1,10 @@
-import { Suspense, useLayoutEffect, useRef } from "react";
+import { Suspense } from "react";
 import { useLocation } from "react-router-dom";
-import useMediaQuery from "@/hooks/useMediaQuery";
 import { pageViewKey } from "@/lib/page-navigation";
-import { motionDuration } from "@/lib/motion";
 import PageSkeleton from "./PageSkeleton";
 
 function ReadyContent({ children, viewKey }) {
-  const ref = useRef(null);
-  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
-  useLayoutEffect(() => {
-    if (reduced) return;
-    const element = ref.current;
-    if (!element?.animate) return;
-    const tokens = getComputedStyle(element);
-    const animation = element.animate([{ transform: "translateX(100%)" }, { transform: "translateX(0)" }], {
-      duration: motionDuration(element, "--dp-page-slide-duration", 350),
-      easing: tokens.getPropertyValue("--dp-page-slide-ease").trim() || "cubic-bezier(0.22, 1, 0.36, 1)",
-    });
-    return () => animation.cancel();
-  }, [viewKey, reduced]);
-  return <div ref={ref} data-page-ready={viewKey}>{children}</div>;
+  return <div data-page-ready={viewKey}>{children}</div>;
 }
 export default function PageContent({ page, children }) {
   const location = useLocation(); const viewKey = pageViewKey(location);
