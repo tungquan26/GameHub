@@ -3,11 +3,9 @@ import { pastDateError } from "./dates";
 
 export const allMatches = (bracket) => bracket?.rounds?.flatMap((round) => round.matches) || [];
 export const findMatch = (bracket, id) => allMatches(bracket).find((match) => String(match.matchId) === String(id));
-export function teamsForBracket(teams, size) {
-  const result = (Array.isArray(teams) ? teams : []).filter((team) => team && typeof team.name === "string" && team.name.trim())
-    .slice(0, size).map((team, index) => ({ id: team.id ?? "team-" + index, name: team.name.trim(), sample: Boolean(team.sample) }));
-  while (result.length < size) result.push(null);
-  return result;
+function teamsForBracket(teams, size) {
+  return (Array.isArray(teams) ? teams : []).filter((team) => team && typeof team.name === "string" && team.name.trim())
+    .slice(0, size).map((team, index) => ({ id: team.id ?? "team-" + index, name: team.name.trim() }));
 }
 function scheduledTime(start, dayOffset, hourOffset) {
   const date = new Date(start);
@@ -18,7 +16,7 @@ function scheduledTime(start, dayOffset, hourOffset) {
 }
 export function generateBracket(entry, size = 8, shuffle = false, random = Math.random) {
   if (![4, 8].includes(size)) throw new Error("Quy mô nhánh đấu phải là 4 hoặc 8 đội.");
-  const teams = teamsForBracket(entry.tournamentTeams, size).filter(Boolean);
+  const teams = teamsForBracket(entry.tournamentTeams, size);
   if (shuffle) for (let index = teams.length - 1; index > 0; index--) {
     const target = Math.floor(random() * (index + 1));
     [teams[index], teams[target]] = [teams[target], teams[index]];
@@ -69,32 +67,6 @@ function propagate(bracket, match, visited = new Set()) {
     next.result = null; next.status = "SCHEDULED";
     propagate(bracket, next, visited);
   }
-}
-export function isGeneratedBracketTeam(team, participants = []) {
-  return Boolean(team && !(Array.isArray(participants) ? participants : []).some((entry) => entry && String(entry.id) === String(team.id))
-    && (team.sample || String(team.id).startsWith("sample-team-")));
-}
-
-// Preserve match IDs/times and independent results. A real team that shares a
-// name or an old source flag with a generated slot is identified by its ID in
-// the tournament's participant list, never by its display name.
-export function sanitizeBracket(bracket, participants = []) {
-  if (!validBracket(bracket)) return bracket;
-  const generated = (team) => isGeneratedBracketTeam(team, participants);
-  if (!bracket.usesSampleTeams && !allMatches(bracket).some((match) => generated(match.teamA) || generated(match.teamB) || generated(match.result?.winner))) return bracket;
-  const updated = clone(bracket);
-  const affected = [];
-  for (const match of allMatches(updated)) {
-    const removed = generated(match.teamA) || generated(match.teamB) || generated(match.result?.winner);
-    if (!removed) continue;
-    if (generated(match.teamA)) match.teamA = null;
-    if (generated(match.teamB)) match.teamB = null;
-    match.result = null; match.status = "SCHEDULED";
-    affected.push(match);
-  }
-  for (const match of affected) propagate(updated, match);
-  updated.usesSampleTeams = false;
-  return updated;
 }
 export function updateBracketMatch(bracket, matchId, values, timeOnly = false) {
   if (!validBracket(bracket)) throw new Error("Dữ liệu nhánh đấu không hợp lệ.");

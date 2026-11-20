@@ -9,13 +9,16 @@ import { FormMessage } from "@/components/shared/AuthPanel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTourney } from "@/context/TourneyContext";
-import { normalizeParticipants } from "@/lib/tournament-settings";
+import { catalogGame } from "@/lib/games";
+import { MAX_TOURNAMENT_TEAMS, normalizeParticipants } from "@/lib/tournament-settings";
 import { lower } from "@/lib/tournaments";
 import useAsyncAction from "@/hooks/useAsyncAction";
 import { useUnsavedChanges } from "@/components/shared/UnsavedChangesProvider";
 
 function TeamsEditor({ entry }) {
-  const { addTournamentTeam } = useTourney();
+  const { addTournamentTeam, games } = useTourney();
+  const game = catalogGame(games, entry.game);
+  const size = game && (game.minPlayers === game.maxPlayers ? game.minPlayers : `${game.minPlayers} đến ${game.maxPlayers}`);
   const [keyword, setKeyword] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", members: "" });
@@ -23,6 +26,9 @@ function TeamsEditor({ entry }) {
   const action = useAsyncAction();
   useUnsavedChanges(open && (Boolean(form.name || form.members) || action.pending));
   const teams = normalizeParticipants(entry.tournamentTeams);
+  const usedSlots = entry.teamCount ?? teams.length;
+  const maxTeams = entry.maxTeams ?? MAX_TOURNAMENT_TEAMS;
+  const full = usedSlots >= maxTeams;
   const filtered = teams.filter((team) => !lower(keyword) || lower(team.name).includes(lower(keyword)) || lower(team.members.join(" / ")).includes(lower(keyword)));
   function openDialog(next) {
     if (next) { setForm({ name: "", members: "" }); action.setError(""); }
@@ -31,21 +37,21 @@ function TeamsEditor({ entry }) {
   function submit(event) {
     event.preventDefault(); event.stopPropagation();
     action.run(async () => {
-      const team = addTournamentTeam(entry.id, form);
+      const team = await addTournamentTeam(entry.id, form, game);
       setNotice(`Đã thêm đội "${team.name}" vào danh sách.`); setOpen(false);
     });
   }
-  return <SettingsCard title="Danh sách đội tuyển" subtitle="Tìm kiếm và quản lý các đội tuyển trong giải đấu.">
+  return <SettingsCard title="Danh sách đội tuyển" subtitle={`Đã dùng ${usedSlots}/${maxTeams} suất thi đấu.`}>
     <div className="flex flex-col gap-3 sm:flex-row">
       <SearchInput label="Tìm đội tuyển hoặc thành viên" placeholder="Tìm kiếm đội tuyển hoặc thành viên..." value={keyword} onChange={setKeyword} />
       <Dialog open={open} onOpenChange={openDialog}>
-        <DialogTrigger asChild><Button><Plus />Thêm đội tuyển</Button></DialogTrigger>
+        <DialogTrigger asChild><Button disabled={full}><Plus />{full ? "Đã đủ đội" : "Thêm đội tuyển"}</Button></DialogTrigger>
         <DialogContent>
           <DialogTitle className="pr-6 text-xl font-semibold">Thêm đội tuyển</DialogTitle>
           <DialogDescription className="mt-2 text-xs leading-6 text-dp-read">Nhập tên các thành viên, cách nhau bởi dấu "/" hoặc dấu phẩy.</DialogDescription>
           <form onSubmit={submit} noValidate className="mt-6 space-y-5">
             <FormField label="Tên đội tuyển" required placeholder="VD: T1 / Gen.G" value={form.name} onChange={(event) => { setForm((previous) => ({ ...previous, name: event.target.value })); action.setError(""); }} />
-            <FormField label="Danh sách thành viên" required placeholder="Faker / Oner / Chovy (phân cách bằng dấu / hoặc dấu phẩy)" value={form.members} onChange={(event) => { setForm((previous) => ({ ...previous, members: event.target.value })); action.setError(""); }} />
+            <FormField label="Danh sách thành viên" required hint={size ? `${game.name} yêu cầu ${size} thành viên.` : "Chọn bộ môn trong mục Thông tin game trước khi thêm đội."} placeholder="Nhập tên, cách nhau bằng dấu / hoặc dấu phẩy" value={form.members} onChange={(event) => { setForm((previous) => ({ ...previous, members: event.target.value })); action.setError(""); }} />
             <FormMessage error={action.error} />
             <div className="flex justify-end gap-3 border-t border-dp-hairline pt-5">
               <Button variant="outline" size="sm" onClick={() => setOpen(false)}>Hủy</Button>

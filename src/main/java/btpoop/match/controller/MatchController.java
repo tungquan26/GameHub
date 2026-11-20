@@ -31,7 +31,8 @@ public class MatchController {
     public ResponseEntity<Match> scheduleMatch(
             @PathVariable Long id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime scheduledTime,
-            @RequestParam(required = false) String location) {
+            @RequestParam(required = false) String location, jakarta.servlet.http.HttpSession session) {
+        btpoop.user.controller.SessionUser.require(session,matchService.getMatchById(id).getTournament().getOrganizer().getUserId());
         return ResponseEntity.ok(matchService.scheduleMatch(id, scheduledTime, location));
     }
 
@@ -39,7 +40,8 @@ public class MatchController {
     public ResponseEntity<Match> updateMatchResult(
             @PathVariable Long id,
             @RequestParam int scoreA,
-            @RequestParam int scoreB) {
+            @RequestParam int scoreB, jakarta.servlet.http.HttpSession session) {
+        btpoop.user.controller.SessionUser.require(session,matchService.getMatchById(id).getTournament().getOrganizer().getUserId());
         return ResponseEntity.ok(matchService.updateMatchResult(id, scoreA, scoreB));
     }
 }

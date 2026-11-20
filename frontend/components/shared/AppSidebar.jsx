@@ -1,10 +1,9 @@
 import { Link, NavLink } from "react-router-dom";
-import { ArrowLeft, LayoutDashboard, Plus, Search, Trophy, Users } from "lucide-react";
+import { ArrowLeft, Plus, Search, Trophy, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const PRIMARY_NAV = [
-  { to: "/dashboard", label: "Tổng quan", icon: LayoutDashboard },
   { to: "/events", label: "Giải đấu của tôi", icon: Trophy },
   { to: "/search", label: "Khám phá giải đấu", icon: Search },
   { to: "/community", label: "Cộng đồng", icon: Users },

@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTourney } from "@/context/TourneyContext";
 import { resolvePublicTournament, tournamentAccess } from "@/lib/public-tournament";
 import { tournamentApi } from "@/lib/api";
+import { parseVietnamDateTime } from "@/lib/dates";
 
 export default function useTournamentView() {
   const context = useTourney();
@@ -40,7 +41,7 @@ export default function useTournamentView() {
   const tournament = resolved || result?.tournament || null;
   useEffect(() => {
     const boundaries = [tournament?.regSettings?.registrationStartDate, tournament?.regSettings?.registrationEndDate]
-      .map((value) => Date.parse(value)).filter((value) => Number.isFinite(value) && value > now.getTime());
+      .map(parseVietnamDateTime).filter((value) => Number.isFinite(value) && value > now.getTime());
     if (!boundaries.length) return;
     const timer = setTimeout(() => setNow(new Date()), Math.min(2147483647, Math.max(1, Math.min(...boundaries) - Date.now())));
     return () => clearTimeout(timer);

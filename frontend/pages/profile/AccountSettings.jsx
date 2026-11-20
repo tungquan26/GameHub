@@ -17,11 +17,11 @@ export default function AccountSettings({ profile }) {
   const [emailNotice, setEmailNotice] = useState("");
   const [passwords, setPasswords] = useState({ old: "", next: "" });
   const [passwordError, setPasswordError] = useState("");
-  function saveEmail(event) {
+  async function saveEmail(event) {
     event.preventDefault(); setEmailNotice(""); setEmailError("");
     const value = email.trim();
     if (!value || !value.includes("@")) { setEmailError("Vui lòng nhập địa chỉ email hợp lệ."); return; }
-    updateProfile({ ...profile, email: value }); setEditingEmail(false);
+    try { await updateProfile({ email: value }); } catch (error) { setEmailError(error.message); return; } setEditingEmail(false);
     setEmailNotice("Đã cập nhật địa chỉ email liên hệ thành công!");
   }
   function savePassword(event) {
@@ -64,7 +64,7 @@ export default function AccountSettings({ profile }) {
             <DialogDescription className="mt-3 text-sm leading-6 text-dp-read">Hồ sơ đã lưu trên trình duyệt này sẽ bị xóa và bạn sẽ được chuyển về trang đăng nhập. Thao tác này không xóa tài khoản trên máy chủ.</DialogDescription>
             <div className="mt-6 flex flex-wrap justify-end gap-3">
               <DialogClose asChild><Button variant="outline" size="sm">Hủy</Button></DialogClose>
-              <Button size="sm" variant="destructive" onClick={() => { clearProfile(); navigate("/login", { replace: true, state: { deletedLocal: true } }); }}>Xóa hồ sơ trên thiết bị</Button>
+              <Button size="sm" variant="destructive" onClick={async () => { try { await clearProfile(); } catch (error) { setEmailError(error.message); return; } navigate("/login", { replace: true, state: { deletedLocal: true } }); }}>Xóa hồ sơ trên thiết bị</Button>
             </div>
           </DialogContent>
         </Dialog>

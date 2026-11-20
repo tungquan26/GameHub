@@ -14,6 +14,7 @@ import java.util.List;
 public class BracketController {
 
     private final BracketService bracketService;
+    private final btpoop.tournament.service.TournamentService tournaments;
 
     @GetMapping
     public ResponseEntity<List<Bracket>> getAllBrackets() {
@@ -26,12 +27,14 @@ public class BracketController {
     }
 
     @PostMapping
-    public ResponseEntity<Bracket> createBracket(@RequestBody Bracket bracket, @RequestParam Long tournamentId) {
+    public ResponseEntity<Bracket> createBracket(@RequestBody Bracket bracket, @RequestParam Long tournamentId, jakarta.servlet.http.HttpSession session) {
+        btpoop.user.controller.SessionUser.require(session,tournaments.getTournamentById(tournamentId).getOrganizer().getUserId());
         return ResponseEntity.ok(bracketService.createBracket(bracket, tournamentId));
     }
 
     @PostMapping("/generate/{tournamentId}")
-    public ResponseEntity<Bracket> generateBracket(@PathVariable Long tournamentId) {
+    public ResponseEntity<Bracket> generateBracket(@PathVariable Long tournamentId, jakarta.servlet.http.HttpSession session) {
+        btpoop.user.controller.SessionUser.require(session,tournaments.getTournamentById(tournamentId).getOrganizer().getUserId());
         return ResponseEntity.ok(bracketService.generateBracket(tournamentId));
     }
 

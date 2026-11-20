@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class FrontendController {
 
     @GetMapping({
-            "/{page:login|register|verify|profile|dashboard|search|events|community|news|create}",
-            "/{page:login|register|verify|profile|dashboard|search|events|community|news|create}/",
+            "/{page:login|register|verify|profile|dashboard|search|events|community|news|create|messages}",
+            "/{page:login|register|verify|profile|dashboard|search|events|community|news|create|messages}/",
             "/profile/settings", "/profile/settings/",
             "/auth/{page:login|register|verify}",
             "/auth/{page:login|register|verify}/",

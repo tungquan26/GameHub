@@ -1,16 +1,16 @@
 ﻿import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { LANDING_GAMES } from "@/constants/games";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
 import useReveal from "@/hooks/useReveal";
 import GameBackdrop from "./GameBackdrop";
 
-const COUNT = LANDING_GAMES.length;
 const DWELL = 8000;
 const DURATION = 450;
-const modulo = (value) => ((value % COUNT) + COUNT) % COUNT;
+const modulo = (value, count) => ((value % count) + count) % count;
 
-export default function GameCarousel() {
+export default function GameCarousel({ games }) {
+  const count = games.length;
+  const firstIndex = Math.min(1, count - 1);
   const section = useRef(null);
   const track = useRef(null);
   useReveal({ mode: "posters", targetRef: track });
@@ -18,7 +18,7 @@ export default function GameCarousel() {
   const dragged = useRef(false);
   const geometry = useRef(null);
   const position = useRef(0);
-  const active = useRef(1);
+  const active = useRef(firstIndex);
   const animation = useRef(null);
   const frame = useRef(null);
   const timer = useRef(null);
@@ -29,8 +29,8 @@ export default function GameCarousel() {
   const paused = useRef({ focused: false, hidden: document.hidden, outside: typeof IntersectionObserver !== "undefined" });
   const [playing, setPlaying] = useState(!paused.current.hidden && !paused.current.outside);
   const [copies, setCopies] = useState(3);
-  const [index, setIndex] = useState(1);
-  const [selectedCard, setSelectedCard] = useState(COUNT + 1);
+  const [index, setIndex] = useState(firstIndex);
+  const [selectedCard, setSelectedCard] = useState(count + firstIndex);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const reduced = useRef(reducedMotion);
   reduced.current = reducedMotion;
@@ -42,16 +42,16 @@ export default function GameCarousel() {
     animation.current = null;
   }, []);
   const select = useCallback((next) => {
-    active.current = modulo(next);
+    active.current = modulo(next, count);
     setIndex(active.current);
-    if (!geometry.current) setSelectedCard(COUNT + active.current);
-  }, []);
+    if (!geometry.current) setSelectedCard(count + active.current);
+  }, [count]);
 
   const scheduleNext = useCallback(() => {
     clearAuto();
-    if (!mounted.current || reduced.current || paused.current.focused || paused.current.hidden || paused.current.outside || drag.current || settleTimer.current != null) return;
+    if (count < 2 || !mounted.current || reduced.current || paused.current.focused || paused.current.hidden || paused.current.outside || drag.current || settleTimer.current != null) return;
     timer.current = setTimeout(() => actions.current.move(1), DWELL);
-  }, [clearAuto]);
+  }, [clearAuto, count]);
 
   const place = useCallback((offset, updateSelection = true) => {
     const element = track.current;
@@ -69,8 +69,8 @@ export default function GameCarousel() {
     element.scrollTop = next;
     if (updateSelection) select(Math.floor((next + size.anchor - size.origin - size.extent / 2) / size.stride + 0.5));
     const physical = (next + size.anchor - size.origin - size.extent / 2) / size.stride;
-    setSelectedCard(active.current + Math.round((physical - active.current) / COUNT) * COUNT);
-  }, [select]);
+    setSelectedCard(active.current + Math.round((physical - active.current) / count) * count);
+  }, [count, select]);
 
   const animateTo = useCallback((to, next, instant = false) => {
     clearAuto(); stopAnimation();
@@ -80,7 +80,7 @@ export default function GameCarousel() {
       scheduleNext();
       return;
     }
-    animation.current = { from: position.current, to, index: modulo(next), started: performance.now() };
+    animation.current = { from: position.current, to, index: modulo(next, count), started: performance.now() };
     function tick(time) {
       const transition = animation.current;
       if (!transition) return;
@@ -90,19 +90,19 @@ export default function GameCarousel() {
       else { animation.current = null; frame.current = null; scheduleNext(); }
     }
     frame.current = requestAnimationFrame(tick);
-  }, [clearAuto, place, scheduleNext, select, stopAnimation]);
+  }, [clearAuto, count, place, scheduleNext, select, stopAnimation]);
 
   const move = useCallback((direction, focus = false) => {
     clearTimeout(settleTimer.current); settleTimer.current = null;
-    const next = modulo((animation.current?.index ?? active.current) + direction);
+    const next = modulo((animation.current?.index ?? active.current) + direction, count);
     const size = geometry.current;
     if (size) {
       const from = animation.current?.to ?? position.current;
       const physical = Math.floor((from - size.origin + size.anchor - size.extent / 2) / size.stride + 0.5) + direction;
       animateTo(size.origin + physical * size.stride + size.extent / 2 - size.anchor, next);
     } else { select(next); scheduleNext(); }
-    if (focus) track.current?.children[COUNT + next]?.focus({ preventScroll: true });
-  }, [animateTo, scheduleNext, select]);
+    if (focus) track.current?.children[count + next]?.focus({ preventScroll: true });
+  }, [animateTo, count, scheduleNext, select]);
 
   const snap = useCallback((instant = false) => {
     clearTimeout(settleTimer.current); settleTimer.current = null;
@@ -133,11 +133,11 @@ export default function GameCarousel() {
       const origin = bounds.height ? bounds.top - element.getBoundingClientRect().top + element.scrollTop : first.offsetTop;
       const viewport = element.clientHeight;
       const anchor = viewport / 2;
-      const loop = COUNT * stride;
+      const loop = count * stride;
       setCopies(Math.max(3, Math.ceil(viewport / loop) + 2));
       geometry.current = { extent, origin, viewport, anchor, stride, loop, start: origin + loop + extent / 2 - anchor };
       stopAnimation();
-      place(origin + (COUNT + active.current) * stride + extent / 2 - anchor);
+      place(origin + (count + active.current) * stride + extent / 2 - anchor);
       if (drag.current) {
         drag.current.start = drag.current.lastY;
         drag.current.offset = position.current;
@@ -149,7 +149,7 @@ export default function GameCarousel() {
     observer?.observe(element);
     window.addEventListener("resize", measure);
     return () => { observer?.disconnect(); window.removeEventListener("resize", measure); };
-  }, [copies, place, scheduleNext, stopAnimation]);
+  }, [copies, count, place, scheduleNext, stopAnimation]);
 
   useEffect(() => {
     mounted.current = true;
@@ -187,7 +187,7 @@ export default function GameCarousel() {
     clearTimeout(settleTimer.current); settleTimer.current = null;
     const size = geometry.current;
     if (size) {
-      const physical = COUNT + next;
+      const physical = count + next;
       const target = size.origin + physical * size.stride + size.extent / 2 - size.anchor;
       const nearest = target + Math.round(((animation.current?.to ?? position.current) - target) / size.loop) * size.loop;
       animateTo(nearest, next);
@@ -201,12 +201,12 @@ export default function GameCarousel() {
     onBlurCapture={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget)) { paused.current.focused = false; scheduleNext(); }
     }}>
-    <GameBackdrop game={LANDING_GAMES[index]} playing={playing} reducedMotion={reducedMotion} />
+    <GameBackdrop game={games[index]} playing={playing} reducedMotion={reducedMotion} />
     <div className="game-showcase-shade" aria-hidden="true" />
     <div className="game-showcase-heading">
       <h2 id="games-title" className="home-section-title">TRÒ CHƠI CỦA CHÚNG TÔI</h2>
     </div>
-    <div ref={track} role="region" aria-roledescription="carousel" aria-label={`Carousel ${COUNT} trò chơi`} tabIndex={0}
+    <div ref={track} role="region" aria-roledescription="carousel" aria-label={`Carousel ${count} trò chơi`} tabIndex={0}
       className="game-carousel"
       onDragStart={(event) => event.preventDefault()}
       onFocusCapture={(event) => {
@@ -217,7 +217,7 @@ export default function GameCarousel() {
         if (next !== active.current) {
           stopAnimation(); select(next);
           const size = geometry.current;
-          if (size) place(size.origin + (COUNT + next) * size.stride + size.extent / 2 - size.anchor);
+          if (size) place(size.origin + (count + next) * size.stride + size.extent / 2 - size.anchor);
         }
       }}
       onPointerDown={(event) => {
@@ -263,11 +263,11 @@ export default function GameCarousel() {
           event.preventDefault(); dragged.current = false; move(["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1, true);
         }
       }}>
-      {Array.from({ length: copies }, (_, copy) => LANDING_GAMES.map((game, next) => <button key={`${copy}-${game.id}`}
+      {Array.from({ length: copies }, (_, copy) => games.map((game, next) => <button key={`${copy}-${game.id}`}
         type="button" draggable={false} data-game-index={next} onClick={() => choose(next)}
         aria-label={`Chọn ${game.name}`} aria-pressed={index === next} aria-hidden={copy !== 1 ? true : undefined} tabIndex={copy === 1 ? 0 : -1}
         onMouseDown={copy !== 1 ? (event) => event.preventDefault() : undefined}
-        className={cn("game-carousel-card", index === next && selectedCard === copy * COUNT + next && "is-active")}>
+        className={cn("game-carousel-card", index === next && selectedCard === copy * count + next && "is-active")}>
         <span className="game-carousel-art"><img src={game.image} alt="" draggable={false} decoding="async" /></span>
         <span className="game-carousel-name">{game.name}</span>
       </button>))}

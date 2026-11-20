@@ -15,7 +15,7 @@ export function FormField({ label, hint, children, id: providedId, ...props }) {
 export function PasswordField({ label = "Mật khẩu", ...props }) {
   const [visible, setVisible] = useState(false);
   return <FormField label={label} required={props.required}>{(id) => <div className="relative">
-    <Input id={id} type={visible ? "text" : "password"} className="pr-12" {...props} />
+    <Input id={id} type={visible ? "text" : "password"} className="pr-12 [&::-ms-reveal]:hidden" {...props} />
     <button type="button" aria-label={`${visible ? "Ẩn" : "Hiện"} ${label.toLowerCase()}`} aria-pressed={visible}
       onClick={() => setVisible((value) => !value)} className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-dp-meta hover:text-dp-bright">
       {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

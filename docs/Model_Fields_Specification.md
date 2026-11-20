@@ -1,244 +1,276 @@
-# Model Fields Specification
+# Đặc tả mô hình dữ liệu Game-Hub
 
-## 1. User
+Tên trường dưới đây là thuộc tính Java. Cột **Ánh xạ** ghi tên bảng hoặc quan hệ JPA. Với quan hệ một–nhiều, danh sách Java được dựng từ các bản ghi liên quan. Các lớp con của `User` dùng chung bảng `users`.
 
-### Công dụng
-`User` là model cha dùng để lưu thông tin chung của người dùng trong hệ thống. `Player`, `Organizer` và `Admin` kế thừa từ `User`.
+## User · `users`
 
-### Fields
+Tài khoản gốc. Username và email là duy nhất. Giá trị băm mật khẩu dùng cho đăng nhập, còn profileJson chứa hồ sơ hiển thị và email liên hệ.
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `userId` | `long` | Mã định danh duy nhất của người dùng. |
-| `username` | `String` | Tên đăng nhập của người dùng. |
-| `password` | `String` | Mật khẩu của người dùng. |
-| `email` | `String` | Địa chỉ email của người dùng. |
-| `fullName` | `String` | Họ và tên của người dùng. |
-| `role` | `UserRole` | Vai trò của người dùng trong hệ thống: `PLAYER`, `ORGANIZER` hoặc `ADMIN`. |
-| `isVerified` | `boolean` | Trạng thái xác thực email (chặn đăng nhập nếu false). |
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `userId` | `Long` | Khóa chính |
+| `username` | `String` | — |
+| `profileJson` | `String` | — |
+| `password` | `String` | — |
+| `email` | `String` | — |
+| `role` | `UserRole` | — |
+| `isVerified` | `Boolean` | false |
 
-## 2. Player
+## Player · `users`
 
-### Vai trò
-`Player` đại diện cho người chơi trong hệ thống. Model này kế thừa từ `User` và không bổ sung field riêng.
+Kế thừa User, gắn với một bản thống kê cá nhân.
 
-### Kế thừa
-`Player` kế thừa toàn bộ fields của `User`.
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `stats` | `PlayerStats` | OneToOne · stats_id |
 
-## 3. Organizer
+## Organizer · `users`
 
-### Vai trò
-`Organizer` đại diện cho người tổ chức giải đấu trong hệ thống. Model này kế thừa từ `User` và không bổ sung field riêng.
+Kế thừa User và khởi tạo vai trò ORGANIZER.
 
-### Kế thừa
-`Organizer` kế thừa toàn bộ fields của `User`.
+## Admin · `users`
 
-## 4. Admin
+Kế thừa User và khởi tạo vai trò ADMIN.
 
-### Vai trò
-`Admin` đại diện cho quản trị viên của hệ thống. Model này kế thừa từ `User` và không bổ sung field riêng. Quyền được xác định thông qua `UserRole`.
+## VerificationToken · `verification_tokens`
 
-### Kế thừa
-`Admin` kế thừa toàn bộ fields của `User`.
+Mã xác thực theo email và loại yêu cầu, kèm thời hạn, bộ đếm và thời điểm yêu cầu.
 
-## 5. Team
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `id` | `long` | Khóa chính |
+| `email` | `String` | — |
+| `type` | `VerificationType` | — |
+| `token` | `String` | — |
+| `createdAt` | `LocalDateTime` | — |
+| `expiresAt` | `LocalDateTime` | — |
+| `dailyRequestCount` | `int` | 0 |
+| `lastRequestDate` | `LocalDateTime` | — |
 
-### Công dụng
-`Team` đại diện cho một đội tham gia các giải đấu. Model lưu thông tin đội, đội trưởng, danh sách thành viên và trạng thái của đội.
+## Game · `games`
 
-### Fields
+Danh mục bộ môn quy định quân số tối thiểu và tối đa của đội.
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `teamId` | `long` | Mã định danh duy nhất của đội. |
-| `teamName` | `String` | Tên của đội. |
-| `game` | `Game` | Loại trò chơi mà đội thi đấu (chứa luật min/max thành viên). |
-| `description` | `String` | Mô tả về đội. |
-| `captain` | `Player` | Người chơi giữ vai trò đội trưởng của đội. |
-| `members` | `List<TeamMember>` | Danh sách thành viên của đội thông qua model `TeamMember`. |
-| `status` | `TeamStatus` | Trạng thái hoạt động của đội: `ACTIVE` hoặc `INACTIVE`. |
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `gameId` | `long` | Khóa chính |
+| `name` | `String` | — |
+| `type` | `GameType` | — |
+| `minPlayers` | `int` | — |
+| `maxPlayers` | `int` | — |
+| `description` | `String` | — |
 
-## 6. TeamMember
+## Team · `teams`
 
-### Công dụng
-`TeamMember` là model trung gian thể hiện mối quan hệ giữa `Player` và `Team`, đồng thời lưu thông tin về thời điểm tham gia và vai trò của người chơi trong đội.
+Đội cộng đồng có đội trưởng và danh sách thành viên liên kết tài khoản. Đội thuộc phạm vi giải có tournamentScope và tên hiển thị participantName.
 
-### Fields
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `teamId` | `long` | Khóa chính |
+| `teamName` | `String` | — |
+| `game` | `Game` | ManyToOne · game_id |
+| `description` | `String` | — |
+| `recruiting` | `boolean` | — |
+| `logo` | `String` | — |
+| `tournamentScope` | `Long` | — |
+| `participantName` | `String` | — |
+| `participantMembers` | `List<String>` | ElementCollection · team_participant_members |
+| `applicants` | `Set<Long>` | ElementCollection · team_applicants |
+| `captain` | `Player` | ManyToOne · captain_id |
+| `members` | `List<TeamMember>` | OneToMany |
+| `status` | `TeamStatus` | TeamStatus.ACTIVE |
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `player` | `Player` | Người chơi tham gia đội. |
-| `joinedAt` | `LocalDateTime` | Thời điểm người chơi tham gia đội. |
-| `role` | `TeamMemberRole` | Vai trò của người chơi trong đội: `CAPTAIN` hoặc `MEMBER`. |
+## TeamMember · `team_members`
 
-## 7. Tournament
+Một lần tham gia đội của một người chơi, có vai trò và thời điểm gia nhập.
 
-### Công dụng
-`Tournament` đại diện cho một giải đấu trong hệ thống, bao gồm thông tin giải đấu, người tổ chức, thời gian, số lượng đội tối đa, thể thức và trạng thái.
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `id` | `long` | Khóa chính |
+| `team` | `Team` | ManyToOne · team_id |
+| `player` | `Player` | ManyToOne · player_id |
+| `joinedAt` | `LocalDateTime` | LocalDateTime.now() |
+| `role` | `TeamMemberRole` | — |
 
-### Fields
+## Tournament · `tournaments`
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `tournamentId` | `long` | Mã định danh duy nhất của giải đấu. |
-| `name` | `String` | Tên giải đấu. |
-| `game` | `Game` | Trò chơi được tổ chức trong giải đấu. |
-| `organizer` | `Organizer` | Người tổ chức giải đấu. |
-| `startDate` | `LocalDateTime` | Thời gian bắt đầu giải đấu. |
-| `endDate` | `LocalDateTime` | Thời gian kết thúc giải đấu. |
-| `maxTeams` | `int` | Số lượng đội tối đa được phép tham gia. |
-| `format` | `TournamentFormat` | Thể thức thi đấu của giải đấu. |
-| `status` | `TournamentStatus` | Trạng thái hiện tại của giải đấu. |
+Giải thuộc về organizer. Mỗi giải nhận tối đa 8 đội. settingsJson chứa liên hệ, địa điểm, hình ảnh, luật, cấu hình đăng ký, bộ môn và bố cục trang chủ.
 
-## 8. Registration
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `tournamentId` | `long` | Khóa chính |
+| `name` | `String` | — |
+| `game` | `Game` | ManyToOne · game_id |
+| `organizer` | `User` | ManyToOne · organizer_id |
+| `settingsJson` | `String` | — |
+| `startDate` | `LocalDateTime` | — |
+| `endDate` | `LocalDateTime` | — |
+| `maxTeams` | `int` | MAX_TEAMS |
+| `format` | `TournamentFormat` | — |
+| `status` | `TournamentStatus` | — |
+| `registrations` | `List<Registration>` | OneToMany |
+| `matches` | `List<Match>` | OneToMany |
 
-### Công dụng
-`Registration` là model trung gian thể hiện việc một `Team` đăng ký tham gia một `Tournament`, đồng thời lưu trạng thái đăng ký và check-in.
+## Registration · `registrations`
 
-### Fields
+Một lượt đăng ký đội vào giải. team trỏ tới đội thi đấu, sourceTeamId nhận diện đội cộng đồng. captainUserId và rosterUserIds ghi nhận đội trưởng và thành viên lúc đăng ký. Khi đọc bản ghi cũ thiếu thông tin chụp tại thời điểm đăng ký, RegistrationModule tra đội và thành viên liên kết.
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `registrationId` | `long` | Mã định danh duy nhất của đăng ký. |
-| `team` | `Team` | Đội thực hiện đăng ký. |
-| `tournament` | `Tournament` | Giải đấu mà đội đăng ký tham gia. |
-| `registrationDate` | `LocalDateTime` | Thời điểm đội thực hiện đăng ký. |
-| `status` | `RegistrationStatus` | Trạng thái đăng ký: `PENDING`, `APPROVED`, `REJECTED` hoặc `CANCELLED`. |
-| `checkInStatus` | `CheckInStatus` | Trạng thái check-in: `NOT_CHECKED_IN` hoặc `CHECKED_IN`. |
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `registrationId` | `long` | Khóa chính |
+| `team` | `Team` | ManyToOne · team_id |
+| `sourceTeamId` | `Long` | — |
+| `captainUserId` | `Long` | — |
+| `rosterUserIds` | `Set<Long>` | ElementCollection · registration_roster |
+| `tournament` | `Tournament` | ManyToOne · tournament_id |
+| `registrationDate` | `LocalDateTime` | LocalDateTime.now() |
+| `status` | `RegistrationStatus` | RegistrationStatus.PENDING |
+| `checkInStatus` | `CheckInStatus` | CheckInStatus.NOT_CHECKED_IN |
 
-## 9. Bracket
+## Bracket · `brackets`
 
-### Công dụng
-`Bracket` đại diện cho bảng đấu của một giải đấu, xác định thể thức và chứa các vòng đấu (`Round`) tương ứng.
+Nhánh đấu thuộc một giải. revision dùng để phát hiện hai lượt sửa dựa trên cùng một phiên bản.
 
-### Fields
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `bracketId` | `long` | Khóa chính |
+| `revision` | `long` | — |
+| `tournament` | `Tournament` | ManyToOne · tournament_id |
+| `format` | `TournamentFormat` | — |
+| `rounds` | `List<Round>` | OneToMany |
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `bracketId` | `long` | Mã định danh duy nhất của bảng đấu. |
-| `tournament` | `Tournament` | Giải đấu mà bảng đấu thuộc về. |
-| `format` | `TournamentFormat` | Thể thức thi đấu được sử dụng cho bảng đấu. |
-| `rounds` | `List<Round>` | Danh sách các vòng đấu trong bảng đấu. |
+## Round · `rounds`
 
-## 10. Round
+Vòng đấu trong nhánh. roundNumber xác định thứ tự vòng.
 
-### Công dụng
-`Round` đại diện cho một vòng đấu trong `Bracket`, xác định số thứ tự, tên vòng và danh sách các trận đấu thuộc vòng đó.
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `roundId` | `long` | Khóa chính |
+| `bracket` | `Bracket` | ManyToOne · bracket_id |
+| `roundNumber` | `int` | — |
+| `name` | `String` | — |
+| `matches` | `List<Match>` | OneToMany |
 
-### Fields
+## Match · `matches`
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `roundNumber` | `int` | Số thứ tự của vòng đấu. |
-| `name` | `String` | Tên của vòng đấu. |
-| `matches` | `List<Match>` | Danh sách các trận đấu thuộc vòng. |
+Trận trong giải, có thể thuộc một vòng. nextMatch và nextMatchSlot xác định nơi chuyển đội đi tiếp. Ba cờ notified ghi nhận các mốc đã nhắc lịch.
 
-## 11. Match
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `matchId` | `long` | Khóa chính |
+| `tournament` | `Tournament` | ManyToOne · tournament_id |
+| `teamA` | `Team` | ManyToOne · team_a_id |
+| `teamB` | `Team` | ManyToOne · team_b_id |
+| `scheduledTime` | `LocalDateTime` | — |
+| `round` | `Round` | ManyToOne · round_id |
+| `status` | `MatchStatus` | MatchStatus.SCHEDULED |
+| `location` | `String` | — |
+| `notified1Week` | `boolean` | false |
+| `notified1Day` | `boolean` | false |
+| `notified1Hour` | `boolean` | false |
+| `matchOrder` | `int` | 0 |
+| `nextMatch` | `Match` | ManyToOne · next_match_id |
+| `nextMatchSlot` | `String` | — |
+| `result` | `MatchResult` | Embedded |
 
-### Công dụng
-`Match` đại diện cho một trận đấu giữa hai đội trong một vòng đấu, đồng thời lưu lịch thi đấu, trạng thái và kết quả của trận.
+## MatchResult · `matches`
 
-### Fields
+Kiểu nhúng trong Match. Tỉ số và đội thắng được lưu cùng bản ghi trận.
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `matchId` | `long` | Mã định danh duy nhất của trận đấu. |
-| `teamA` | `Team` | Đội ở vị trí A của trận đấu. Có thể chưa có giá trị trước khi bracket xác định đội. |
-| `teamB` | `Team` | Đội ở vị trí B của trận đấu. Có thể chưa có giá trị trước khi bracket xác định đội. |
-| `scheduledTime` | `LocalDateTime` | Thời gian dự kiến diễn ra trận đấu. |
-| `location` | `String` | Địa điểm tổ chức trận đấu (nếu online thì giá trị là "Online"). |
-| `round` | `Round` | Vòng đấu mà trận đấu thuộc về. |
-| `status` | `MatchStatus` | Trạng thái trận đấu: `SCHEDULED`, `ONGOING`, `COMPLETED` hoặc `CANCELLED`. |
-| `result` | `MatchResult` | Kết quả của trận đấu; có thể chưa có khi trận chưa hoàn thành. |
-| `notified1Week` | `boolean` | Đã gửi thông báo trước 1 tuần. |
-| `notified1Day` | `boolean` | Đã gửi thông báo trước 1 ngày. |
-| `notified1Hour` | `boolean` | Đã gửi thông báo trước 1 giờ. |
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `scoreA` | `int` | — |
+| `scoreB` | `int` | — |
+| `winner` | `Team` | ManyToOne · winner_id |
 
-## 12. MatchResult
+## TeamRanking · `team_rankings`
 
-### Công dụng
-`MatchResult` lưu kết quả của một trận đấu, bao gồm điểm số của hai đội và đội chiến thắng.
+Thứ hạng theo điểm, thành tích và hiệu số của đội.
 
-### Fields
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `id` | `Long` | Khóa chính |
+| `team` | `Team` | ManyToOne · team_id |
+| `tournament` | `Tournament` | ManyToOne · tournament_id |
+| `matchesPlayed` | `int` | 0 |
+| `wins` | `int` | 0 |
+| `draws` | `int` | 0 |
+| `losses` | `int` | 0 |
+| `points` | `int` | 0 |
+| `totalScoreDifference` | `int` | 0 |
+| `currentRank` | `int` | 0 |
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `scoreA` | `int` | Điểm của đội A. |
-| `scoreB` | `int` | Điểm của đội B. |
-| `winner` | `Team` | Đội chiến thắng trong trận đấu. |
+## PlayerRanking · `player_rankings`
 
-## 13. Game
+Điểm xếp hạng và vị trí của người chơi.
 
-### Công dụng
-`Game` đại diện cho một trò chơi được hỗ trợ trong hệ thống. Model lưu thông tin về tên trò chơi, thể loại và quy định số lượng người chơi.
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `id` | `Long` | Khóa chính |
+| `player` | `Player` | ManyToOne · player_id |
+| `tournament` | `Tournament` | ManyToOne · tournament_id |
+| `rankingScore` | `double` | — |
+| `currentRank` | `int` | — |
 
-### Fields
+## PlayerStats · `player_stats`
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `gameId` | `long` | Mã định danh duy nhất của trò chơi. |
-| `name` | `String` | Tên trò chơi. |
-| `type` | `GameType` | Thể loại trò chơi. |
-| `minPlayers` | `int` | Số lượng người chơi tối thiểu yêu cầu cho một đội. |
-| `maxPlayers` | `int` | Số lượng người chơi tối đa cho phép trong một đội. |
-| `description` | `String` | Mô tả về trò chơi. |
+Thống kê cá nhân gắn với Player, gồm Elo và số trận thắng, thua.
 
-## 14. Notification
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `id` | `Long` | Khóa chính |
+| `eloScore` | `double` | 1200.0 |
+| `matchesPlayed` | `int` | 0 |
+| `wins` | `int` | 0 |
+| `losses` | `int` | 0 |
 
-### Công dụng
-`Notification` lưu trữ các thông báo gửi đến người dùng (như lời nhắc trận đấu), bao gồm nội dung nhắc nhở và trạng thái đọc. Hệ thống cũng sử dụng thông tin từ model này để gửi email song song.
+## Notification · `notifications`
 
-### Fields
+Thông báo gắn với tài khoản nhận và trạng thái đã đọc.
 
-| Field | Type | Ý nghĩa |
-|---|---|---|
-| `notificationId` | `long` | Mã định danh duy nhất của thông báo. |
-| `user` | `User` | Người dùng nhận thông báo. |
-| `title` | `String` | Tiêu đề thông báo. |
-| `message` | `String` | Nội dung chi tiết của thông báo. |
-| `isRead` | `boolean` | Trạng thái đã đọc hay chưa. |
-| `createdAt` | `LocalDateTime` | Thời gian tạo thông báo. |
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `notificationId` | `long` | Khóa chính |
+| `user` | `User` | ManyToOne · user_id |
+| `title` | `String` | — |
+| `message` | `String` | — |
+| `isRead` | `boolean` | false |
+| `createdAt` | `LocalDateTime` | LocalDateTime.now() |
 
-## 15. Tổng hợp toàn bộ model
+## Conversation · `chat_conversations`
 
-| Model | Fields |
-|---|---|
-| `User` | `userId`, `username`, `password`, `email`, `fullName`, `role`, `isVerified` |
-| `Player` | Kế thừa từ `User`, không có field riêng |
-| `Organizer` | Kế thừa từ `User`, không có field riêng |
-| `Admin` | Kế thừa từ `User`, không có field riêng |
-| `VerificationToken` | `id`, `email`, `type`, `token`, `createdAt`, `expiresAt`, `dailyRequestCount`, `lastRequestDate` |
-| `Team` | `teamId`, `teamName`, `game`, `description`, `captain`, `members`, `status` |
-| `Game` | `gameId`, `name`, `type`, `minPlayers`, `maxPlayers`, `description` |
-| `TeamMember` | `player`, `joinedAt`, `role` |
-| `Tournament` | `tournamentId`, `name`, `game`, `organizer`, `startDate`, `endDate`, `maxTeams`, `format`, `status` |
-| `Registration` | `registrationId`, `team`, `tournament`, `registrationDate`, `status`, `checkInStatus` |
-| `Bracket` | `bracketId`, `tournament`, `format`, `rounds` |
-| `Round` | `roundNumber`, `name`, `matches` |
-| `Match` | `matchId`, `teamA`, `teamB`, `scheduledTime`, `location`, `round`, `status`, `result`, `notified1Week`, `notified1Day`, `notified1Hour` |
-| `MatchResult` | `scoreA`, `scoreB`, `winner` |
-| `Notification` | `notificationId`, `user`, `title`, `message`, `isRead`, `createdAt` |
+Hội thoại giữa hai tài khoản. Cặp user_a_id và user_b_id có ràng buộc duy nhất.
 
-### Quan hệ kế thừa
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `id` | `Long` | Khóa chính |
+| `userA` | `User` | ManyToOne · user_a_id |
+| `userB` | `User` | ManyToOne · user_b_id |
+| `updatedAt` | `Instant` | — |
 
-```mermaid
-classDiagram
-    User <|-- Player
-    User <|-- Organizer
-    User <|-- Admin
-```
+## Message · `chat_messages`
 
-### Enum được sử dụng
+Nội dung tin nhắn thuộc hội thoại, lưu người gửi và thời điểm gửi.
 
-| Enum | Giá trị |
-|---|---|
-| `UserRole` | `PLAYER`, `ORGANIZER`, `ADMIN` |
-| `TeamStatus` | `ACTIVE`, `INACTIVE` |
-| `TeamMemberRole` | `CAPTAIN`, `MEMBER` |
-| `TournamentFormat` | `SINGLE_ELIMINATION`, `DOUBLE_ELIMINATION`, `ROUND_ROBIN` |
-| `TournamentStatus` | `OPEN_REGISTRATION`, `REGISTRATION_CLOSED`, `ONGOING`, `COMPLETED`, `CANCELLED` |
-| `RegistrationStatus` | `PENDING`, `APPROVED`, `REJECTED`, `CANCELLED` |
-| `CheckInStatus` | `NOT_CHECKED_IN`, `CHECKED_IN` |
-| `MatchStatus` | `SCHEDULED`, `ONGOING`, `COMPLETED`, `CANCELLED` |
-| `GameType` | `MOBA`, `FPS`, `BATTLE_ROYALE`, `SPORTS`, `RTS`, `CARD_GAME` |
-| `VerificationType` | `EMAIL_ACTIVATION`, `PASSWORD_RESET` |
+| Trường | Kiểu Java | Ánh xạ / mặc định |
+| --- | --- | --- |
+| `id` | `Long` | Khóa chính |
+| `conversation` | `Conversation` | ManyToOne · conversation_id |
+| `sender` | `User` | ManyToOne · sender_id |
+| `content` | `String` | — |
+| `createdAt` | `Instant` | — |
+
+## Kiểu liệt kê
+
+- `VerificationType` — `EMAIL_ACTIVATION`, `PASSWORD_RESET`.
+- `CheckInStatus` — `NOT_CHECKED_IN`, `CHECKED_IN`.
+- `GameType` — `MOBA`, `FPS`, `BATTLE_ROYALE`, `SPORTS`, `RTS`, `CARD_GAME`.
+- `MatchStatus` — `SCHEDULED`, `ONGOING`, `COMPLETED`, `CANCELLED`.
+- `RegistrationStatus` — `PENDING`, `APPROVED`, `REJECTED`, `CANCELLED`.
+- `TeamMemberRole` — `CAPTAIN`, `MEMBER`.
+- `TeamStatus` — `ACTIVE`, `INACTIVE`.
+- `TournamentFormat` — `SINGLE_ELIMINATION`, `DOUBLE_ELIMINATION`, `SWISS`, `ROUND_ROBIN`.
+- `TournamentStatus` — `OPEN_REGISTRATION`, `REGISTRATION_CLOSED`, `ONGOING`, `COMPLETED`, `CANCELLED`.
+- `UserRole` — `PLAYER`, `ORGANIZER`, `ADMIN`.
+
+`MatchScheduledEvent` và `MatchFinishedEvent` là sự kiện Java dùng khi lập lịch và hoàn tất trận. Xem các luồng xử lý trong [mô-đun hệ thống](System_Modules.md).

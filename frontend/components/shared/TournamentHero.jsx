@@ -5,6 +5,7 @@ import { dateRange } from "@/lib/profile";
 import { safeWebUrl } from "@/lib/homepage";
 import { gameImage, gameLabel } from "@/lib/games";
 import { TournamentCover } from "./GameArtwork";
+import { REGISTRATION_STATUS_LABELS } from "@/lib/tournaments";
 
 export function ContactLink({ entry, compact = false }) {
   const { contactType, contact } = detailsValues(entry);
@@ -15,7 +16,6 @@ export function ContactLink({ entry, compact = false }) {
   return href ? <a href={href} target={contactType === "DISCORD" ? "_blank" : undefined} rel={contactType === "DISCORD" ? "noopener noreferrer" : undefined} className="flex items-start gap-3 text-xs leading-6 text-dp-read hover:text-dp-bright">{content}</a>
     : <p className="flex items-start gap-3 text-xs leading-6 text-dp-read">{content}</p>;
 }
-const STATUS_LABELS = { OPEN_REGISTRATION: "Đang mở đăng ký", REGISTRATION_NOT_STARTED: "Chưa mở đăng ký", REGISTRATION_CLOSED: "Đã đóng đăng ký", IN_PROGRESS: "Đang diễn ra", COMPLETED: "Đã kết thúc", CANCELLED: "Đã hủy" };
 export default function TournamentHero({ entry, headingLevel = 2, status, actions }) {
   const values = detailsValues(entry); const Heading = `h${headingLevel}`;
   const game = entry.gameInfo?.game || entry.game;
@@ -31,7 +31,7 @@ export default function TournamentHero({ entry, headingLevel = 2, status, action
           {profile ? <TournamentCover src={profile} game={game} alt="Ảnh đại diện giải đấu" className="size-full" /> : values.name.charAt(0).toUpperCase() || "G"}
         </span>
         <div className="min-w-0 flex-1"><Heading className={`text-2xl leading-tight font-semibold break-words tracking-tight sm:text-3xl${headingLevel === 1 ? " uppercase" : ""}`}>{values.name || "Giải đấu mới"}</Heading></div>
-        {status && <span className="self-start rounded-pill border border-dp-live/30 px-3 py-1 text-[10px] leading-5 text-dp-live sm:self-center">{STATUS_LABELS[status] || "Chưa cập nhật"}</span>}
+        {status && <span className="self-start rounded-pill border border-dp-live/30 px-3 py-1 text-[10px] leading-5 text-dp-live sm:self-center">{REGISTRATION_STATUS_LABELS[status] || "Chưa cập nhật"}</span>}
       </div>
       <div className="grid gap-3 text-xs leading-6 text-dp-read xl:grid-cols-2">
         <p className="flex items-start gap-3 font-mono text-[11px]"><CalendarDays aria-hidden="true" className="mt-1 size-4 shrink-0 text-dp-meta" /><span>{dateRange(values.startDate, values.endDate)}</span></p>

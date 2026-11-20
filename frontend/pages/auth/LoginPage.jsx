@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import AuthPanel, { FormMessage } from "@/components/shared/AuthPanel";
-import { CheckboxField, FormField, PasswordField } from "@/components/shared/FormField";
+import { FormField, PasswordField } from "@/components/shared/FormField";
 import { Button } from "@/components/ui/button";
 import { authApi } from "@/lib/api";
 import { profileFromLogin } from "@/lib/profile";
@@ -12,7 +12,6 @@ import { authPath, returnToFrom } from "@/lib/navigation";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
-  const [remember, setRemember] = useState(false);
   const action = useAsyncAction();
   const { currentUser, setProfile } = useTourney();
   const navigate = useNavigate();
@@ -30,15 +29,14 @@ export default function LoginPage() {
         if (error.status === 401) throw new Error("Tên người dùng hoặc mật khẩu không chính xác.");
         throw error;
       }
-      setProfile(profileFromLogin(user, currentUser), { remember });
-      navigate(returnToFrom(location, "/dashboard"), { replace: true });
+      await setProfile(profileFromLogin(user, currentUser));
+      navigate(returnToFrom(location), { replace: true });
     });
   }
   return <AuthPanel title="Đăng nhập" subtitle="Chào mừng trở lại. Tiếp tục cuộc chơi của bạn.">
     <form onSubmit={submit} className="space-y-5" aria-busy={action.pending}>
       <FormField label="Tên người dùng" name="username" autoComplete="username" required value={form.username} onChange={(event) => change("username", event.target.value)} />
       <PasswordField name="password" autoComplete="current-password" required value={form.password} onChange={(event) => change("password", event.target.value)} />
-      <CheckboxField checked={remember} onChange={(event) => setRemember(event.target.checked)}>Lưu đăng nhập</CheckboxField>
       <FormMessage error={action.error} notice={state?.verified ? "Xác thực email thành công! Bạn có thể đăng nhập." : state?.deletedLocal ? "Hồ sơ trên thiết bị đã được xóa. Tài khoản máy chủ vẫn được giữ." : ""} />
       <Button type="submit" disabled={!valid || action.pending} className="w-full">
         {action.pending ? <LoaderCircle className="animate-spin" /> : <ArrowRight />}Đăng nhập

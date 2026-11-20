@@ -20,6 +20,8 @@ public class Bracket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long bracketId;
 
+    private long revision;
+
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
     private Tournament tournament;

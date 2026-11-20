@@ -15,12 +15,6 @@ export function TournamentViewSkeleton() {
     <div aria-hidden="true" className="dp-panel space-y-5 p-6"><Bar className="h-5 w-2/5" /><Bar /><Bar className="w-4/5" /><Bar className="w-3/5" /></div>
   </div>;
 }
-export function TournamentGridSkeleton() {
-  return <div role="status" aria-label="Đang tải giải đang hoạt động" data-navigation-pending className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-    <span className="sr-only">Đang tải giải đang hoạt động…</span>
-    {[0,1,2].map((key) => <div key={key} aria-hidden="true" className="dp-panel overflow-hidden"><Bar className="aspect-video h-auto rounded-none" /><div className="space-y-5 p-5"><Bar className="h-4 w-4/5" /><Bar className="w-2/3" /><Bar className="w-3/4" /></div></div>)}
-  </div>;
-}
 export default function PageSkeleton({ page, contained = false }) {
   const management = page?.layout === "tournament";
   return <div className={cn(!contained && !management && "dp-container py-9 sm:py-12")}>

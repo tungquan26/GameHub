@@ -22,17 +22,17 @@ function Schedule({ entry, publicView = false }) {
   const [editingId, setEditingId] = useState(null); const [notice, setNotice] = useState("");
   const returnFocus = useRef(null);
   const stats = bracketStats(bracket);
-  useEffect(() => { if (canEdit && !validBracket(stored)) saveTournamentBracket(entry, initial); }, [canEdit, stored, entry, initial, saveTournamentBracket]);
+  useEffect(() => { if (canEdit && !validBracket(stored)) saveTournamentBracket(entry, initial).catch(error => setNotice(error.message)); }, [canEdit, stored, entry, initial, saveTournamentBracket]);
   function open(id) { returnFocus.current = document.activeElement; setEditingId(id); }
-  function regenerate(size, shuffle) {
+  async function regenerate(size, shuffle) {
     if (!canEdit) return;
-    try { saveTournamentBracket(entry, generateBracket(entry, size, shuffle)); setEditingId(null); setNotice(shuffle ? `Đã tạo và bốc thăm nhánh đấu ${size} đội kèm lịch thi đấu mới!` : `Đã chuyển sang nhánh đấu ${size} đội.`); }
+    try { await saveTournamentBracket(entry, generateBracket(entry, size, shuffle)); setEditingId(null); setNotice(shuffle ? `Đã tạo và bốc thăm nhánh đấu ${size} đội kèm lịch thi đấu mới!` : `Đã chuyển sang nhánh đấu ${size} đội.`); }
     catch (cause) { setNotice(cause.message); }
   }
-  function save(values, timeOnly) {
+  async function save(values, timeOnly) {
     if (!canEdit) throw new Error("Chỉ ban tổ chức mới có thể cập nhật lịch thi đấu.");
     const updated = updateBracketMatch(bracket, editingId, values, timeOnly);
-    saveTournamentBracket(entry, updated); setEditingId(null);
+    await saveTournamentBracket(entry, updated); setEditingId(null);
     const match = findMatch(updated, editingId);
     setNotice(timeOnly ? `Đã cập nhật lịch thi đấu cho Trận #${match.matchNumber}.` : `Đã lưu kết quả: ${match.teamA.name} (${match.result.scoreA} - ${match.result.scoreB}) ${match.teamB.name}. Đội "${match.result.winner.name}" đi tiếp!`);
   }

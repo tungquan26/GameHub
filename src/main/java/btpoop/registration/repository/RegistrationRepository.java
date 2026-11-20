@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
-    long countByTournament(Tournament tournament);
-    List<Registration> findByTournamentAndStatus(Tournament tournament, RegistrationStatus status);
+    List<Registration> findByTournamentOrderByRegistrationIdAsc(Tournament tournament);
     List<Registration> findByTournament_TournamentIdAndStatus(Long tournamentId, RegistrationStatus status);
 }

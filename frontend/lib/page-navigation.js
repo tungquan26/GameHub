@@ -1,7 +1,7 @@
 export function pageViewKey(location) {
   const params = new URLSearchParams(location.search);
   const keys = location.pathname.startsWith("/tournament/") ? ["id", "sample", "view", "tab"]
-    : location.pathname === "/profile" ? ["user"] : location.pathname === "/profile/settings" ? ["tab"] : [];
+    : location.pathname === "/profile" ? ["id", "user"] : location.pathname === "/profile/settings" ? ["tab"] : [];
   return location.pathname + keys.map((key) => `|${key}=${params.get(key) || ""}`).join("");
 }
 

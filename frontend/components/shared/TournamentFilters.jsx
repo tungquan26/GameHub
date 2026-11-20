@@ -1,11 +1,13 @@
 import { SlidersHorizontal } from "lucide-react";
-import { SUPPORTED_GAMES } from "@/constants/games";
+import { useTourney } from "@/context/TourneyContext";
+import { canonicalGame, gameLabel } from "@/lib/games";
 import { DATE_FILTERS, EMPTY_FILTERS, STATUS_FILTERS } from "@/lib/tournaments";
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { CheckboxField, FormField } from "./FormField";
 
 export default function TournamentFilters({ value, onChange }) {
+  const { games, gameError } = useTourney();
   const count = [value.statuses, value.games, value.dateRanges].filter((group) => group.length > 0).length;
   const invalidDates = value.dateRanges.includes("custom") && value.from && value.to && value.from > value.to;
   function toggle(group, item) { onChange({ ...value, [group]: value[group].includes(item) ? value[group].filter((entry) => entry !== item) : [...value[group], item] }); }
@@ -18,7 +20,11 @@ export default function TournamentFilters({ value, onChange }) {
         </fieldset>
         <fieldset className="space-y-3 border-t border-dp-hairline pt-5"><legend className="mb-4 font-mono text-[11px] tracking-wide text-dp-meta">TỰA GAME</legend>
           <div className="max-h-44 space-y-3 overflow-y-auto pr-2">
-            {SUPPORTED_GAMES.map((game) => <CheckboxField key={game.id} checked={value.games.includes(game.id)} onChange={() => toggle("games", game.id)}>{game.name}</CheckboxField>)}
+            {gameError && <p role="alert" className="text-xs text-red-400">Không thể tải danh mục game.</p>}
+            {games.map((game) => {
+              const name = canonicalGame(game.name);
+              return <CheckboxField key={game.gameId} checked={value.games.includes(name)} onChange={() => toggle("games", name)}>{gameLabel(game.name)}</CheckboxField>;
+            })}
           </div>
         </fieldset>
         <fieldset className="space-y-3 border-t border-dp-hairline pt-5"><legend className="mb-4 font-mono text-[11px] tracking-wide text-dp-meta">NGÀY BẮT ĐẦU</legend>

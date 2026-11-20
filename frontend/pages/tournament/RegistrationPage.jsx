@@ -23,7 +23,7 @@ function RegistrationEditor({ entry }) {
   const complete = values.registrationStartDate && values.registrationEndDate && String(values.maxTeamSize).trim() !== "";
   function change(key, value) { draft.setValue((previous) => ({ ...previous, [key]: value })); setNotice(""); }
   return <SettingsCard title="Cài đặt đăng ký" subtitle="Thời hạn đăng ký, lệ phí và giới hạn số lượng đội tuyển" noValidate
-    isDirty={dirty} saveDisabled={!complete || Boolean(error)} onSave={() => { updateTournament(entry.id, { regSettings: cleanRegistration(values, dateOptions) }); setNotice("Đã lưu cài đặt đăng ký thành công."); }}>
+    isDirty={dirty} saveDisabled={!complete || Boolean(error)} onSave={async () => { await updateTournament(entry.id, { regSettings: cleanRegistration(values, dateOptions) }); setNotice("Đã lưu cài đặt đăng ký thành công."); }}>
     <p className="text-sm leading-6 text-dp-read">Thiết lập khoảng thời gian cho phép các đội tuyển đăng ký tham gia giải đấu này.</p>
     <div className="grid gap-5 sm:grid-cols-2">
       <FutureDateField label="Thời gian mở đăng ký" className="font-mono" required value={values.registrationStartDate} onChange={(event) => change("registrationStartDate", event.target.value)} />
@@ -34,9 +34,9 @@ function RegistrationEditor({ entry }) {
     </div>
     <h3 className="text-sm font-medium">Số lượng thành viên &amp; Đội tuyển</h3>
     <div className="grid gap-5 lg:grid-cols-3">
-      <FormField label="Số thành viên tối thiểu mỗi đội" type="number" className="font-mono" value={4} disabled readOnly />
-      <FormField label="Số thành viên tối đa mỗi đội" type="number" className="font-mono" min={4} max={20} step={1} required value={values.maxTeamSize} onChange={(event) => change("maxTeamSize", event.target.value)} hint="— bao gồm dự bị, huấn luyện viên,..." />
-      <FormField label="Số đội tối đa của giải" type="number" className="font-mono" value={16} disabled readOnly hint="— cố định 16 đội theo sơ đồ nhánh đấu." />
+      <FormField label="Số thành viên tối thiểu mỗi đội" type="number" className="font-mono" value={values.minTeamSize} disabled readOnly />
+      <FormField label="Số thành viên tối đa mỗi đội" type="number" className="font-mono" min={values.minTeamSize} max={20} step={1} required value={values.maxTeamSize} onChange={(event) => change("maxTeamSize", event.target.value)} hint={entry.teamMaxPlayers ? `Bộ môn cho phép tối đa ${entry.teamMaxPlayers} thành viên.` : "Quân số sẽ được kiểm tra theo bộ môn của giải."} />
+      <FormField label="Số đội tối đa của giải" type="number" className="font-mono" value={values.maxTeams} disabled readOnly />
     </div>
     <FormMessage error={error} notice={notice} />
   </SettingsCard>;

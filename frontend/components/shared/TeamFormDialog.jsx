@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/input";
 import { FormField } from "./FormField";
 import { FormMessage } from "./AuthPanel";
-import { TEAM_GAMES, validateTeam } from "@/lib/teams";
+import { validateTeam } from "@/lib/teams";
 import useAsyncAction from "@/hooks/useAsyncAction";
-import { gameLabel, getGame } from "@/lib/games";
+import { catalogGame, gameLabel } from "@/lib/games";
+import { useTourney } from "@/context/TourneyContext";
 
 export default function TeamFormDialog({ team, onClose, onSave, restoreFocus }) {
   const [form, setForm] = useState(() => ({ name: team?.name || "", game: team?.game || "", recruiting: team?.recruiting ?? true, logo: team?.logo || "" }));
+  const { games, gameError } = useTourney();
+  const selectedGame = catalogGame(games, form.game);
   const [uploading, setUploading] = useState(false);
   const input = useRef(null);
   const reader = useRef(null);
@@ -31,7 +34,7 @@ export default function TeamFormDialog({ team, onClose, onSave, restoreFocus }) 
   function submit(event) {
     event.preventDefault();
     if (uploading) return;
-    action.run(async () => { const values = validateTeam(form); await onSave(values); onClose(); });
+    action.run(async () => { const values = validateTeam(form, games); await onSave(values); onClose(); });
   }
   return <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
     <DialogContent onCloseAutoFocus={(event) => { event.preventDefault(); restoreFocus?.(); }}>
@@ -39,11 +42,11 @@ export default function TeamFormDialog({ team, onClose, onSave, restoreFocus }) 
       <DialogDescription className="mt-2 text-xs leading-6 text-dp-read">Thiết lập hồ sơ đội tuyển và biểu tượng huy hiệu</DialogDescription>
       <form onSubmit={submit} noValidate className="mt-6 space-y-5">
         <FormField label="Tên Đội Tuyển" required placeholder="VD: BTP Gaming, T1 Vietnam..." value={form.name} onChange={(event) => change("name", event.target.value)} />
-        <FormField label="Tựa Game Thi Đấu Chính" required>{(id) => <NativeSelect id={id} required value={getGame(form.game)?.id || ""} onChange={(event) => change("game", event.target.value)}>
+        <FormField label="Tựa Game Thi Đấu Chính" required>{(id) => <NativeSelect id={id} required value={selectedGame?.name || ""} onChange={(event) => change("game", event.target.value)}>
           <option value="" disabled>-- Chọn tựa game --</option>
-          {TEAM_GAMES.map((game) => <option key={game} value={game}>{gameLabel(game)}</option>)}
+          {games.map((game) => <option key={game.gameId} value={game.name}>{gameLabel(game.name)}</option>)}
         </NativeSelect>}</FormField>
-        {form.game && !getGame(form.game) && <p className="text-xs leading-6 text-dp-meta">Bộ môn cũ: {form.game}. Hãy chọn một trong {TEAM_GAMES.length} game hiện được hỗ trợ trước khi lưu.</p>}
+        {games.length > 0 && form.game && !selectedGame && <p className="text-xs leading-6 text-dp-meta">Bộ môn cũ: {form.game}. Hãy chọn một trong {games.length} game hiện được hỗ trợ trước khi lưu.</p>}
         <FormField label="Trạng Thái Đội Hình">{(id) => <NativeSelect id={id} value={String(form.recruiting)} onChange={(event) => change("recruiting", event.target.value === "true")}>
           <option value="true">Đang mở tuyển thành viên</option><option value="false">Đã chốt đội hình</option>
         </NativeSelect>}</FormField>
@@ -60,10 +63,10 @@ export default function TeamFormDialog({ team, onClose, onSave, restoreFocus }) 
             </div>
           </div>
         </div>
-        <FormMessage error={action.error} />
+        <FormMessage error={action.error || (gameError && "Không thể tải danh mục game.")} />
         <div className="flex justify-end gap-3 border-t border-dp-hairline pt-5">
           <Button size="sm" variant="outline" onClick={onClose}>Hủy</Button>
-          <Button size="sm" type="submit" disabled={uploading || action.pending}>Lưu Đội Tuyển</Button>
+          <Button size="sm" type="submit" disabled={uploading || action.pending || !games.length}>Lưu Đội Tuyển</Button>
         </div>
       </form>
     </DialogContent>

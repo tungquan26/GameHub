@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface PlayerRankingRepository extends JpaRepository<PlayerRanking, Long> {
-    List<PlayerRanking> findAllByOrderByCurrentRankAsc();
+    List<PlayerRanking> findByTournamentIsNullOrderByCurrentRankAsc();
     List<PlayerRanking> findByTournament_TournamentIdOrderByCurrentRankAsc(Long tournamentId);
     Optional<PlayerRanking> findByPlayer_UserIdAndTournament_TournamentId(Long playerId, Long tournamentId);
     Optional<PlayerRanking> findByPlayer_UserIdAndTournamentIsNull(Long playerId);

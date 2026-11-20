@@ -1,9 +1,8 @@
-import { canonicalGame, gameDisplay, gameImage, getGame, isManagedGameArtwork, resolveGameArtwork } from "./games";
+import { canonicalGame, gameDisplay, gameImage, isManagedGameArtwork, resolveGameArtwork } from "./games";
 import { dateRange } from "./profile";
-import { pastDateError } from "./dates";
+import { parseVietnamDateTime } from "./dates";
 import logo from "@/assets/logo.png";
-import { matchesIdentity, userKey } from "./identity";
-import { findSample, TOURNAMENT_SAMPLES } from "@/constants/tournament-catalog";
+import { matchesIdentity } from "./identity";
 
 export const STATUS_FILTERS = [
   { value: "open_registration", label: "Đang mở đăng ký" },
@@ -18,6 +17,14 @@ export const DATE_FILTERS = [
   { value: "past_7_days", label: "7 ngày qua" }, { value: "custom", label: "Tùy chọn ngày" },
 ];
 export const EMPTY_FILTERS = { statuses: [], games: [], dateRanges: [], from: "", to: "" };
+export const REGISTRATION_STATUS_LABELS = {
+  OPEN_REGISTRATION: "Đang mở đăng ký",
+  REGISTRATION_NOT_STARTED: "Chưa mở đăng ký",
+  REGISTRATION_CLOSED: "Đã đóng đăng ký",
+  IN_PROGRESS: "Đang diễn ra",
+  COMPLETED: "Đã kết thúc",
+  CANCELLED: "Đã hủy",
+};
 const FORMAT_LABELS = { SINGLE_ELIMINATION: "Loại trực tiếp đơn", DOUBLE_ELIMINATION: "Loại trực tiếp kép", ROUND_ROBIN: "Vòng tròn tính điểm", SWISS: "Hệ Thụy Sĩ" };
 export const lower = (value) => String(value || "").trim().toLocaleLowerCase("vi");
 
@@ -28,29 +35,26 @@ export function resolveTournamentImage(value, game) {
   return gameImage(game) || logo;
 }
 export function isOwnTournament(entry, user) {
-  if (entry.sample) return false;
   return matchesIdentity(entry.ownerKey, entry.ownerId ?? entry.organizer?.userId ?? entry.organizer?.id ?? entry.organizerId, user);
 }
-export const hasTournamentOwner = (entry) => Boolean(entry.ownerKey || (entry.ownerId ?? entry.organizer?.userId ?? entry.organizer?.id ?? entry.organizerId) != null);
-export const isLegacyTournament = (entry) => !entry.sample && !hasTournamentOwner(entry) && (entry.source === "local" || Boolean(entry.details) || String(entry.id).startsWith("tourney_") || entry.id === "legacy-tournament");
+const hasTournamentOwner = (entry) => Boolean(entry.ownerKey || (entry.ownerId ?? entry.organizer?.userId ?? entry.organizer?.id ?? entry.organizerId) != null);
+export const isLegacyTournament = (entry) => !hasTournamentOwner(entry) && (entry.source === "local" || Boolean(entry.details) || String(entry.id).startsWith("tourney_") || entry.id === "legacy-tournament");
 export const isUserRegistration = (entry, user) => matchesIdentity(entry.registrantKey, entry.registrantId, user);
-export function normalizeTournament(entry, { sample = Boolean(entry.sample), user = null, player = false } = {}) {
+export function normalizeTournament(entry, { user = null, player = false } = {}) {
   const details = entry.details || {};
   const game = canonicalGame(entry.gameInfo?.game || entry.game || "");
   const raw = lower(entry.status);
   const status = ["in_progress", "ongoing"].includes(raw) ? "in_progress" : ["completed", "finished"].includes(raw) ? "completed" : raw === "cancelled" ? "cancelled" : "upcoming";
   const registration = entry.registrationState || (["closed", "registration_closed"].includes(raw) ? "closed" : raw === "closing" ? "closing" : "open");
-  const role = isOwnTournament({ ...entry, sample }, user) ? "Organizer"
+  const role = isOwnTournament(entry, user) ? "Organizer"
     : player && isUserRegistration(entry, user) ? "Player" : null;
   const startDate = entry.startDate || details.startDate || "";
   const endDate = entry.endDate || details.endDate || "";
   const format = entry.gameInfo?.format || entry.format;
   const displayFormat = FORMAT_LABELS[format] || [entry.gameDisplay, entry.game].find((value) => typeof value === "string" && value.includes("·"))?.split("·").slice(1).join(" · ").trim() || "";
-  const badgeLabel = entry.badgeLabel || (status === "cancelled" ? "Đã hủy" : status === "in_progress" ? "Đang diễn ra" : status === "completed" ? "Đã kết thúc"
-    : registration === "closed" ? "Đã đóng đăng ký" : registration === "closing" ? "Sắp đóng đăng ký" : "Đang mở đăng ký");
   return {
-    ...entry, id: entry.id ?? entry.tournamentId ?? entry.name, sample,
-    name: entry.name || details.name || "Giải đấu chưa đặt tên", game, status, registrationState: registration, badgeLabel, role,
+    ...entry, id: entry.id ?? entry.tournamentId ?? entry.name,
+    name: entry.name || details.name || "Giải đấu chưa đặt tên", game, status, registrationState: registration, role,
     gameDisplay: gameDisplay(game, displayFormat),
     startDate, endDate, dateText: entry.dateLabel || entry.date || dateRange(startDate, endDate),
     location: entry.venueAddress || details.venueAddress || entry.location || "Trực tuyến",
@@ -63,21 +67,20 @@ export function uniqueTournaments(items) {
   return items.filter((item) => {
     const id = item.storeId ?? item.id;
     if (id == null) return true;
-    const key = `${item.sample ? "sample" : "tournament"}:${id}`;
+    const key = String(id);
     if (ids.has(key)) return false;
     ids.add(key); return true;
   });
 }
-export function buildCatalog(tournaments, samples = TOURNAMENT_SAMPLES, user) {
-  return uniqueTournaments([...tournaments.map((entry) => normalizeTournament(entry, { user })),
-    ...samples.map((entry) => normalizeTournament(entry, { sample: true }))]).filter((entry) => !entry.game || getGame(entry.game));
+export function buildCatalog(tournaments, user) {
+  return uniqueTournaments(tournaments.map((entry) => normalizeTournament(entry, { user })));
 }
-export function buildUserEvents(tournaments, registered, samples = TOURNAMENT_SAMPLES, user) {
+export function buildUserEvents(tournaments, registered, user) {
   return uniqueTournaments([
     ...tournaments.filter((item) => isOwnTournament(item, user)).map((entry) => normalizeTournament(entry, { user })),
     ...registered.filter((item) => isUserRegistration(item, user)).map((entry) => {
-      const stored = entry.sample ? findSample(entry.id) || samples.find((item) => String(item.id) === String(entry.id)) : tournaments.find((item) => String(item.id) === String(entry.storeId ?? entry.id));
-      return normalizeTournament({ ...entry, ...stored, sample: Boolean(entry.sample), registrantKey: entry.registrantKey, registrantId: entry.registrantId }, { user, player: true });
+      const stored = tournaments.find((item) => String(item.id) === String(entry.storeId ?? entry.id));
+      return normalizeTournament({ ...entry, ...stored, registrantKey: entry.registrantKey, registrantId: entry.registrantId }, { user, player: true });
     }),
   ]);
 }
@@ -92,7 +95,7 @@ function todayNumber(now) {
   const part = (type) => parts.find((entry) => entry.type === type).value;
   return dayNumber(`${part("year")}-${part("month")}-${part("day")}`);
 }
-export function matchesDates(item, filters, now = new Date()) {
+function matchesDates(item, filters, now) {
   if (!filters.dateRanges.length) return true;
   const day = dayNumber(item.startDate);
   if (Number.isNaN(day)) return false;
@@ -119,13 +122,14 @@ export function registrationStatus(entry, now = new Date()) {
   if (["in_progress", "ongoing"].includes(status) || ["in progress", "đang diễn ra"].includes(badge)) return "IN_PROGRESS";
   if (["closed", "registration_closed"].includes(status) || entry.registrationState === "closed" || ["registration closed", "đã đóng đăng ký"].includes(badge)) return "REGISTRATION_CLOSED";
   if (["upcoming", "sắp diễn ra"].includes(badge)) return "REGISTRATION_NOT_STARTED";
-  const start = Date.parse(entry.regSettings?.registrationStartDate); const end = Date.parse(entry.regSettings?.registrationEndDate);
+  const start = parseVietnamDateTime(entry.regSettings?.registrationStartDate);
+  const end = parseVietnamDateTime(entry.regSettings?.registrationEndDate);
   if (Number.isFinite(start) && now.getTime() < start) return "REGISTRATION_NOT_STARTED";
   if (Number.isFinite(end) && now.getTime() >= end) return "REGISTRATION_CLOSED";
   return "OPEN_REGISTRATION";
 }
 
-export function matchesTournamentStatus(entry, status, now = new Date()) {
+function matchesTournamentStatus(entry, status, now) {
   return status === "open_registration" ? !isLegacyTournament(entry) && registrationStatus(entry, now) === "OPEN_REGISTRATION" : entry.status === status;
 }
 
@@ -134,15 +138,4 @@ export function landingHighlights(catalog, now = new Date()) {
     open: catalog.filter((entry) => matchesTournamentStatus(entry, "open_registration", now)).slice(0, 4),
     ongoing: catalog.filter((entry) => matchesTournamentStatus(entry, "in_progress", now)).slice(0, 4),
   };
-}
-export function makeTournament(values, owner, now = new Date()) {
-  if (!userKey(owner)) throw new Error("Vui lòng đăng nhập để tạo giải đấu.");
-  if (!values.name.trim() || !values.contact.trim() || !values.startDate || !values.endDate) throw new Error("Vui lòng điền đầy đủ thông tin.");
-  if (!Number.isFinite(Date.parse(values.startDate)) || !Number.isFinite(Date.parse(values.endDate)) || new Date(values.endDate) <= new Date(values.startDate)) throw new Error("Ngày kết thúc phải diễn ra sau ngày bắt đầu.");
-  const dateError = pastDateError(values, ["startDate", "endDate"], { now });
-  if (dateError) throw new Error(dateError);
-  const id = "tourney_" + crypto.randomUUID();
-  const details = { id, name: values.name.trim(), contactType: values.contactType, contact: values.contact.trim(), startDate: values.startDate, endDate: values.endDate, venueAddress: "", venueLat: null, venueLon: null };
-  return { ...details, details, source: "local", ownerKey: userKey(owner), ownerId: owner?.id ?? null, role: "Organizer", attendees: 0, status: "upcoming",
-    profileImg: "", bannerImg: "", rules: "", gameInfo: { game: "", stageType: "SINGLE_STAGE", format: "SINGLE_ELIMINATION" }, regSettings: null, homepageLayout: null, tournamentTeams: [] };
 }

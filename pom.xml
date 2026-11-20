@@ -20,6 +20,8 @@
         <java.version>25</java.version>
         <!-- Ghim phiên bản Lombok (hỗ trợ JDK 25), dùng chung cho Maven và IDE -->
         <lombok.version>1.18.46</lombok.version>
+        <!-- H2 2.4.240 fails to evaluate CHECK (... IN (...)) after the DDL connection closes. -->
+        <h2.version>2.5.252</h2.version>
         <frontend-maven-plugin.version>1.15.1</frontend-maven-plugin.version>
         <frontend.node.version>v22.12.0</frontend.node.version>
         <frontend.npm.version>10.9.0</frontend.npm.version>
@@ -51,6 +53,12 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <!-- CSDL H2: Database chạy trong bộ nhớ giúp bạn test nhanh mà chưa cần cài MySQL -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -65,12 +73,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Thư viện Thymeleaf -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        
         <!-- Thư viện để gửi Email -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

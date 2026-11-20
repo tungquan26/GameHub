@@ -12,7 +12,7 @@ function MatchForm({ match, onSave, onCancel }) {
   useUnsavedChanges(values.scheduledTime !== (match.scheduledTime || "") || String(values.scoreA) !== String(match.result?.scoreA ?? 0) || String(values.scoreB) !== String(match.result?.scoreB ?? 0));
   const ready = Boolean(match.teamA && match.teamB);
   function change(key, value) { setValues((previous) => ({ ...previous, [key]: value })); setError(""); }
-  function save(timeOnly) { try { onSave(values, timeOnly); } catch (cause) { setError(cause.message); } }
+  async function save(timeOnly) { try { await onSave(values, timeOnly); } catch (cause) { setError(cause.message); } }
   return <form className="mt-6 space-y-5" noValidate onSubmit={(event) => { event.preventDefault(); if (ready) save(false); }}>
     <FutureDateField label="Thời gian thi đấu" className="font-mono" value={values.scheduledTime} onChange={(event) => change("scheduledTime", event.target.value)} />
     <div className="grid grid-cols-2 gap-4"><FormField label={match.teamA?.name || "Đội A (TBD)"} type="number" min="0" step="1" className="font-mono" disabled={!ready} value={values.scoreA} onChange={(event) => change("scoreA", event.target.value)} /><FormField label={match.teamB?.name || "Đội B (TBD)"} type="number" min="0" step="1" className="font-mono" disabled={!ready} value={values.scoreB} onChange={(event) => change("scoreB", event.target.value)} /></div>

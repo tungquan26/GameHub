@@ -7,6 +7,7 @@ import MarkdownEditorBox from "@/components/shared/MarkdownEditorBox";
 import { FormField } from "@/components/shared/FormField";
 import FutureDateField from "@/components/shared/FutureDateField";
 import { pastDateError } from "@/lib/dates";
+import { homepageOverview, withHomepageOverview } from "@/lib/homepage";
 import useCurrentDay from "@/hooks/useCurrentDay";
 import { FormMessage } from "@/components/shared/AuthPanel";
 import { NativeSelect } from "@/components/ui/input";
@@ -25,7 +26,7 @@ function DetailsForm({ entry }) {
   const error = pastDateError(values, ["startDate", "endDate"], dateOptions) || detailsError(values);
   const complete = values.name.trim() && values.contact.trim() && values.startDate && values.endDate;
   function change(key, value) { draft.setValue((previous) => ({ ...previous, [key]: value })); setNotice(""); }
-  function save() { updateTournament(entry.id, cleanDetails(values, dateOptions)); setNotice("Đã lưu thông tin chi tiết giải đấu thành công."); }
+  async function save() { await updateTournament(entry.id, cleanDetails(values, dateOptions)); setNotice("Đã lưu thông tin chi tiết giải đấu thành công."); }
   return <SettingsCard title="Chi tiết giải đấu" subtitle="Tên, thời gian tổ chức và các thông tin cơ bản" noValidate
     isDirty={draft.isDirty} saveDisabled={!complete || Boolean(error) || locating} onSave={save}>
     <FormField label="Tên giải đấu" required placeholder="Nhập tên giải đấu" value={values.name} onChange={(event) => change("name", event.target.value)} />
@@ -51,7 +52,7 @@ function ImagesForm({ entry }) {
   const [notice, setNotice] = useState("");
   function change(key, value) { draft.setValue((previous) => ({ ...previous, [key]: value })); setNotice(""); }
   return <SettingsCard title="Hình ảnh giải đấu" subtitle="Tải lên ảnh đại diện và ảnh bìa cho giải đấu." isDirty={draft.isDirty}
-    saveDisabled={reading.profile || reading.banner} onSave={() => { updateTournament(entry.id, draft.value); setNotice("Đã lưu hình ảnh giải đấu thành công."); }}>
+    saveDisabled={reading.profile || reading.banner} onSave={async () => { await updateTournament(entry.id, draft.value); setNotice("Đã lưu hình ảnh giải đấu thành công."); }}>
     <div className="grid items-start gap-6 sm:grid-cols-2">
       <ImageUploadField label="Ảnh đại diện giải đấu" value={draft.value.profileImg} onChange={(value) => change("profileImg", value)} onBusyChange={(busy) => setReading((previous) => ({ ...previous, profile: busy }))} />
       <ImageUploadField label="Ảnh bìa (Banner)" kind="banner" value={draft.value.bannerImg} onChange={(value) => change("bannerImg", value)} onBusyChange={(busy) => setReading((previous) => ({ ...previous, banner: busy }))} />
@@ -59,18 +60,31 @@ function ImagesForm({ entry }) {
     <FormMessage notice={notice} />
   </SettingsCard>;
 }
-function RulesForm({ entry }) {
-  const draft = useDraft(entry.id, entry.rules || "");
+function TournamentMarkdownForm({ entry, id, title, subtitle, initialValue, toPatch }) {
+  const draft = useDraft(entry.id, initialValue);
   const { updateTournament } = useTourney();
   const [notice, setNotice] = useState("");
-  return <SettingsCard id="rulesCard" title="Điều lệ giải đấu" subtitle="Nhập quy định và thể lệ chung của giải đấu tại đây" isDirty={draft.isDirty}
-    onSave={() => { updateTournament(entry.id, { rules: draft.value }); setNotice("Đã lưu điều lệ giải đấu thành công."); }}>
-    <MarkdownEditorBox value={draft.value} onChange={(value) => { draft.setValue(value); setNotice(""); }} />
+  async function save() {
+    await updateTournament(entry.id, toPatch(draft.value));
+    setNotice(`Đã lưu ${title.toLocaleLowerCase("vi")} thành công.`);
+  }
+  return <SettingsCard id={id} title={title} subtitle={subtitle} isDirty={draft.isDirty} onSave={save}>
+    <MarkdownEditorBox label={title} value={draft.value} onChange={(value) => { draft.setValue(value); setNotice(""); }} />
     <FormMessage notice={notice} />
   </SettingsCard>;
 }
 function DetailsEditor({ entry }) {
-  return <><DetailsForm entry={entry} /><ImagesForm entry={entry} /><RulesForm entry={entry} /></>;
+  return <>
+    <DetailsForm entry={entry} />
+    <ImagesForm entry={entry} />
+    <TournamentMarkdownForm entry={entry} id="overviewCard" title="Tổng quan giải đấu"
+      subtitle="Nhập nội dung giới thiệu sẽ hiển thị trên trang chủ giải đấu."
+      initialValue={homepageOverview(entry.homepageLayout)}
+      toPatch={(value) => ({ homepageLayout: withHomepageOverview(entry.homepageLayout, value) })} />
+    <TournamentMarkdownForm entry={entry} id="rulesCard" title="Điều lệ giải đấu"
+      subtitle="Nhập quy định và thể lệ chung của giải đấu tại đây"
+      initialValue={entry.rules || ""} toPatch={(rules) => ({ rules })} />
+  </>;
 }
 export default function DetailsPage() {
   return <TournamentEditorPage title="Chi tiết giải đấu">{(entry) => <DetailsEditor key={entry.id} entry={entry} />}</TournamentEditorPage>;

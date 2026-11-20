@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ExternalLink, LayoutDashboard, LogOut, Settings, Trophy, User } from "lucide-react";
+import { ExternalLink, LogOut, Settings, Trophy, User } from "lucide-react";
 import { useTourney } from "@/context/TourneyContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ export default function AccountMenu({ expanded = false, side = "bottom", onNavig
   const leaving = useRef(false);
   useEffect(() => {
     if (location.pathname === "/" && location.state?.signOut) {
-      clearProfile(); navigate("/", { replace: true, state: null });
+      clearProfile().then(() => navigate("/", { replace: true, state: null })).catch(error => window.alert(error.message));
     }
   }, [location.pathname, location.state, clearProfile, navigate]);
   const name = currentUser?.gamerTag || currentUser?.tagName || currentUser?.username || "Tài khoản";
@@ -34,12 +34,10 @@ export default function AccountMenu({ expanded = false, side = "bottom", onNavig
         {currentUser?.userCode && <p className="mt-1 font-mono text-xs text-dp-meta">{currentUser.userCode}</p>}
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onSelect={() => go("/dashboard")}><LayoutDashboard />Tổng quan</DropdownMenuItem>
       <DropdownMenuItem onSelect={() => go("/events")}><Trophy />Giải đấu của tôi</DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem onSelect={() => go("/profile")}><ExternalLink />Xem hồ sơ công khai</DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => go("/profile/settings?tab=profile")}><User />Cài đặt hồ sơ</DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => go("/profile/settings?tab=account")}><Settings />Cài đặt tài khoản</DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => go("/profile/settings")}><Settings />Cài đặt hồ sơ</DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem onSelect={() => go("/", { state: { signOut: true } })}><LogOut />Đăng xuất</DropdownMenuItem>
     </DropdownMenuContent>

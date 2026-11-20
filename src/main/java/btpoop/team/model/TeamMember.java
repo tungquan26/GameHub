@@ -20,6 +20,7 @@ public class TeamMember {
 
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"members","applicants"})
     private Team team;
 
     @ManyToOne

@@ -41,6 +41,15 @@ public class TeamRanking implements Comparable<TeamRanking> {
         this.tournament = tournament;
     }
 
+    public void resetStats() {
+        matchesPlayed = 0;
+        wins = 0;
+        draws = 0;
+        losses = 0;
+        points = 0;
+        totalScoreDifference = 0;
+    }
+
     public void updateStats(int goalsFor, int goalsAgainst, boolean isWinner, boolean isDraw) {
         this.matchesPlayed++;
         this.totalScoreDifference += (goalsFor - goalsAgainst);

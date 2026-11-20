@@ -1,14 +1,16 @@
 import { useOutletContext } from "react-router-dom";
 import { Users } from "lucide-react";
-import HomepageBuilder from "@/components/shared/HomepageBuilder";
+import TournamentHomepage from "@/components/shared/TournamentHomepage";
 import MarkdownRenderer from "@/components/shared/MarkdownRenderer";
 import TournamentLoadState from "@/components/shared/TournamentLoadState";
+import TournamentStandings from "@/components/shared/TournamentStandings";
 import EmptyState from "@/components/shared/EmptyState";
 import { normalizeParticipants } from "@/lib/tournament-settings";
 
 export default function PublicViewPage() {
   const { tournament, section, status, retry } = useOutletContext();
   if (!tournament) return <><h1 className="mb-7 text-2xl font-semibold uppercase">Xem giải đấu công khai</h1><TournamentLoadState status={status} retry={retry} /></>;
+  if (section === "standings") return <TournamentStandings key={tournament.id} tournamentId={tournament.id} />;
   if (section === "teams") {
     const teams = normalizeParticipants(tournament.tournamentTeams);
     return <section aria-labelledby="public-teams-title"><h2 id="public-teams-title" className="mb-5 text-xl font-semibold">Đội tuyển <span className="ml-2 font-mono text-sm text-dp-meta">{teams.length}</span></h2>
@@ -17,5 +19,5 @@ export default function PublicViewPage() {
     </section>;
   }
   if (section === "rules") return <section aria-labelledby="public-rules-title"><h2 id="public-rules-title" className="mb-5 text-xl font-semibold">Thể lệ giải đấu</h2>{tournament.rules?.trim() ? <div className="dp-panel p-5 sm:p-7"><MarkdownRenderer value={tournament.rules} /></div> : <EmptyState title="Chưa có thể lệ" description="Ban tổ chức chưa công bố thể lệ giải đấu." />}</section>;
-  return <section aria-labelledby="public-overview-title"><h2 id="public-overview-title" className="mb-5 text-xl font-semibold">Tổng quan</h2><HomepageBuilder key={tournament.id} entry={tournament} readOnly /></section>;
+  return <section aria-labelledby="public-overview-title"><h2 id="public-overview-title" className="mb-5 text-xl font-semibold">Tổng quan</h2><TournamentHomepage key={tournament.id} entry={tournament} /></section>;
 }

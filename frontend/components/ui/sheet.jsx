@@ -7,7 +7,6 @@ export const Sheet = DialogPrimitive.Root;
 export const SheetTrigger = DialogPrimitive.Trigger;
 export const SheetTitle = DialogPrimitive.Title;
 export const SheetDescription = DialogPrimitive.Description;
-export const SheetClose = DialogPrimitive.Close;
 
 export function SheetContent({ className, children, ...props }) {
   return (

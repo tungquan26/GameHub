@@ -39,7 +39,7 @@ function WidgetContent({ widget, entry }) {
   if (widget.type === "MARKDOWN") return widget.content?.trim() ? <MarkdownRenderer value={widget.content} /> : <p className="text-sm text-dp-meta">(Chưa cập nhật nội dung)</p>;
   if (widget.type === "IMAGE") {
     const src = safeWebUrl(widget.imageUrl, { image: true }); const href = safeWebUrl(widget.linkUrl);
-    if (!src) return <p className="text-sm leading-7 text-dp-meta">Chưa có ảnh — Tải ảnh lên hoặc dán URL ảnh trong chế độ chỉnh sửa.</p>;
+    if (!src) return <p className="text-sm leading-7 text-dp-meta">Chưa có ảnh.</p>;
     const picture = <ImageWithFallback src={src} alt={widget.caption || widget.title || "Hình ảnh giải đấu"} loading="lazy" className="max-h-[600px] w-full rounded-panel object-contain" />;
     return <figure>{href ? <a href={href} target="_blank" rel="noopener noreferrer">{picture}</a> : picture}{widget.caption && <figcaption className="mt-3 text-center text-xs leading-6 text-dp-read">{widget.caption}</figcaption>}</figure>;
   }

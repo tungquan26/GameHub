@@ -30,4 +30,8 @@ public class Game {
     private int maxPlayers;
 
     private String description;
+
+    public boolean acceptsTeamSize(int size) {
+        return size > 0 && size >= minPlayers && size <= maxPlayers;
+    }
 }

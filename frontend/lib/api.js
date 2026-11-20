@@ -38,9 +38,16 @@ export async function request(path, { body, form, headers, responseType = "json"
   }
   return data || null;
 }
+export const profileApi = {
+  getPublic: (id, options) => request(`/api/website/profiles/${encodeURIComponent(id)}`, options),
+};
+
+export const gameApi = { list: (options) => request("/api/games", options) };
+
 export const tournamentApi = {
-  list: (options) => request("/api/tournaments", options),
-  get: (id, options) => request(`/api/tournaments/${encodeURIComponent(id)}`, options),
+  list: (options) => request("/api/website/tournaments", options),
+  get: (id, options) => request(`/api/website/tournaments/${encodeURIComponent(id)}`, options),
+  standings: (id, options) => request(`/api/website/tournaments/${encodeURIComponent(id)}/standings`, options),
 };
 
 export const notificationApi = {

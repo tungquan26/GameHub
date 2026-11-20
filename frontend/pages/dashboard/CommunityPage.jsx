@@ -9,22 +9,22 @@ import EmptyState from "@/components/shared/EmptyState";
 import { FormMessage } from "@/components/shared/AuthPanel";
 import { GameSelect, SearchInput } from "@/components/shared/TournamentControls";
 import { useTourney } from "@/context/TourneyContext";
-import { isCaptain, isLegacyTeam, TEAM_GAMES } from "@/lib/teams";
+import { isCaptain, isLegacyTeam, isTeamFull } from "@/lib/teams";
 import { lower } from "@/lib/tournaments";
-import { getGame } from "@/lib/games";
+import { canonicalGame, catalogGame, getGame } from "@/lib/games";
 import useRequireAuth from "@/hooks/useRequireAuth";
 import { userKey } from "@/lib/identity";
 import usePersonalActivity from "@/hooks/usePersonalActivity";
 
 export default function CommunityPage() {
-  const { teams, currentUser, initializeCommunity, performTeamAction } = useTourney();
+  const { teams, games, gameError, currentUser, initializeCommunity, performTeamAction } = useTourney();
   const { teams: mine } = usePersonalActivity({ loadTournaments: false });
   const { authenticated, requireAuth } = useRequireAuth();
   const location = useLocation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const keyword = params.get("q") || "";
-  const game = getGame(params.get("game"))?.id || "";
+  const game = catalogGame(games, params.get("game"))?.name || "";
   const status = ["RECRUITING", "MY_TEAM"].includes(params.get("teamStatus")) ? params.get("teamStatus") : "";
   function filter(key, value, replace = false) {
     const next = new URLSearchParams(params);
@@ -69,8 +69,8 @@ export default function CommunityPage() {
   }, [authenticated, teams, params, navigate, currentUser, location.pathname, location.hash]);
   const all = teams || [];
   const legacy = all.filter(isLegacyTeam);
-  const filtered = all.filter((team) => !isLegacyTeam(team) && getGame(team.game) && (!lower(keyword) || lower(team.name).includes(lower(keyword)) || team.members.some((member) => lower(member).includes(lower(keyword))))
-    && (!game || team.game === game) && (status === "RECRUITING" ? team.recruiting : status === "MY_TEAM" ? mine.some((entry) => entry.id === team.id) : true));
+  const filtered = all.filter((team) => !isLegacyTeam(team) && (!lower(keyword) || lower(team.name).includes(lower(keyword)) || team.members.some((member) => lower(member).includes(lower(keyword))))
+    && (!game || canonicalGame(team.game) === canonicalGame(game)) && (status === "RECRUITING" ? team.recruiting && !isTeamFull(team, games) : status === "MY_TEAM" ? mine.some((entry) => entry.id === team.id) : true));
   function destination(action, team) {
     const search = new URLSearchParams(location.search);
     search.set("action", action);
@@ -81,12 +81,12 @@ export default function CommunityPage() {
     if (!requireAuth(destination(team ? "edit-team" : "create-team", team?.id))) return;
     lastTrigger.current = trigger; setDialog({ team });
   }
-  function changeTeam(action) {
+  async function changeTeam(action) {
     if (!requireAuth(destination(action.type === "join" ? "join-team" : "view-team", action.id))) return;
     setError(""); setNotice("");
     try {
       const team = all.find((item) => String(item.id) === String(action.id));
-      performTeamAction(action);
+      await performTeamAction(action);
       const messages = {
         join: `Đã gửi yêu cầu xin gia nhập đội "${team?.name}". Vui lòng chờ đội trưởng phê duyệt.`,
         cancel: `Đã hủy yêu cầu xin gia nhập đội "${team?.name}".`,
@@ -128,7 +128,8 @@ export default function CommunityPage() {
         <p className="mt-2 text-xs leading-5 text-dp-meta">Tìm kiếm và gia nhập các đội tuyển đang hoạt động trên hệ thống</p>
         <div className="my-5 flex flex-col gap-3 xl:flex-row">
           <SearchInput label="Tìm đội hoặc thành viên" placeholder="Tìm theo tên đội hoặc thành viên..." value={keyword} onChange={(value) => filter("q", value, true)} />
-          <GameSelect games={TEAM_GAMES} value={game} onChange={(value) => filter("game", getGame(value)?.slug || "")} />
+          <GameSelect value={game} onChange={(value) => filter("game", getGame(value)?.slug || value)} />
+          {gameError && <p role="alert" className="text-xs text-red-400">Không thể tải danh mục game.</p>}
           <NativeSelect aria-label="Trạng thái đội" value={status} onChange={(event) => filter("teamStatus", event.target.value)} className="w-full sm:w-60">
             <option value="">Mọi trạng thái</option><option value="RECRUITING">Đang tuyển thành viên</option><option value="MY_TEAM">Team tôi đang tham gia</option>
           </NativeSelect>
@@ -137,9 +138,9 @@ export default function CommunityPage() {
       </section>
     </div>
     {authenticated && dialog && <TeamFormDialog team={dialog.team} onClose={() => setDialog(null)} restoreFocus={() => (lastTrigger.current?.isConnected ? lastTrigger.current : createTrigger.current)?.focus({ preventScroll: true })}
-      onSave={(values) => {
+      onSave={async (values) => {
         if (!requireAuth(destination(dialog.team ? "edit-team" : "create-team", dialog.team?.id))) return;
-        performTeamAction({ type: dialog.team ? "edit" : "create", id: dialog.team?.id, values });
+        await performTeamAction({ type: dialog.team ? "edit" : "create", id: dialog.team?.id, values });
         setError(""); setNotice(dialog.team ? `Đã cập nhật đội tuyển "${values.name}".` : `Đã tạo đội tuyển "${values.name}" thành công!`);
       }} />}
   </div>;

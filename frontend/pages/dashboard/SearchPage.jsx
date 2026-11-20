@@ -38,7 +38,7 @@ export default function SearchPage() {
       <p aria-live="polite" className="ml-auto font-mono text-[10px] text-dp-meta">{filtered.length} KẾT QUẢ</p>
     </div>
     <div id="results" className="scroll-mt-24">
-      {filtered.length ? <div className="space-y-4">{filtered.slice((page - 1) * 5, page * 5).map((item) => <TournamentCardHorizontal key={(item.sample ? "sample:" : "local:") + item.id} tournament={item} />)}</div>
+      {filtered.length ? <div className="space-y-4">{filtered.slice((page - 1) * 5, page * 5).map((item) => <TournamentCardHorizontal key={item.id} tournament={item} />)}</div>
         : ["idle", "loading"].includes(apiStatus) ? <TournamentListSkeleton />
           : <EmptyState title="Không tìm thấy giải đấu nào" description="Thử thay đổi từ khóa tìm kiếm hoặc các tùy chọn bộ lọc." />}
     </div>

@@ -6,7 +6,10 @@ import btpoop.match.model.MatchFinishedEvent;
 import btpoop.match.model.MatchResult;
 import btpoop.match.model.MatchScheduledEvent;
 import btpoop.match.repository.MatchRepository;
+import btpoop.ranking.service.RankingService;
 import btpoop.team.model.Team;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ public class MatchServiceImpl implements MatchService {
 
     private final ApplicationEventPublisher eventPublisher;
     private final MatchRepository matchRepository;
+    private final RankingService rankings;
+    private final EntityManager em;
 
     @Override
     @Transactional
@@ -62,6 +67,9 @@ public class MatchServiceImpl implements MatchService {
     public Match updateMatchResult(Long matchId, int scoreA, int scoreB) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
+        em.lock(match.getTournament(), LockModeType.PESSIMISTIC_WRITE);
+        em.refresh(match);
+        boolean alreadyCompleted = match.getStatus() == MatchStatus.COMPLETED;
 
         if (scoreA == scoreB) {
             throw new IllegalArgumentException("Trận đấu theo thể thức loại trực tiếp không thể có kết quả hòa.");
@@ -78,20 +86,28 @@ public class MatchServiceImpl implements MatchService {
         
         Match savedMatch = matchRepository.save(match);
 
-        // 🌟 Tự động đẩy đội thắng lên vòng tiếp theo trong nhánh đấu
-        if (savedMatch.getNextMatch() != null) {
-            Match next = savedMatch.getNextMatch();
-            if ("A".equalsIgnoreCase(savedMatch.getNextMatchSlot())) {
-                next.setTeamA(winner);
-            } else if ("B".equalsIgnoreCase(savedMatch.getNextMatchSlot())) {
-                next.setTeamB(winner);
-            }
-            matchRepository.save(next);
-        }
+        advanceWinner(savedMatch, winner);
 
         // Bắn sự kiện trận đấu kết thúc
-        eventPublisher.publishEvent(new MatchFinishedEvent(savedMatch.getMatchId(), winner));
+        if (alreadyCompleted) rankings.rebuildTeamRankings(savedMatch.getTournament());
+        else eventPublisher.publishEvent(new MatchFinishedEvent(savedMatch.getMatchId(), winner));
         return savedMatch;
+    }
+
+    private void advanceWinner(Match match, Team winner) {
+        var next = match.getNextMatch();
+        if (next == null) return;
+
+        boolean slotA = "A".equalsIgnoreCase(match.getNextMatchSlot());
+        if (!slotA && !"B".equalsIgnoreCase(match.getNextMatchSlot())) return;
+        var previous = slotA ? next.getTeamA() : next.getTeamB();
+        if (previous == null ? winner == null : winner != null && previous.getTeamId() == winner.getTeamId()) return;
+
+        if (slotA) next.setTeamA(winner);
+        else next.setTeamB(winner);
+        next.setResult(null);
+        next.setStatus(MatchStatus.SCHEDULED);
+        advanceWinner(next, null);
     }
 
     @Override

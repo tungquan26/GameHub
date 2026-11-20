@@ -29,7 +29,8 @@ public class TournamentController {
     public ResponseEntity<Tournament> createTournament(
             @RequestBody Tournament tournament,
             @RequestParam Long gameId,
-            @RequestParam Long organizerId) {
+            @RequestParam Long organizerId, jakarta.servlet.http.HttpSession session) {
+        btpoop.user.controller.SessionUser.require(session,organizerId);
         return ResponseEntity.ok(tournamentService.createTournament(tournament, gameId, organizerId));
     }
 }

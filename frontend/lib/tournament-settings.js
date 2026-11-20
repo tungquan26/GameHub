@@ -1,6 +1,8 @@
-import { ORGANIZER_GAMES, BRACKET_FORMATS } from "@/constants/games";
-import { canonicalGame } from "./tournaments";
+import { BRACKET_FORMATS } from "@/constants/games";
+import { catalogGame } from "./games";
 import { pastDateError } from "./dates";
+
+export const MAX_TOURNAMENT_TEAMS = 8;
 
 export function detailsValues(entry) {
   const details = entry?.details || {};
@@ -25,47 +27,50 @@ export function cleanDetails(values, dateOptions) {
 }
 export function registrationValues(entry) {
   return { registrationStartDate: entry?.regSettings?.registrationStartDate || "", registrationEndDate: entry?.regSettings?.registrationEndDate || "",
-    feeType: "FREE", minTeamSize: 4, maxTeamSize: entry?.regSettings?.maxTeamSize ?? "", maxTeams: 16 };
+    feeType: "FREE", minTeamSize: entry?.teamMinPlayers ?? 1,
+    maxTeamSize: entry?.regSettings?.maxTeamSize ?? entry?.teamMaxPlayers ?? "", maxTeams: MAX_TOURNAMENT_TEAMS };
 }
 export function registrationError(values, required = false) {
   if (!values.registrationStartDate || !values.registrationEndDate || String(values.maxTeamSize).trim() === "") return required ? "Vui lòng nhập đầy đủ thời gian đăng ký và số thành viên tối đa." : "";
   if (!Number.isFinite(Date.parse(values.registrationStartDate)) || !Number.isFinite(Date.parse(values.registrationEndDate)) || new Date(values.registrationEndDate) <= new Date(values.registrationStartDate)) return "Thời gian đóng đăng ký phải sau thời gian mở đăng ký.";
   const maximum = Number(values.maxTeamSize);
-  if (!Number.isInteger(maximum)) return "Số thành viên tối đa mỗi đội phải là số nguyên từ 4 đến 20.";
-  if (maximum < 4) return "Số thành viên tối đa mỗi đội phải lớn hơn hoặc bằng số thành viên tối thiểu (4).";
+  if (!Number.isInteger(maximum)) return `Số thành viên tối đa mỗi đội phải là số nguyên từ ${values.minTeamSize} đến 20.`;
+  if (maximum < values.minTeamSize) return `Bộ môn yêu cầu ít nhất ${values.minTeamSize} thành viên mỗi đội.`;
   if (maximum > 20) return "Số thành viên tối đa mỗi đội không được vượt quá 20.";
   return "";
 }
 export function cleanRegistration(values, dateOptions) {
   const error = registrationError(values, true) || pastDateError(values, ["registrationStartDate", "registrationEndDate"], dateOptions);
   if (error) throw new Error(error);
-  return { ...values, feeType: "FREE", minTeamSize: 4, maxTeamSize: Number(values.maxTeamSize), maxTeams: 16 };
+  return { ...values, feeType: "FREE", maxTeamSize: Number(values.maxTeamSize), maxTeams: MAX_TOURNAMENT_TEAMS };
 }
 export function gameValues(entry) {
-  return { game: canonicalGame(entry?.gameInfo?.game || entry?.game || ""), stageType: "SINGLE_STAGE", format: entry?.gameInfo?.format || entry?.format || "SINGLE_ELIMINATION" };
+  return { game: entry?.game || entry?.gameInfo?.game || "", stageType: "SINGLE_STAGE", format: entry?.gameInfo?.format || entry?.format || "SINGLE_ELIMINATION" };
 }
-export function cleanGame(values) {
-  if (!ORGANIZER_GAMES.some((game) => game.id === values.game)) throw new Error("Vui lòng chọn một tựa game trong hệ thống.");
+export function cleanGame(values, games) {
+  const game = catalogGame(games, values.game);
+  if (!game) throw new Error("Vui lòng chọn một tựa game trong hệ thống.");
   if (!BRACKET_FORMATS.some((format) => format.value === values.format)) throw new Error("Vui lòng chọn thể thức nhánh đấu hợp lệ.");
-  return { game: values.game, stageType: "SINGLE_STAGE", format: values.format };
+  return { game: game.name, stageType: "SINGLE_STAGE", format: values.format };
 }
 export function normalizeParticipants(value) {
   if (!Array.isArray(value)) return [];
   return value.filter((team) => team && typeof team.name === "string" && Array.isArray(team.members))
     .map((team, index) => ({ ...team, id: team.id ?? "legacy-team-" + index, members: team.members.filter((member) => typeof member === "string") }));
 }
-export function makeParticipant(values) {
+export function makeParticipant(values, game) {
   const name = values.name.trim();
   const raw = values.members.trim();
   if (!name || !raw) throw new Error("Vui lòng nhập đầy đủ tên đội tuyển và danh sách thành viên.");
   const members = raw.split(/[\/,]+/).map((member) => member.trim()).filter(Boolean);
   if (!members.length) throw new Error("Vui lòng nhập ít nhất 1 thành viên.");
+  if (!game) throw new Error("Vui lòng chọn bộ môn của giải trước khi thêm đội.");
+  if (members.length < game.minPlayers || members.length > game.maxPlayers) {
+    const size = game.minPlayers === game.maxPlayers ? game.minPlayers : `${game.minPlayers} đến ${game.maxPlayers}`;
+    throw new Error(`Đội ${game.name} cần có ${size} thành viên.`);
+  }
+  if (new Set(members.map((member) => member.toLocaleLowerCase("vi"))).size !== members.length) {
+    throw new Error("Tên thành viên trong cùng một đội phải khác nhau.");
+  }
   return { id: "participant_" + crypto.randomUUID(), name, members };
-}
-
-export function applyTournamentPatch(entry, patch) {
-  const original = detailsValues(entry);
-  const direct = Object.fromEntries(Object.keys(original).filter((key) => Object.hasOwn(patch, key)).map((key) => [key, patch[key]]));
-  const details = { ...original, ...patch.details, ...direct };
-  return { ...entry, ...patch, ...details, id: entry.id, details: { ...entry.details, ...details, id: entry.id } };
 }

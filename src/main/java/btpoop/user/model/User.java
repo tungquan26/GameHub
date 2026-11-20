@@ -17,8 +17,14 @@ public class User {
     
     @Column(nullable = false, unique = true)
     private String username;
+
+    @Lob
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(length=67108864)
+    private String profileJson;
     
     @Column(nullable = false)
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private String password;
     
     @Column(nullable = false, unique = true)

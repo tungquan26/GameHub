@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Upload, User } from "lucide-react";
 import SettingsCard from "@/components/shared/SettingsCard";
-import { CheckboxField, FormField } from "@/components/shared/FormField";
+import { FormField } from "@/components/shared/FormField";
 import { FormMessage } from "@/components/shared/AuthPanel";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/input";
-import { COUNTRIES, formatDate } from "@/lib/profile";
+import { COUNTRIES } from "@/lib/profile";
 import { useTourney } from "@/context/TourneyContext";
 
-const EDITABLE = ["tagName", "bio", "displayPronouns", "pronouns", "country", "city", "zipCode", "phone", "displayCityMode", "avatarUrl"];
+const EDITABLE = ["avatarUrl", "tagName", "bio", "country", "city"];
 function snapshot(profile) { return Object.fromEntries(EDITABLE.map((key) => [key, profile[key]])); }
 
 export default function ProfileForm({ profile }) {
@@ -40,12 +40,12 @@ export default function ProfileForm({ profile }) {
     task.onerror = () => { if (reader.current === task) { setUploadError("Không thể đọc ảnh. Vui lòng thử lại."); setUploading(false); } };
     task.readAsDataURL(file);
   }
-  function save() {
+  async function save() {
     const tagName = draft.tagName.trim();
     if (!tagName) throw new Error("Tên hiển thị (GamerTag) không được để trống.");
     const next = Object.fromEntries(Object.entries(draft).map(([key, value]) => [key, typeof value === "string" ? value.trim() : value]));
     // Hai tên trường được giữ đồng nhất cho sidebar và dữ liệu cũ.
-    updateProfile({ ...profile, ...next, gamerTag: tagName, tagName });
+    await updateProfile({ ...next, gamerTag: tagName });
     setSaved(next); setDraft(next);
     setNotice("Đã cập nhật hồ sơ cá nhân thành công!");
   }
@@ -65,8 +65,6 @@ export default function ProfileForm({ profile }) {
     <FormMessage error={uploadError} notice={notice} />
     <FormField label="Tên hiển thị (GamerTag)" required value={draft.tagName} onChange={(event) => change("tagName", event.target.value)} />
     <FormField label="Nhập tiểu sử ngắn hiển thị cùng tên của bạn" placeholder="VD: Tuyển thủ bán chuyên, yêu thích các giải đấu Esports..." value={draft.bio} onChange={(event) => change("bio", event.target.value)} />
-    <CheckboxField checked={draft.displayPronouns} onChange={(event) => change("displayPronouns", event.target.checked)}>Hiển thị đại từ nhân xưng</CheckboxField>
-    {draft.displayPronouns && <FormField label="Đại từ nhân xưng" placeholder="VD: Anh ấy, Cô ấy..." value={draft.pronouns} onChange={(event) => change("pronouns", event.target.value)} />}
     <div className="border-t border-dp-hairline pt-5">
       <h3 className="text-sm font-medium">Địa điểm và Thông tin liên hệ</h3>
       <p className="mt-2 text-xs leading-6 text-dp-read">Các giải đấu bạn đăng ký tham gia có thể yêu cầu một số thông tin liên hệ dưới đây.</p>
@@ -77,12 +75,6 @@ export default function ProfileForm({ profile }) {
         {COUNTRIES.map((country) => <option key={country}>{country}</option>)}
       </NativeSelect>}</FormField>
       <FormField label="Thành phố" hint="Không bắt buộc" value={draft.city} onChange={(event) => change("city", event.target.value)} />
-      <FormField label="Mã bưu chính" hint="Không bắt buộc" value={draft.zipCode} onChange={(event) => change("zipCode", event.target.value)} />
-      <FormField label="Số điện thoại" type="tel" hint="Không bắt buộc" value={draft.phone} onChange={(event) => change("phone", event.target.value)} />
     </div>
-    <FormField label="Hiển thị địa điểm">{(id) => <NativeSelect id={id} value={draft.displayCityMode} onChange={(event) => change("displayCityMode", event.target.value)}>
-      <option>Hiển thị thành phố</option><option>Ẩn thành phố</option>
-    </NativeSelect>}</FormField>
-    <div className="border-t border-dp-hairline pt-5"><h3 className="text-sm font-medium">Ngày sinh</h3><p className="mt-2 font-mono text-sm text-dp-read">{formatDate(profile.birthday) || "Chưa cập nhật ngày sinh"}</p></div>
   </SettingsCard>;
 }

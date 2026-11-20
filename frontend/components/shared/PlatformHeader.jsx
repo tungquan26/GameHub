@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight, LayoutDashboard, Menu, Trophy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Menu, MessageSquare, Trophy } from "lucide-react";
 import { useTourney } from "@/context/TourneyContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -45,7 +45,6 @@ export default function PlatformHeader({ auth = false }) {
   };
   const destination = returnToFrom(location);
   const returnTo = requiresAuthentication(destination) ? "/" : destination;
-  const personal = ["/dashboard", "/events"].includes(location.pathname);
   useEffect(() => { setMenuOpen(false); }, [location.pathname, location.search, location.hash]);
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
@@ -65,8 +64,8 @@ export default function PlatformHeader({ auth = false }) {
         {auth ? <Button asChild variant="ghost" size="sm"><Link to={returnTo}><ArrowLeft />{returnTo === "/" ? "Về trang chủ" : "Quay lại"}</Link></Button>
           : <>
             {authenticated ? <>
-              <NavLink to="/dashboard" aria-label="Không gian của tôi" className={cn("flex h-10 items-center gap-2 rounded-pill border border-dp-hairline-2 px-3 text-xs font-semibold text-dp-read transition-colors hover:border-dp-read hover:text-dp-bright", personal && "border-dp-live/40 text-dp-bright")}>
-                <LayoutDashboard aria-hidden="true" className="size-4" /><span className="hidden lg:inline">Không gian của tôi</span>
+              <NavLink to="/messages" aria-label="Tin nhắn" title="Tin nhắn" className={({ isActive }) => cn("flex size-10 shrink-0 items-center justify-center rounded-pill border border-dp-hairline-2 text-dp-read transition-colors hover:border-dp-read hover:text-dp-bright", isActive && "border-dp-live/40 text-dp-bright")}>
+                <MessageSquare aria-hidden="true" className="size-4" />
               </NavLink>
               <AccountMenu />
             </> : <Button asChild variant="outline" size="sm" className="uppercase"><Link to={loginPath(location)}>Đăng nhập<ArrowRight /></Link></Button>}
@@ -79,8 +78,8 @@ export default function PlatformHeader({ auth = false }) {
                 <div className="mt-7"><Navigation mobile onNavigate={closeMenu} /></div>
                 <div className="mt-auto space-y-4 border-t border-dp-hairline pt-5">
                   {authenticated ? <>
-                    <nav aria-label="Không gian cá nhân mobile" className="grid gap-1">
-                      {[{ to: "/dashboard", label: "Tổng quan", icon: LayoutDashboard }, { to: "/events", label: "Giải đấu của tôi", icon: Trophy }].map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} onClick={() => closeMenu(to)} className={({ isActive }) => cn("flex items-center gap-3 rounded-panel px-4 py-3 text-sm text-dp-read", isActive && "bg-dp-ground text-dp-bright")}><Icon aria-hidden="true" className="size-4" />{label}</NavLink>)}
+                    <nav aria-label="Lối tắt tài khoản" className="grid gap-1">
+                      {[{ to: "/events", label: "Giải đấu của tôi", icon: Trophy }, { to: "/messages", label: "Tin nhắn", icon: MessageSquare }].map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} onClick={() => closeMenu(to)} className={({ isActive }) => cn("flex items-center gap-3 rounded-panel px-4 py-3 text-sm text-dp-read", isActive && "bg-dp-ground text-dp-bright")}><Icon aria-hidden="true" className="size-4" />{label}</NavLink>)}
                     </nav>
                     <AccountMenu expanded side="top" onNavigate={closeMenu} />
                   </> : <Button asChild className="w-full uppercase"><Link to={loginPath(location)} onClick={closeMenu}>Đăng nhập<ArrowRight /></Link></Button>}

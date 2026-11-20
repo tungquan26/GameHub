@@ -26,7 +26,7 @@ export default function CreatePage() {
   function submit(event) {
     event.preventDefault();
     if (!valid) return;
-    action.run(async () => { createTournament(form); navigate("/tournament/details"); });
+    action.run(async () => { await createTournament(form); navigate("/tournament/details"); });
   }
   return <div className="dp-container py-9 sm:py-12">
     <PageHeader title="Tạo giải đấu" breadcrumbs={[{ to: "/", label: "Trang chủ" }, { label: "Tạo giải đấu" }]} />

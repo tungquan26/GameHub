@@ -1,80 +1,103 @@
 # Game-Hub
 
-Website React và API Java được phục vụ cùng địa chỉ bởi Spring Boot.
+Game-Hub là website tổ chức giải thể thao điện tử. Người chơi có thể tìm giải, tạo đội cộng đồng và nhắn tin riêng. Đội trưởng đăng ký đội vào giải và hệ thống ghi lại đội hình tại thời điểm đăng ký. Ban tổ chức thiết lập luật, chọn bộ môn, xếp nhánh, đặt lịch và nhập kết quả. Người xem theo dõi lịch đấu và bảng xếp hạng từ trang công khai của giải.
 
-## Chạy website
+Giao diện dùng React, Vite và Tailwind CSS. Spring Boot phục vụ cả giao diện và API trên cùng một địa chỉ. Dữ liệu được lưu trong MySQL.
 
-Yêu cầu **JDK 25**, **Maven** và kết nối mạng ở lần build đầu để tải thư viện,
-Node.js 22.12.0 và npm 10.9.0. Maven cài Node/npm trong thư mục build của dự án,
-không thay đổi Node/npm đang cài trên máy.
+## Chạy trên máy
 
-Tại thư mục chứa `pom.xml`, chạy:
+### Yêu cầu
+
+- **JDK 25** và **Maven** để chạy hoặc build dự án.
+- **MySQL** đang chạy và một tài khoản database dành cho ứng dụng.
+- Kết nối mạng khi build lần đầu. Maven tải thư viện Java, Node.js 22.12.0 và npm 10.9.0 vào thư mục build.
+
+### Cấu hình MySQL
+
+Nếu đã có database của dự án, dùng tên database đó trong URL JDBC. Với cài đặt mới, tạo database bằng tài khoản quản trị MySQL và cấp cho tài khoản ứng dụng quyền đọc, ghi và tạo hoặc cập nhật bảng trong database này.
+
+```sql
+CREATE DATABASE IF NOT EXISTS gamehub CHARACTER SET utf8mb4;
+```
+
+Tạo `application-local.properties` cạnh `pom.xml`. Thay tên đăng nhập, mật khẩu và tên database theo cấu hình của bạn.
+
+```properties
+GAMEHUB_DB_URL=jdbc:mysql://localhost:3306/gamehub
+spring.datasource.username=your-mysql-user
+spring.datasource.password=your-mysql-password
+```
+
+Profile `mysql` dùng Hibernate để tạo hoặc cập nhật bảng khi ứng dụng khởi động. Git bỏ qua file cấu hình cục bộ.
+
+### Cấu hình OTP
+
+Để đăng ký tài khoản mới và nhận email thông báo, thêm hai dòng sau vào cùng file cấu hình. Dự án dùng Gmail SMTP qua cổng `587`. Điền mật khẩu ứng dụng của tài khoản Gmail gửi thư.
+
+```properties
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-google-app-password
+```
+
+### Khởi động
+
+Từ thư mục chứa `pom.xml`, chạy các lệnh sau trong PowerShell.
 
 ```powershell
+$env:SPRING_PROFILES_ACTIVE = "mysql"
 mvn spring-boot:run
 ```
 
-Mở **http://localhost:8080**. Không cần chạy `npm run dev` riêng.
-Nhấn `Ctrl+C` trong terminal để dừng.
+Mở [http://localhost:8080](http://localhost:8080). Maven build frontend trước khi Spring Boot khởi động. Nhấn `Ctrl+C` để dừng. Sau khi chỉnh frontend, chạy lại lệnh trên để Spring Boot phục vụ giao diện mới.
 
-Nếu đang chạy Vite hoặc kiểm thử frontend, dừng các tiến trình đó trước khi chuyển
-sang Maven để `npm ci` có thể cập nhật thư viện, tránh khóa tệp trên Windows.
+## Phát triển frontend
 
-Mỗi lần chạy Maven sẽ cài dependency frontend theo `frontend/package-lock.json`,
-build React và chép `frontend/dist` vào thư mục static trong classpath.
-Các trang như `/login`, `/news` và `/tournament/schedule?id=31&view=public`
-có thể mở trực tiếp hoặc nhấn F5. API tiếp tục dùng `/api/...` cùng địa chỉ;
-giữ `VITE_API_BASE_URL` trống khi build cho Spring Boot.
-
-Khi sửa React, khởi động lại bằng lệnh Maven trên để build giao diện mới.
-Bấm Run trực tiếp lớp `BtpApplication` trong IDE không chạy quy trình build frontend;
-hãy dùng lệnh Maven để bảo đảm giao diện luôn được cập nhật.
-
-Mặc định đăng nhập chỉ được giữ trong tab hiện tại (kể cả khi nhấn F5).
-Chọn **Lưu đăng nhập** nếu muốn giữ tài khoản khi đóng tab rồi mở lại.
-Hồ sơ từ phiên bản cũ không tự đăng nhập; dữ liệu giải đấu vẫn được giữ.
-
-Mục **Trò chơi của chúng tôi** dùng video nền trong `frontend/assets/game-backgrounds/`,
-đặt tên theo slug game (ví dụ `valorant.mp4`). Video tự phát không tiếng và lặp lại;
-danh sách game cuộn dọc ở bên phải và chuyển mỗi 8 giây. Sau khi thay video, chạy lại Maven để cập nhật bản build.
-
-## Cấu hình gửi email
-
-Để gửi OTP và thông báo, sao chép `application-local.properties.example` thành
-`application-local.properties` tại thư mục gốc, ngang cấp `pom.xml`, rồi điền
-email và mật khẩu ứng dụng SMTP. File riêng này được `.gitignore` bỏ qua và
-không được đóng gói vào JAR. Khởi động Maven, IDE hoặc JAR từ thư mục gốc để
-Spring Boot tự đọc file; khởi động lại ứng dụng sau khi thay đổi cấu hình.
-
-Cũng có thể đặt các biến sau trong cùng terminal PowerShell trước khi chạy
-Maven hoặc JAR; biến môi trường được ưu tiên hơn file cấu hình riêng:
+Để thấy thay đổi giao diện ngay khi lưu file, giữ Spring Boot chạy ở cổng `8080` và mở terminal riêng. Cách này cần Node.js từ 22.12 và npm trong PATH.
 
 ```powershell
-$env:SPRING_MAIL_USERNAME = "your-email@gmail.com"
-$env:SPRING_MAIL_PASSWORD = "your-app-password"
+cd frontend
+npm ci
+npm run dev
 ```
 
-Nếu chưa có cấu hình riêng hoặc biến môi trường, ứng dụng chưa thể gửi email.
-Spring Boot không tự nạp file `.env`; file mẫu trong `frontend/` chỉ dành cho Vite.
-Không ghi mật khẩu thật vào mã nguồn hoặc tài liệu để commit.
+Mở địa chỉ Vite in trong terminal. Vite chuyển tiếp các yêu cầu `/api` về Spring Boot. Nếu backend chạy ở địa chỉ khác, đặt `API_PROXY_TARGET` trong `frontend/.env.local`. Để trống `VITE_API_BASE_URL` khi dùng proxy Vite hoặc khi React được phục vụ cùng Spring Boot.
 
-## Đóng gói và chạy JAR
+## Kiểm thử cục bộ
 
-```powershell
-mvn clean package
-java -jar target/backend-0.0.1-SNAPSHOT.jar
+Git bỏ qua hai thư mục kiểm thử cục bộ `frontend/tests/` và `src/test/`. Khi có các file kiểm thử trên máy, chạy `npm test` trong `frontend/` và `mvn test` ở thư mục gốc.
+
+## Đóng gói và triển khai
+
+Từ thư mục gốc, build JAR bằng `mvn clean package`. Maven đóng gói giao diện React, tài nguyên tĩnh và API vào `target/backend-0.0.1-SNAPSHOT.jar`. Máy chủ cần Java 25 và cấu hình MySQL để chạy JAR. Cấu hình SMTP dùng cho OTP và thông báo qua email.
+
+Trên máy chủ, cấp cấu hình qua biến môi trường. Dùng địa chỉ MySQL mà máy chủ ứng dụng truy cập được và đặt thông tin xác thực trong cấu hình riêng của môi trường chạy.
+
+```dotenv
+SPRING_PROFILES_ACTIVE=mysql
+GAMEHUB_DB_URL=jdbc:mysql://mysql-host:3306/gamehub
+SPRING_DATASOURCE_USERNAME=your-mysql-user
+SPRING_DATASOURCE_PASSWORD=your-mysql-password
+SPRING_MAIL_USERNAME=your-email@gmail.com
+SPRING_MAIL_PASSWORD=your-google-app-password
 ```
 
-Bản JAR chứa cả giao diện, ảnh, font và API. Máy chạy JAR chỉ cần Java 25;
-không cần Node.js, npm, Maven hoặc thư mục `frontend` bên ngoài.
-Địa chỉ vẫn là **http://localhost:8080**. Dừng phiên đang chạy trước khi chạy JAR
-để tránh trùng cổng 8080.
+Khởi động bản build bằng lệnh sau khi đặt các biến môi trường.
 
-Không đưa `frontend/dist`, `node_modules` hoặc `target` vào Git.
-Profile Maven `ide` dùng `target-ide`; tài nguyên giao diện được chép theo
-`${project.build.outputDirectory}` nên vẫn đi cùng đúng thư mục build.
+```text
+java -jar backend-0.0.1-SNAPSHOT.jar
+```
 
-## Phát triển frontend với Vite (tùy chọn)
+Lệnh trên chạy từ thư mục chứa JAR. Ứng dụng mặc định nghe ở cổng `8080`. Khi đưa web ra Internet, trỏ reverse proxy HTTPS về Spring Boot và để MySQL trên mạng nội bộ. Khi triển khai bản mới, dùng lại database hiện có. Tạo bản sao MySQL trước lần cập nhật có thay đổi cấu trúc bảng.
 
-Để có cập nhật giao diện tức thời, xem [hướng dẫn frontend](docs/FRONTEND_STRUCTURE.md#72-phát-triển-riêng-với-vite).
-Đây là cách phát triển tùy chọn; chạy website thông thường chỉ cần Spring Boot.
+## Cấu trúc dự án
+
+- `frontend/` chứa trang React, component, tài nguyên tĩnh và mã gọi API.
+- `src/main/java/btpoop/` chứa các module Spring Boot như tài khoản, đăng ký giải, nhánh đấu và xếp hạng.
+- `src/main/resources/` chứa cấu hình Spring Boot và profile MySQL.
+- `docs/` chứa tài liệu chi tiết về giao diện, mô hình dữ liệu và kiến trúc backend.
+
+## Tài liệu
+
+- [Cấu trúc frontend](docs/FRONTEND_STRUCTURE.md)
+- [Đặc tả mô hình dữ liệu](docs/Model_Fields_Specification.md)
+- [Các module hệ thống](docs/System_Modules.md)

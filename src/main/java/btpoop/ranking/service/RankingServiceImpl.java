@@ -1,5 +1,6 @@
 package btpoop.ranking.service;
 
+import btpoop.enums.MatchStatus;
 import btpoop.match.model.Match;
 import btpoop.match.model.MatchFinishedEvent;
 import btpoop.match.model.MatchResult;
@@ -12,18 +13,20 @@ import btpoop.statistics.model.PlayerStats;
 import btpoop.statistics.repository.PlayerStatsRepository;
 import btpoop.team.model.Team;
 import btpoop.team.model.TeamMember;
-import btpoop.team.repository.TeamRepository;
 import btpoop.tournament.model.Tournament;
 import btpoop.user.model.Player;
-import btpoop.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -33,52 +36,18 @@ public class RankingServiceImpl implements RankingService {
     private final TeamRankingRepository teamRankingRepository;
     private final PlayerStatsRepository playerStatsRepository;
     private final MatchRepository matchRepository;
-    private final UserRepository userRepository;
-    private final TeamRepository teamRepository;
-
     @Override
+    @Transactional(readOnly = true)
     public List<PlayerRanking> getPlayerRankings(Long tournamentId) {
-        List<PlayerRanking> list;
-        if (tournamentId != null) {
-            list = playerRankingRepository.findByTournament_TournamentIdOrderByCurrentRankAsc(tournamentId);
-        } else {
-            list = playerRankingRepository.findAllByOrderByCurrentRankAsc();
-        }
-
-        // Fallback khởi tạo ban đầu nếu DB chưa có bản ghi ranking nào
-        if (list.isEmpty()) {
-            list = userRepository.findAll().stream()
-                    .filter(u -> u instanceof Player)
-                    .map(u -> new PlayerRanking((Player) u))
-                    .collect(Collectors.toList());
-            list = rankPlayers(list);
-            if (!list.isEmpty()) {
-                playerRankingRepository.saveAll(list);
-            }
-        }
-        return list;
+        return tournamentId == null ? playerRankingRepository.findByTournamentIsNullOrderByCurrentRankAsc()
+                : playerRankingRepository.findByTournament_TournamentIdOrderByCurrentRankAsc(tournamentId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TeamRanking> getTeamRankings(Long tournamentId) {
-        List<TeamRanking> list;
-        if (tournamentId != null) {
-            list = teamRankingRepository.findByTournament_TournamentIdOrderByCurrentRankAsc(tournamentId);
-        } else {
-            list = teamRankingRepository.findAllByOrderByCurrentRankAsc();
-        }
-
-        // Fallback khởi tạo ban đầu nếu DB chưa có bản ghi ranking nào
-        if (list.isEmpty()) {
-            list = teamRepository.findAll().stream()
-                    .map(TeamRanking::new)
-                    .collect(Collectors.toList());
-            list = rankTeams(list);
-            if (!list.isEmpty()) {
-                teamRankingRepository.saveAll(list);
-            }
-        }
-        return list;
+        return tournamentId == null ? teamRankingRepository.findByTournamentIsNullOrderByCurrentRankAsc()
+                : teamRankingRepository.findByTournament_TournamentIdOrderByCurrentRankAsc(tournamentId);
     }
 
     @Override
@@ -92,11 +61,48 @@ public class RankingServiceImpl implements RankingService {
 
     @Override
     public List<TeamRanking> rankTeams(List<TeamRanking> teams) {
-        Collections.sort(teams);
+        teams.sort(Comparator.<TeamRanking>naturalOrder().thenComparingLong(row -> row.getTeam().getTeamId()));
         for (int i = 0; i < teams.size(); i++) {
             teams.get(i).setCurrentRank(i + 1);
         }
         return teams;
+    }
+
+    @Override
+    @Transactional
+    public void rebuildTeamRankings(Tournament tournament) {
+        long tournamentId = tournament.getTournamentId();
+        var previous = teamRankingRepository.findByTournament_TournamentIdOrderByCurrentRankAsc(tournamentId);
+        Map<Long, TeamRanking> previousByTeam = new HashMap<>();
+        for (var row : previous) {
+            previousByTeam.putIfAbsent(row.getTeam().getTeamId(), row);
+        }
+        Map<Long, TeamRanking> standings = new LinkedHashMap<>();
+        for (var match : matchRepository.findByTournament_TournamentIdOrderByRound_RoundNumberAscMatchOrderAsc(tournamentId)) {
+            var result = match.getResult();
+            if (match.getStatus() != MatchStatus.COMPLETED || result == null
+                    || match.getTeamA() == null || match.getTeamB() == null) continue;
+            var a = match.getTeamA();
+            var b = match.getTeamB();
+            var winner = result.getWinner();
+            var draw = result.getScoreA() == result.getScoreB();
+            updateTeamStanding(standings, previousByTeam, tournament, a, winner, result.getScoreA(), result.getScoreB(), draw);
+            updateTeamStanding(standings, previousByTeam, tournament, b, winner, result.getScoreB(), result.getScoreA(), draw);
+        }
+        teamRankingRepository.deleteAll(previous.stream()
+                .filter(row -> standings.get(row.getTeam().getTeamId()) != row).toList());
+        teamRankingRepository.saveAll(rankTeams(new ArrayList<>(standings.values())));
+    }
+
+    private void updateTeamStanding(Map<Long, TeamRanking> standings, Map<Long, TeamRanking> previous,
+                                    Tournament tournament, Team team, Team winner, int scored, int conceded, boolean draw) {
+        var standing = standings.computeIfAbsent(team.getTeamId(), id -> {
+            var row = previous.get(id);
+            if (row == null) return new TeamRanking(team, tournament);
+            row.resetStats();
+            return row;
+        });
+        standing.updateStats(scored, conceded, winner != null && winner.getTeamId() == team.getTeamId(), draw);
     }
 
     /**
@@ -122,38 +128,9 @@ public class RankingServiceImpl implements RankingService {
         MatchResult result = match.getResult();
         Tournament tournament = match.getTournament();
 
-        int scoreA = result.getScoreA();
-        int scoreB = result.getScoreB();
         boolean aWins = (result.getWinner() != null && result.getWinner().getTeamId() == teamA.getTeamId());
         boolean bWins = (result.getWinner() != null && result.getWinner().getTeamId() == teamB.getTeamId());
-        boolean isDraw = (scoreA == scoreB);
-
-        Long tourneyId = (tournament != null) ? tournament.getTournamentId() : null;
-
-        // 1. Cập nhật Team Ranking cho Team A
-        TeamRanking rankA = (tourneyId != null)
-                ? teamRankingRepository.findByTeam_TeamIdAndTournament_TournamentId(teamA.getTeamId(), tourneyId)
-                        .orElseGet(() -> new TeamRanking(teamA, tournament))
-                : teamRankingRepository.findByTeam_TeamIdAndTournamentIsNull(teamA.getTeamId())
-                        .orElseGet(() -> new TeamRanking(teamA));
-        rankA.updateStats(scoreA, scoreB, aWins, isDraw);
-        teamRankingRepository.save(rankA);
-
-        // 2. Cập nhật Team Ranking cho Team B
-        TeamRanking rankB = (tourneyId != null)
-                ? teamRankingRepository.findByTeam_TeamIdAndTournament_TournamentId(teamB.getTeamId(), tourneyId)
-                        .orElseGet(() -> new TeamRanking(teamB, tournament))
-                : teamRankingRepository.findByTeam_TeamIdAndTournamentIsNull(teamB.getTeamId())
-                        .orElseGet(() -> new TeamRanking(teamB));
-        rankB.updateStats(scoreB, scoreA, bWins, isDraw);
-        teamRankingRepository.save(rankB);
-
-        // 3. Tái xếp hạng (Re-rank) toàn bộ Team của giải đấu (hoặc global)
-        List<TeamRanking> allTeamRanks = (tourneyId != null)
-                ? teamRankingRepository.findByTournament_TournamentIdOrderByCurrentRankAsc(tourneyId)
-                : teamRankingRepository.findAllByOrderByCurrentRankAsc();
-        rankTeams(allTeamRanks);
-        teamRankingRepository.saveAll(allTeamRanks);
+        rebuildTeamRankings(tournament);
 
         // 4. Tính Elo trung bình giữa 2 team để cập nhật Elo công bằng
         double avgEloA = calculateAverageElo(teamA);
@@ -208,7 +185,7 @@ public class RankingServiceImpl implements RankingService {
         // Tái xếp hạng (Re-rank) các Player
         List<PlayerRanking> allPlayerRanks = (tourneyId != null)
                 ? playerRankingRepository.findByTournament_TournamentIdOrderByCurrentRankAsc(tourneyId)
-                : playerRankingRepository.findAllByOrderByCurrentRankAsc();
+                : playerRankingRepository.findByTournamentIsNullOrderByCurrentRankAsc();
         rankPlayers(allPlayerRanks);
         playerRankingRepository.saveAll(allPlayerRanks);
     }

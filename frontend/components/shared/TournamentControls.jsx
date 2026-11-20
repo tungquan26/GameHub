@@ -1,6 +1,6 @@
 import { Search, X } from "lucide-react";
 import { Input, NativeSelect } from "@/components/ui/input";
-import { DASHBOARD_GAMES } from "@/constants/games";
+import { useTourney } from "@/context/TourneyContext";
 import { gameLabel } from "@/lib/games";
 
 export function SearchInput({ value, onChange, label = "Tìm kiếm giải đấu", placeholder = "Tìm kiếm giải đấu...", large = false }) {
@@ -11,9 +11,10 @@ export function SearchInput({ value, onChange, label = "Tìm kiếm giải đấ
     {value && <button type="button" aria-label="Xóa từ khóa" onClick={() => onChange("")} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-dp-meta"><X className="size-4" /></button>}
   </div>;
 }
-export function GameSelect({ value, onChange, games = DASHBOARD_GAMES, label = "Lọc tựa game" }) {
+export function GameSelect({ value, onChange, label = "Lọc tựa game" }) {
+  const { games } = useTourney();
   return <NativeSelect aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} className="w-full sm:w-60">
     <option value="">Tất cả tựa game</option>
-    {games.map((game) => <option key={game.id || game} value={game.id || game}>{gameLabel(game.id || game)}</option>)}
+    {games.map((game) => <option key={game.gameId} value={game.name}>{gameLabel(game.name)}</option>)}
   </NativeSelect>;
 }

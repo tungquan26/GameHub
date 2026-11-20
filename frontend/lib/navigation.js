@@ -1,5 +1,5 @@
 const AUTH_PATHS = new Set(["/login", "/register", "/verify", "/auth/login", "/auth/register", "/auth/verify"]);
-const PRIVATE_PATHS = new Set(["/dashboard", "/events", "/create", "/profile/settings", "/tournament"]);
+const PRIVATE_PATHS = new Set(["/events", "/create", "/messages", "/profile/settings", "/tournament"]);
 
 function decodedPath(pathname) {
   let path = pathname;

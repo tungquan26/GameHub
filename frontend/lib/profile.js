@@ -3,10 +3,6 @@ export const EMPTY_PROFILE = {
   displayPronouns: false, pronouns: "", country: "Việt Nam", city: "", zipCode: "",
   phone: "", displayCityMode: "Hiển thị thành phố", birthday: "", email: "", avatarUrl: "", bannerUrl: "",
 };
-export const DEMO_PROFILE = {
-  ...EMPTY_PROFILE, tagName: "tungquan", userCode: "f4c0f609", joinedDate: "Tháng 10, 2026",
-  birthday: "2002-01-10", email: "quanquan4101990@gmail.com",
-};
 export const COUNTRIES = ["Việt Nam", "Hoa Kỳ", "Hàn Quốc", "Nhật Bản", "Singapore", "Thái Lan", "Vương quốc Anh", "Úc"];
 
 export function userCodeFor(tag) {
@@ -15,9 +11,8 @@ export function userCodeFor(tag) {
   return Math.abs(hash).toString(16).padStart(8, "0").slice(0, 8);
 }
 export function displayProfile(profile) {
-  const result = profile ? { ...EMPTY_PROFILE, ...profile, tagName: profile.gamerTag || profile.tagName || profile.username || "" } : { ...DEMO_PROFILE };
+  const result = profile ? { ...EMPTY_PROFILE, ...profile, tagName: profile.gamerTag || profile.tagName || profile.username || "" } : { ...EMPTY_PROFILE };
   if (result.country === "Vietnam") result.country = "Việt Nam";
-  if (result.joinedDate === "October 2026") result.joinedDate = "Tháng 10, 2026";
   if (result.displayCityMode === "Hide city") result.displayCityMode = "Ẩn thành phố";
   if (result.displayCityMode === "Display city") result.displayCityMode = "Hiển thị thành phố";
   return result;

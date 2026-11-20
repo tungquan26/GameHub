@@ -35,11 +35,12 @@ public class TournamentServiceImpl implements TournamentService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
         
-        Organizer organizer = (Organizer) userRepository.findById(organizerId)
+        var organizer = userRepository.findById(organizerId)
                 .orElseThrow(() -> new RuntimeException("Organizer not found"));
 
         tournament.setGame(game);
         tournament.setOrganizer(organizer);
+        tournament.setMaxTeams(Tournament.MAX_TEAMS);
         return tournamentRepository.save(tournament);
     }
 }

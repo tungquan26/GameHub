@@ -1,5 +1,5 @@
 import { DATE_FILTERS, EMPTY_FILTERS, STATUS_FILTERS } from "./tournaments";
-import { getGame } from "./games";
+import { canonicalGame, getGame } from "./games";
 
 const KEYS = ["q", "game", "status", "range", "from", "to", "page"];
 const unique = (items) => [...new Set(items)];
@@ -17,7 +17,7 @@ export function readTournamentSearch(params) {
   const rawPage = params.get("page");
   const page = /^[1-9]\d*$/.test(rawPage || "") && Number.isSafeInteger(Number(rawPage)) ? Number(rawPage) : 1;
   return { keyword: params.get("q") || "", page, filters: {
-    games: unique(params.getAll("game").map((value) => getGame(value)?.id).filter(Boolean)),
+    games: unique(params.getAll("game").map((value) => canonicalGame(value)).filter(Boolean)),
     statuses: allowed(params.getAll("status"), STATUS_FILTERS), dateRanges, from, to,
   } };
 }
@@ -26,7 +26,7 @@ export function writeTournamentSearch({ keyword = "", filters = EMPTY_FILTERS, p
   const params = new URLSearchParams(previous);
   KEYS.forEach((key) => params.delete(key));
   if (keyword) params.set("q", keyword);
-  unique(filters.games.map((value) => getGame(value)?.slug).filter(Boolean)).forEach((game) => params.append("game", game));
+  unique(filters.games.map((value) => getGame(value)?.slug || value).filter(Boolean)).forEach((game) => params.append("game", game));
   allowed(filters.statuses, STATUS_FILTERS).forEach((status) => params.append("status", status));
   const ranges = allowed(filters.dateRanges, DATE_FILTERS);
   ranges.forEach((range) => params.append("range", range));

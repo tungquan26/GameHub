@@ -21,7 +21,8 @@ public class TeamController {
     }
 
     @PostMapping
-    public ResponseEntity<Team> createTeam(@RequestBody Team team, @RequestParam Long captainId) {
+    public ResponseEntity<Team> createTeam(@RequestBody Team team, @RequestParam Long captainId, jakarta.servlet.http.HttpSession session) {
+        btpoop.user.controller.SessionUser.require(session,captainId);
         return ResponseEntity.ok(teamService.createTeam(team, captainId));
     }
 }

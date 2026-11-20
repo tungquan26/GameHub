@@ -17,11 +17,11 @@ import RegisterPage from "@/pages/auth/RegisterPage";
 import VerifyPage from "@/pages/auth/VerifyPage";
 import ProfilePage from "@/pages/profile/ProfilePage";
 import ProfileSettingsPage from "@/pages/profile/ProfileSettingsPage";
-const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
 const LandingPage = lazy(() => import("@/pages/dashboard/LandingPage"));
 const SearchPage = lazy(() => import("@/pages/dashboard/SearchPage"));
 const EventsPage = lazy(() => import("@/pages/dashboard/EventsPage"));
 const CommunityPage = lazy(() => import("@/pages/dashboard/CommunityPage"));
+const MessagesPage = lazy(() => import("@/pages/messages/MessagesPage"));
 const NewsPage = lazy(() => import("@/pages/dashboard/NewsPage"));
 const CreatePage = lazy(() => import("@/pages/dashboard/CreatePage"));
 const DetailsPage = lazy(() => import("@/pages/tournament/DetailsPage"));
@@ -35,8 +35,9 @@ const SchedulePage = lazy(() => import("@/pages/tournament/SchedulePage"));
 const PAGE_COMPONENTS = {
   "/": LandingPage, "/login": LoginPage, "/register": RegisterPage, "/verify": VerifyPage,
   "/profile": ProfilePage, "/profile/settings": ProfileSettingsPage,
-  "/dashboard": DashboardPage, "/search": SearchPage, "/events": EventsPage,
+  "/search": SearchPage, "/events": EventsPage,
   "/community": CommunityPage, "/news": NewsPage, "/create": CreatePage,
+  "/messages": MessagesPage,
   "/tournament/details": DetailsPage, "/tournament/registration-settings": RegistrationPage,
   "/tournament/teams": TeamsPage, "/tournament/game-info": GameInfoPage,
   "/tournament/home": HomePage, "/tournament/view": PublicViewPage, "/tournament/schedule": SchedulePage,
@@ -85,6 +86,7 @@ export function AppRoutes() {
                 </div></PageContent>
               } />
             </Route>
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
             <Route path="/tournament" element={<RedirectTo to="/tournament/home" />} />
             {["login", "register", "verify"].map((page) => <Route key={page} path={`/auth/${page}`} element={<RedirectTo to={`/${page}`} />} />)}
           </Routes>

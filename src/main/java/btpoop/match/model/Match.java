@@ -22,6 +22,7 @@ public class Match {
 
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"registrations","matches"})
     private Tournament tournament;
 
     @ManyToOne

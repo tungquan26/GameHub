@@ -1,4 +1,4 @@
-# Java / Maven build output
+# Java and Maven build output
 /target/
 /target-ide/
 /bin/
@@ -6,7 +6,7 @@
 hs_err_pid*
 replay_pid*
 
-# Frontend dependencies, build output and caches
+# Frontend dependencies, build output, and test artifacts
 node_modules/
 dist/
 .vite/
@@ -14,15 +14,29 @@ dist/
 coverage/
 .qa/
 
-# Local environment files; keep templates in Git
+# Local test sources
+/frontend/tests/
+/src/test/
+
+# Local configuration and secrets
 .env
 .env.*
 !.env.example
 !.env.*.example
-/application-local.properties
-/src/main/resources/application-local.properties
-/src/main/resources/application-local.yml
-/src/main/resources/application-local.yaml
+application-local.properties
+application-local.yml
+application-local.yaml
+*.key
+*.pem
+*.jks
+*.p12
+*.pfx
+/.ssh/
+/.aws/
+
+# Local database backups and SQL exports stored at the repository root
+/backups/
+/*.sql
 
 # Runtime and package-manager logs
 logs/

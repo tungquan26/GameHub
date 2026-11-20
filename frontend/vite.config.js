@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: "jsdom",
       exclude: [...configDefaults.exclude, "**/.qa/**"],
-      setupFiles: ["./tests/setup.js"],
       restoreMocks: true,
       clearMocks: true,
     },

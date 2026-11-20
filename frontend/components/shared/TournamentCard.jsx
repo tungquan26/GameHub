@@ -4,11 +4,15 @@ import { useTourney } from "@/context/TourneyContext";
 import { cn } from "@/lib/utils";
 import { TournamentCover } from "./GameArtwork";
 import { tournamentPath } from "@/lib/public-tournament";
+import { registrationStatus, REGISTRATION_STATUS_LABELS } from "@/lib/tournaments";
 
 function TournamentStatus({ tournament }) {
-  const active = !["completed", "cancelled"].includes(tournament.status) && tournament.registrationState !== "closed";
+  const status = registrationStatus(tournament);
+  const active = status === "OPEN_REGISTRATION" || status === "IN_PROGRESS";
+  const label = status === "OPEN_REGISTRATION" && tournament.registrationState === "closing"
+    ? "Sắp đóng đăng ký" : REGISTRATION_STATUS_LABELS[status];
   return <span className={cn("inline-flex items-center gap-1.5 rounded-pill border border-dp-hairline-2 bg-dp-panel px-2.5 py-1 text-[10px] whitespace-nowrap", active ? "text-dp-bright" : "text-dp-meta")}>
-    <span aria-hidden="true" className={cn("size-1.5 rounded-full", active ? "bg-dp-live" : "bg-dp-meta")} />{tournament.badgeLabel}
+    <span aria-hidden="true" className={cn("size-1.5 rounded-full", active ? "bg-dp-live" : "bg-dp-meta")} />{label}
   </span>;
 }
 function Metadata({ icon: Icon, children, mono = false }) {
@@ -17,11 +21,11 @@ function Metadata({ icon: Icon, children, mono = false }) {
   </p>;
 }
 
-export default function TournamentCard({ tournament, variant = "grid", showRole = false, showManage = false, reveal = false }) {
+function TournamentCard({ tournament, variant = "grid", showRole = false, showManage = false, reveal = false }) {
   const { selectTournament, setPublicTournament } = useTourney();
   const horizontal = variant === "horizontal";
   function choose() {
-    if (!tournament.sample) selectTournament(tournament.storeId || tournament.id);
+    selectTournament(tournament.storeId || tournament.id);
     setPublicTournament(tournament);
   }
   return <article data-reveal={reveal || undefined} className="dp-panel dp-interactive-card flex h-full flex-col">
@@ -52,7 +56,7 @@ export default function TournamentCard({ tournament, variant = "grid", showRole 
         <span className="flex items-center gap-1 text-[10px] text-dp-meta">Xem giải đấu<ArrowUpRight className="size-3" /></span>
       </div>}
     </Link>
-    {showManage && tournament.role === "Organizer" && !tournament.sample && <div className="flex justify-end border-t border-dp-hairline px-5 py-3">
+    {showManage && tournament.role === "Organizer" && <div className="flex justify-end border-t border-dp-hairline px-5 py-3">
       <Link to={tournamentPath("/tournament/details", tournament)} onClick={choose} aria-label={`Quản lý giải đấu ${tournament.name}`} className="inline-flex items-center gap-2 text-xs font-medium text-dp-live hover:text-dp-bright">Quản lý giải đấu<ArrowUpRight aria-hidden="true" className="size-3.5" /></Link>
     </div>}
   </article>;

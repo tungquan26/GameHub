@@ -1,3 +1,9 @@
+export function parseVietnamDateTime(value) {
+  if (!value) return NaN;
+  const local = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(value);
+  return Date.parse(local ? `${value}+07:00` : value);
+}
+
 export function currentDay(now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ho_Chi_Minh", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now);
   const part = (type) => parts.find((value) => value.type === type).value;

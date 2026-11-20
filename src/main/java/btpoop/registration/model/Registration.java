@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "registrations")
@@ -23,9 +25,24 @@ public class Registration {
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
+
+    @Column(name = "source_team_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Long sourceTeamId;
+
+    @Column(name = "captain_user_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Long captainUserId;
+
+    @ElementCollection
+    @CollectionTable(name = "registration_roster", joinColumns = @JoinColumn(name = "registration_id"))
+    @Column(name = "user_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Set<Long> rosterUserIds = new LinkedHashSet<>();
     
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"registrations","matches"})
     private Tournament tournament;
     
     @Column(nullable = false)

@@ -13,9 +13,10 @@ export default function MarkdownEditorBox({ value, onChange, label = "Điều l�
   const id = useId();
   const [preview, setPreview] = useState(false);
   const [help, setHelp] = useState(false);
+  const field = label.toLocaleLowerCase("vi");
   return <div className="space-y-4">
-    {preview ? <section aria-label={`Xem trước ${label.toLowerCase()}`} className="min-h-40 overflow-x-auto rounded-panel border border-dp-hairline-2 bg-dp-ground p-5"><Suspense fallback={<p role="status" className="text-xs text-dp-meta">Đang tải bản xem trước…</p>}><MarkdownRenderer value={value} /></Suspense></section>
-      : <div><label htmlFor={id} className="sr-only">{label}</label><Textarea id={id} rows={7} value={value} onChange={(event) => onChange(event.target.value)} placeholder="Nhập điều lệ giải đấu (hỗ trợ định dạng Markdown)..." className="font-mono text-xs leading-6" /></div>}
+    {preview ? <section aria-label={`Xem trước ${field}`} className="min-h-40 overflow-x-auto rounded-panel border border-dp-hairline-2 bg-dp-ground p-5"><Suspense fallback={<p role="status" className="text-xs text-dp-meta">Đang tải bản xem trước…</p>}><MarkdownRenderer value={value} emptyMessage={`Chưa cập nhật ${field}.`} /></Suspense></section>
+      : <div><label htmlFor={id} className="sr-only">{label}</label><Textarea id={id} rows={7} value={value} onChange={(event) => onChange(event.target.value)} placeholder={`Nhập ${field} (hỗ trợ định dạng Markdown)...`} className="font-mono text-xs leading-6" /></div>}
     <div className="flex flex-wrap gap-2">
       <Button size="sm" variant="ghost" aria-pressed={preview} onClick={() => setPreview((current) => !current)}>{preview ? <FileText /> : <Eye />}{preview ? "Chỉnh sửa Markdown" : "Xem trước Markdown"}</Button>
       <Button size="sm" variant="ghost" aria-expanded={help} aria-controls={`${id}-help`} onClick={() => setHelp((current) => !current)}><HelpCircle />Hướng dẫn định dạng</Button>

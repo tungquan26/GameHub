@@ -4,7 +4,7 @@ import btpoop.game.model.Game;
 import btpoop.enums.TournamentFormat;
 import btpoop.enums.TournamentStatus;
 import btpoop.match.model.Match;
-import btpoop.user.model.Organizer;
+import btpoop.user.model.User;
 import btpoop.registration.model.Registration;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,6 +19,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class Tournament {
+    public static final int MAX_TEAMS = 8;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long tournamentId;
@@ -27,12 +29,17 @@ public class Tournament {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "game_id", nullable = false)
+    @JoinColumn(name = "game_id")
     private Game game;
 
     @ManyToOne
     @JoinColumn(name = "organizer_id", nullable = false)
-    private Organizer organizer;
+    private User organizer;
+
+    @Lob
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(length=67108864)
+    private String settingsJson;
 
     @Column(nullable = false)
     private LocalDateTime startDate;
@@ -41,7 +48,7 @@ public class Tournament {
     private LocalDateTime endDate;
 
     @Column(nullable = false)
-    private int maxTeams;
+    private int maxTeams = MAX_TEAMS;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
