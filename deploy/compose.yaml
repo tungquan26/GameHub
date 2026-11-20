@@ -1,0 +1,67 @@
+name: gamehub
+
+services:
+  db:
+    image: mysql:9.7
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: gamehub
+      MYSQL_USER: gamehub
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="$${MYSQL_PASSWORD}" mysql --protocol=TCP -h 127.0.0.1 -u "$${MYSQL_USER}" -D "$${MYSQL_DATABASE}" -e "SELECT 1" >/dev/null'
+      interval: 5s
+      timeout: 4s
+      retries: 24
+      start_period: 20s
+
+  app:
+    image: eclipse-temurin:25-jre-noble
+    restart: unless-stopped
+    working_dir: /app
+    command: ["java", "-jar", "app.jar"]
+    volumes:
+      - type: bind
+        source: ./app.jar
+        target: /app/app.jar
+        read_only: true
+        bind:
+          create_host_path: false
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      GAMEHUB_DB_URL: jdbc:mysql://db:3306/gamehub
+      SPRING_DATASOURCE_USERNAME: gamehub
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: "true"
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  mysql_data:
+  caddy_data:
+  caddy_config:
