@@ -9,16 +9,21 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
     private final String fromEmail;
+    private final Optional<BrevoEmailSender> brevo;
 
-    public EmailService(JavaMailSender mailSender, @Value("${spring.mail.username:}") String fromEmail) {
+    public EmailService(JavaMailSender mailSender, @Value("${spring.mail.username:}") String fromEmail,
+                        Optional<BrevoEmailSender> brevo) {
         this.mailSender = mailSender;
         this.fromEmail = fromEmail;
+        this.brevo = brevo;
     }
 
     public void sendEmail(String to, String subject, String text) {
@@ -31,6 +36,10 @@ public class EmailService {
     }
 
     public void sendRequiredEmail(String to, String subject, String text) {
+        if (brevo.isPresent()) {
+            brevo.get().send(to, subject, text);
+            return;
+        }
         if (fromEmail == null || fromEmail.isBlank()) {
             throw new IllegalStateException("Máy chủ chưa cấu hình gửi email. Vui lòng liên hệ quản trị viên.");
         }
