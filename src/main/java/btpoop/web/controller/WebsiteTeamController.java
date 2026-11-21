@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -79,10 +80,13 @@ public class WebsiteTeamController {
                 && team.getMembers().size() >= team.getGame().getMaxPlayers();
     }
     @PostMapping
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<Map<String,Object>> act(@RequestBody Action a,HttpSession session) {
         long actor = SessionUser.id(session);
         boolean create = "create".equals(a.type());
-        Team t = create ? new Team() : em.find(Team.class,a.id(),LockModeType.PESSIMISTIC_WRITE);
+        Team t = create ? new Team() : (Team) em.createNativeQuery(
+                "select * from teams where team_id = :id for update", Team.class)
+                .setParameter("id", a.id()).getSingleResultOrNull();
         if (t==null || t.getTournamentScope()!=null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         if (create) t.setCaptain(em.getReference(Player.class,actor));
         if (Set.of("edit","dissolve","accept","reject").contains(a.type())) SessionUser.require(session,t.getCaptain().getUserId());
