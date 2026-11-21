@@ -8,9 +8,10 @@ import btpoop.registration.model.Registration;
 import btpoop.registration.repository.RegistrationRepository;
 import btpoop.team.model.Team;
 import btpoop.team.model.TeamMember;
+import btpoop.team.repository.TeamRepository;
 import btpoop.tournament.model.Tournament;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
+import btpoop.tournament.repository.TournamentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,8 @@ public class RegistrationModule {
 
     private final EntityManager em;
     private final RegistrationRepository registrations;
+    private final TeamRepository teams;
+    private final TournamentRepository tournaments;
     private final ObjectMapper json;
 
     public record Entries(List<Team> teams, List<Registration> registrations, int occupied) {}
@@ -101,7 +104,7 @@ public class RegistrationModule {
 
     public void register(long tournamentId, long sourceTeamId, long actor) {
         var tournament = lockedTournament(tournamentId);
-        var source = em.find(Team.class, sourceTeamId, LockModeType.PESSIMISTIC_WRITE);
+        var source = teams.findByIdForUpdate(sourceTeamId).orElse(null);
         if (source == null || source.getTournamentScope() != null || source.getStatus() != TeamStatus.ACTIVE) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đội cộng đồng đang hoạt động.");
         }
@@ -165,9 +168,8 @@ public class RegistrationModule {
     }
 
     private Tournament lockedTournament(long id) {
-        var tournament = em.find(Tournament.class, id, LockModeType.PESSIMISTIC_WRITE);
-        if (tournament == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        return tournament;
+        return tournaments.findByIdForUpdate(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     private static boolean isCaptain(Team team, long actor) {

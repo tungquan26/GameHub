@@ -6,10 +6,11 @@ import btpoop.enums.TournamentStatus;
 import btpoop.game.repository.GameRepository;
 import btpoop.registration.service.RegistrationModule;
 import btpoop.tournament.model.Tournament;
+import btpoop.tournament.repository.TournamentRepository;
 import btpoop.user.controller.SessionUser;
 import btpoop.user.model.User;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
+import btpoop.user.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class WebsiteController {
     private final EntityManager em;
+    private final TournamentRepository tournaments;
+    private final UserRepository users;
     private final ObjectMapper json;
     private final GameRepository games;
     private final WebsiteBracket brackets;
@@ -84,17 +87,18 @@ public class WebsiteController {
         return view;
     }
     @PatchMapping("/profile")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String,Object> profile(HttpSession session, @RequestBody Map<String,Object> patch) {
-        var user = em.find(User.class, SessionUser.id(session), LockModeType.PESSIMISTIC_WRITE);
+        var user = users.findByIdForUpdate(SessionUser.id(session))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         var data = decode(user.getProfileJson());
         merge(data, patch, PROFILE);
         user.setProfileJson(json.writeValueAsString(data));
         return profile(user);
     }
     private Tournament get(long id, boolean lock) {
-        var t = em.find(Tournament.class, id, lock ? LockModeType.PESSIMISTIC_WRITE : LockModeType.NONE);
-        if (t == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        return t;
+        return (lock ? tournaments.findByIdForUpdate(id) : tournaments.findById(id))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
     private Map<String,Object> view(Tournament t, HttpSession session) {
         var data = decode(t.getSettingsJson());
@@ -190,6 +194,7 @@ public class WebsiteController {
         return response;
     }
     @PatchMapping("/tournaments/{id}")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String,Object> update(@PathVariable long id,@RequestBody Map<String,Object> patch,HttpSession session) {
         var t = get(id,true);
         SessionUser.require(session,t.getOrganizer().getUserId());

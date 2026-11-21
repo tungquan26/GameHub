@@ -10,6 +10,7 @@ import btpoop.ranking.service.TournamentStandings;
 import btpoop.registration.service.RegistrationModule;
 import btpoop.team.model.Team;
 import btpoop.tournament.model.Tournament;
+import btpoop.tournament.repository.TournamentRepository;
 import btpoop.user.controller.SessionUser;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpSession;
@@ -29,6 +30,7 @@ import java.util.*;
 public class WebsiteBracket {
     private final EntityManager em;
     private final BracketRepository brackets;
+    private final TournamentRepository tournaments;
     private final RankingService rankings;
     private final RegistrationModule registrations;
     record Side(long id) {}
@@ -86,8 +88,8 @@ public class WebsiteBracket {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Object save(@PathVariable long id,@RequestBody Draw draw,HttpSession session,
                        @RequestParam(required=false) Long previousRevision, @RequestParam(required=false) Long previousId) {
-        var t=em.find(Tournament.class,id,LockModeType.PESSIMISTIC_WRITE);
-        if (t==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        var t = tournaments.findByIdForUpdate(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         SessionUser.require(session,t.getOrganizer().getUserId());
         var eligibleTeams = new HashMap<Long, Team>();
         for (var team : registrations.entries(t).teams()) eligibleTeams.put(team.getTeamId(), team);

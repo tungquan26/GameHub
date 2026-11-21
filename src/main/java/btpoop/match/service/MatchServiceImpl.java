@@ -8,8 +8,8 @@ import btpoop.match.model.MatchScheduledEvent;
 import btpoop.match.repository.MatchRepository;
 import btpoop.ranking.service.RankingService;
 import btpoop.team.model.Team;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
+import btpoop.tournament.repository.TournamentRepository;
+import org.springframework.transaction.annotation.Isolation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class MatchServiceImpl implements MatchService {
     private final ApplicationEventPublisher eventPublisher;
     private final MatchRepository matchRepository;
     private final RankingService rankings;
-    private final EntityManager em;
+    private final TournamentRepository tournaments;
 
     @Override
     @Transactional
@@ -63,12 +63,13 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Match updateMatchResult(Long matchId, int scoreA, int scoreB) {
+        // Load scores and downstream matches only after acquiring the tournament lock.
+        matchRepository.findTournamentId(matchId).flatMap(tournaments::findByIdForUpdate)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
-        em.lock(match.getTournament(), LockModeType.PESSIMISTIC_WRITE);
-        em.refresh(match);
         boolean alreadyCompleted = match.getStatus() == MatchStatus.COMPLETED;
 
         if (scoreA == scoreB) {
