@@ -6,12 +6,11 @@ import btpoop.chat.repository.ConversationRepository;
 import btpoop.chat.repository.MessageRepository;
 import btpoop.user.model.User;
 import btpoop.user.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,7 +28,6 @@ public class ChatService {
     private final ConversationRepository conversations;
     private final MessageRepository messages;
     private final UserRepository users;
-    private final EntityManager entityManager;
 
     public List<Account> search(long userId, String username) {
         String prefix = username.strip();
@@ -40,7 +38,7 @@ public class ChatService {
                 .stream().map(account -> new Account(account.getUserId(), account.getUsername())).toList();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ConversationView open(long userId, Long recipientId) {
         if (recipientId == null || recipientId <= 0 || recipientId == userId) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Người nhận không hợp lệ.");
@@ -48,9 +46,9 @@ public class ChatService {
 
         long firstId = Math.min(userId, recipientId);
         long secondId = Math.max(userId, recipientId);
-        // Both callers lock the same row before checking for an existing conversation.
-        User first = entityManager.find(User.class, firstId, LockModeType.PESSIMISTIC_WRITE);
-        User second = entityManager.find(User.class, secondId);
+        // Both callers lock the same row before reading the latest committed conversation.
+        User first = users.findByIdForUpdate(firstId).orElse(null);
+        User second = users.findById(secondId).orElse(null);
         User recipient = recipientId == firstId ? first : second;
         if (first == null || second == null || !Boolean.TRUE.equals(recipient.getIsVerified())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy tài khoản.");

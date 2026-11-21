@@ -1,9 +1,7 @@
 package btpoop.chat.repository;
 
 import btpoop.chat.model.Conversation;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
@@ -30,11 +28,11 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
             """)
     Optional<Long> findMemberConversationId(long id, long userId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("""
-            select c from Conversation c
-            where c.id = :id and (c.userA.userId = :userId or c.userB.userId = :userId)
-            """)
+    @Query(value = """
+            select * from chat_conversations
+            where id = :id and (user_a_id = :userId or user_b_id = :userId)
+            for update
+            """, nativeQuery = true)
     Optional<Conversation> findMemberConversationForUpdate(long id, long userId);
 
     interface Summary {
