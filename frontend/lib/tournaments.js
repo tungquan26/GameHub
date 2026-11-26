@@ -119,6 +119,13 @@ export function registrationStatus(entry, now = new Date()) {
   const status = lower(entry.status); const badge = lower(entry.badgeLabel);
   if (status === "cancelled") return "CANCELLED";
   if (["completed", "finished"].includes(status) || ["completed", "đã kết thúc"].includes(badge)) return "COMPLETED";
+  const finalRound = entry.bracket?.rounds?.at(-1);
+  const final = finalRound?.matches?.length === 1 ? finalRound.matches[0] : null;
+  const tournamentEnd = parseVietnamDateTime(entry.endDate || entry.details?.endDate);
+  if (now.getTime() >= tournamentEnd || (entry.bracket?.format === "SINGLE_ELIMINATION"
+    && final?.status === "COMPLETED" && final.result?.winner)) return "COMPLETED";
+  const tournamentStart = parseVietnamDateTime(entry.startDate || entry.details?.startDate);
+  if (now.getTime() >= tournamentStart) return "IN_PROGRESS";
   if (["in_progress", "ongoing"].includes(status) || ["in progress", "đang diễn ra"].includes(badge)) return "IN_PROGRESS";
   if (["closed", "registration_closed"].includes(status) || entry.registrationState === "closed" || ["registration closed", "đã đóng đăng ký"].includes(badge)) return "REGISTRATION_CLOSED";
   if (["upcoming", "sắp diễn ra"].includes(badge)) return "REGISTRATION_NOT_STARTED";
@@ -130,7 +137,10 @@ export function registrationStatus(entry, now = new Date()) {
 }
 
 function matchesTournamentStatus(entry, status, now) {
-  return status === "open_registration" ? !isLegacyTournament(entry) && registrationStatus(entry, now) === "OPEN_REGISTRATION" : entry.status === status;
+  const current = registrationStatus(entry, now);
+  if (status === "open_registration") return !isLegacyTournament(entry) && current === "OPEN_REGISTRATION";
+  if (status === "upcoming") return ["OPEN_REGISTRATION", "REGISTRATION_CLOSED", "REGISTRATION_NOT_STARTED"].includes(current);
+  return lower(current) === status;
 }
 
 export function landingHighlights(catalog, now = new Date()) {

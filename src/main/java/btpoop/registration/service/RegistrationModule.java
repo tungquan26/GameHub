@@ -20,7 +20,6 @@ import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -32,8 +31,6 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class RegistrationModule {
-    private static final ZoneId REGISTRATION_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
-
     private final EntityManager em;
     private final RegistrationRepository registrations;
     private final TeamRepository teams;
@@ -140,7 +137,7 @@ public class RegistrationModule {
         registration.getRosterUserIds().clear();
         registration.getRosterUserIds().addAll(members.keySet());
         registration.setTournament(tournament);
-        registration.setRegistrationDate(LocalDateTime.now(REGISTRATION_ZONE));
+        registration.setRegistrationDate(LocalDateTime.now(Tournament.TIME_ZONE));
         registration.setCheckInStatus(CheckInStatus.NOT_CHECKED_IN);
         registration.setStatus(RegistrationStatus.APPROVED);
         registrations.save(registration);
@@ -181,13 +178,13 @@ public class RegistrationModule {
     }
 
     private void requireOpen(Tournament tournament, long actor) {
-        if (tournament.getOrganizer().getUserId() == actor || tournament.getStatus() != TournamentStatus.OPEN_REGISTRATION) {
+        var now = LocalDateTime.now(Tournament.TIME_ZONE);
+        if (tournament.getOrganizer().getUserId() == actor || tournament.statusAt(now) != TournamentStatus.OPEN_REGISTRATION) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Giải đấu hiện không nhận đăng ký đội.");
         }
         if (tournament.getSettingsJson() == null) return;
         var settings = json.readTree(tournament.getSettingsJson()).path("regSettings");
         if (!settings.isObject()) return;
-        var now = LocalDateTime.now(REGISTRATION_ZONE);
         if (now.isBefore(LocalDateTime.parse(settings.path("registrationStartDate").asText()))
                 || !now.isBefore(LocalDateTime.parse(settings.path("registrationEndDate").asText()))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Giải đấu hiện nằm ngoài thời gian đăng ký.");

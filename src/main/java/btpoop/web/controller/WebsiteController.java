@@ -137,7 +137,7 @@ public class WebsiteController {
             data.put("teamMinPlayers", t.getGame().getMinPlayers());
             data.put("teamMaxPlayers", t.getGame().getMaxPlayers());
         }
-        data.put("status",t.getStatus());
+        data.put("status",t.statusAt(LocalDateTime.now(Tournament.TIME_ZONE)));
         data.put("bracket",brackets.view(t.getTournamentId()));
         data.put("attendees", attendees.size());
         if (!viewerTeamIds.isEmpty()) {

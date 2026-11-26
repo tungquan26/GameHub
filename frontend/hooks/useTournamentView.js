@@ -39,13 +39,15 @@ export default function useTournamentView() {
   }, [requestedId, needsRequest, attempt]);
   const result = needsRequest && remote?.id === requestedId ? remote : null;
   const tournament = resolved || result?.tournament || null;
+  const startDate = tournament?.startDate || tournament?.details?.startDate;
+  const endDate = tournament?.endDate || tournament?.details?.endDate;
   useEffect(() => {
-    const boundaries = [tournament?.regSettings?.registrationStartDate, tournament?.regSettings?.registrationEndDate]
+    const boundaries = [startDate, endDate, tournament?.regSettings?.registrationStartDate, tournament?.regSettings?.registrationEndDate]
       .map(parseVietnamDateTime).filter((value) => Number.isFinite(value) && value > now.getTime());
     if (!boundaries.length) return;
     const timer = setTimeout(() => setNow(new Date()), Math.min(2147483647, Math.max(1, Math.min(...boundaries) - Date.now())));
     return () => clearTimeout(timer);
-  }, [tournament?.regSettings?.registrationStartDate, tournament?.regSettings?.registrationEndDate, now]);
+  }, [startDate, endDate, tournament?.regSettings?.registrationStartDate, tournament?.regSettings?.registrationEndDate, now]);
   const access = tournament ? tournamentAccess(tournament, context.currentUser, context.registeredTournaments, now) : null;
   return { tournament, access, publicView: params.get("view") === "public", status: needsRequest ? result?.status || "loading" : tournament ? "success" : "not-found", retry: () => setAttempt((value) => value + 1) };
 }

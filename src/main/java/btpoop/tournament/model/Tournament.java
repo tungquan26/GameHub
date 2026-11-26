@@ -2,6 +2,7 @@ package btpoop.tournament.model;
 
 import btpoop.game.model.Game;
 import btpoop.enums.TournamentFormat;
+import btpoop.enums.MatchStatus;
 import btpoop.enums.TournamentStatus;
 import btpoop.match.model.Match;
 import btpoop.user.model.User;
@@ -11,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Tournament {
     public static final int MAX_TEAMS = 8;
+    public static final ZoneId TIME_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,4 +66,20 @@ public class Tournament {
 
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches = new ArrayList<>();
+
+    public TournamentStatus statusAt(LocalDateTime now) {
+        if (status == TournamentStatus.CANCELLED || status == TournamentStatus.COMPLETED) return status;
+        if (endDate != null && !now.isBefore(endDate)) return TournamentStatus.COMPLETED;
+        for (Match match : matches) {
+            if (match.getStatus() != MatchStatus.COMPLETED || match.getResult() == null
+                    || match.getResult().getWinner() == null) continue;
+            var round = match.getRound();
+            if (round == null || round.getBracket().getFormat() != TournamentFormat.SINGLE_ELIMINATION) continue;
+            var rounds = round.getBracket().getRounds();
+            if (!rounds.isEmpty() && round.getRoundId() == rounds.getLast().getRoundId()
+                    && round.getMatches().size() == 1) return TournamentStatus.COMPLETED;
+        }
+        if (startDate != null && !now.isBefore(startDate)) return TournamentStatus.ONGOING;
+        return status;
+    }
 }
