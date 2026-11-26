@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -42,11 +43,11 @@ public class RegistrationModule {
     public Entries entries(Tournament tournament) {
         var rows = registrations.findByTournamentOrderByRegistrationIdAsc(tournament);
         var snapshots = new HashSet<Long>();
-        rows.stream().filter(row -> row.getSourceTeamId() != null)
+        rows.stream()
                 .forEach(row -> snapshots.add(row.getTeam().getTeamId()));
         var manual = em.createQuery("from Team where tournamentScope = :id order by teamId", Team.class)
                 .setParameter("id", tournament.getTournamentId()).getResultList().stream()
-                .filter(team -> !snapshots.contains(team.getTeamId())).toList();
+                .filter(team -> team.getStatus() == TeamStatus.ACTIVE && !snapshots.contains(team.getTeamId())).toList();
         var teams = new TreeMap<Long, Team>();
         manual.forEach(team -> teams.put(team.getTeamId(), team));
         rows.stream().filter(row -> row.getStatus() == RegistrationStatus.APPROVED)
@@ -154,6 +155,34 @@ public class RegistrationModule {
         if (active.isEmpty()) return;
         requireOpen(tournament, actor);
         var teams = active.stream().map(Registration::getTeam).toList();
+        requireOutsideBracket(tournament, teams);
+        active.forEach(row -> row.setStatus(RegistrationStatus.CANCELLED));
+    }
+
+    public void revoke(Tournament tournament, long entrantId) {
+        var rows = registrations.findByTournamentOrderByRegistrationIdAsc(tournament).stream()
+                .filter(row -> row.getTeam().getTeamId() == entrantId).toList();
+        var team = rows.isEmpty() ? em.find(Team.class, entrantId) : rows.getFirst().getTeam();
+        if (team == null || (rows.isEmpty() && !Objects.equals(team.getTournamentScope(), tournament.getTournamentId()))) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đội trong giải này.");
+        }
+        var active = rows.stream().filter(RegistrationModule::isActive).toList();
+        boolean manual = rows.isEmpty();
+        if ((manual && team.getStatus() == TeamStatus.INACTIVE) || (!manual && active.isEmpty())) return;
+
+        var status = tournament.statusAt(LocalDateTime.now(Tournament.TIME_ZONE));
+        if (status != TournamentStatus.OPEN_REGISTRATION && status != TournamentStatus.REGISTRATION_CLOSED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Chỉ có thể thu hồi suất trước khi giải bắt đầu và khi giải chưa bị hủy.");
+        }
+        requireOutsideBracket(tournament, List.of(team));
+        if (manual) {
+            team.setStatus(TeamStatus.INACTIVE);
+        } else {
+            active.forEach(row -> row.setStatus(RegistrationStatus.CANCELLED));
+        }
+    }
+
+    private void requireOutsideBracket(Tournament tournament, List<Team> teams) {
         long matches = em.createQuery("""
                 select count(m) from Match m where m.tournament = :tournament
                 and (m.teamA in :teams or m.teamB in :teams)
@@ -161,7 +190,6 @@ public class RegistrationModule {
         if (matches > 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Đội đã được đưa vào nhánh đấu.");
         }
-        active.forEach(row -> row.setStatus(RegistrationStatus.CANCELLED));
     }
 
     private Tournament lockedTournament(long id) {

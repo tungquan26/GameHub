@@ -1,76 +1,71 @@
-import { useState } from "react";
-import { Plus, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users } from "lucide-react";
 import SettingsCard from "@/components/shared/SettingsCard";
 import TournamentEditorPage from "@/components/shared/TournamentEditorPage";
 import EmptyState from "@/components/shared/EmptyState";
 import { SearchInput } from "@/components/shared/TournamentControls";
-import { FormField } from "@/components/shared/FormField";
 import { FormMessage } from "@/components/shared/AuthPanel";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useTourney } from "@/context/TourneyContext";
-import { catalogGame } from "@/lib/games";
+import { allMatches } from "@/lib/bracket";
 import { MAX_TOURNAMENT_TEAMS, normalizeParticipants } from "@/lib/tournament-settings";
-import { lower } from "@/lib/tournaments";
+import { lower, registrationStatus } from "@/lib/tournaments";
 import useAsyncAction from "@/hooks/useAsyncAction";
-import { useUnsavedChanges } from "@/components/shared/UnsavedChangesProvider";
 
 function TeamsEditor({ entry }) {
-  const { addTournamentTeam, games } = useTourney();
-  const game = catalogGame(games, entry.game);
-  const size = game && (game.minPlayers === game.maxPlayers ? game.minPlayers : `${game.minPlayers} đến ${game.maxPlayers}`);
+  const { revokeTournamentTeam } = useTourney();
   const [keyword, setKeyword] = useState("");
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", members: "" });
-  const [notice, setNotice] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [now, setNow] = useState(() => new Date());
   const action = useAsyncAction();
-  useUnsavedChanges(open && (Boolean(form.name || form.members) || action.pending));
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+  const status = registrationStatus(entry, now);
+  const lockedReason = { IN_PROGRESS: "Giải đang diễn ra.", COMPLETED: "Giải đã kết thúc.", CANCELLED: "Giải đã hủy." }[status];
+  const drawnTeams = new Set(allMatches(entry.bracket).flatMap(match => [match.teamA?.id, match.teamB?.id]));
+  const reason = (team) => lockedReason || (drawnTeams.has(team.id) ? "Đội đã được xếp vào nhánh đấu." : "");
   const teams = normalizeParticipants(entry.tournamentTeams);
   const usedSlots = entry.teamCount ?? teams.length;
   const maxTeams = entry.maxTeams ?? MAX_TOURNAMENT_TEAMS;
-  const full = usedSlots >= maxTeams;
   const filtered = teams.filter((team) => !lower(keyword) || lower(team.name).includes(lower(keyword)) || lower(team.members.join(" / ")).includes(lower(keyword)));
-  function openDialog(next) {
-    if (next) { setForm({ name: "", members: "" }); action.setError(""); }
-    setOpen(next);
-  }
-  function submit(event) {
-    event.preventDefault(); event.stopPropagation();
+  function confirmRemoval() {
     action.run(async () => {
-      const team = await addTournamentTeam(entry.id, form, game);
-      setNotice(`Đã thêm đội "${team.name}" vào danh sách.`); setOpen(false);
+      await revokeTournamentTeam(entry.id, selected.id);
+      action.setNotice(`Đã thu hồi suất thi đấu của đội ${selected.name}.`);
+      setSelected(null);
     });
   }
   return <SettingsCard title="Danh sách đội tuyển" subtitle={`Đã dùng ${usedSlots}/${maxTeams} suất thi đấu.`}>
-    <div className="flex flex-col gap-3 sm:flex-row">
-      <SearchInput label="Tìm đội tuyển hoặc thành viên" placeholder="Tìm kiếm đội tuyển hoặc thành viên..." value={keyword} onChange={setKeyword} />
-      <Dialog open={open} onOpenChange={openDialog}>
-        <DialogTrigger asChild><Button disabled={full}><Plus />{full ? "Đã đủ đội" : "Thêm đội tuyển"}</Button></DialogTrigger>
-        <DialogContent>
-          <DialogTitle className="pr-6 text-xl font-semibold">Thêm đội tuyển</DialogTitle>
-          <DialogDescription className="mt-2 text-xs leading-6 text-dp-read">Nhập tên các thành viên, cách nhau bởi dấu "/" hoặc dấu phẩy.</DialogDescription>
-          <form onSubmit={submit} noValidate className="mt-6 space-y-5">
-            <FormField label="Tên đội tuyển" required placeholder="VD: T1 / Gen.G" value={form.name} onChange={(event) => { setForm((previous) => ({ ...previous, name: event.target.value })); action.setError(""); }} />
-            <FormField label="Danh sách thành viên" required hint={size ? `${game.name} yêu cầu ${size} thành viên.` : "Chọn bộ môn trong mục Thông tin game trước khi thêm đội."} placeholder="Nhập tên, cách nhau bằng dấu / hoặc dấu phẩy" value={form.members} onChange={(event) => { setForm((previous) => ({ ...previous, members: event.target.value })); action.setError(""); }} />
-            <FormMessage error={action.error} />
-            <div className="flex justify-end gap-3 border-t border-dp-hairline pt-5">
-              <Button variant="outline" size="sm" onClick={() => setOpen(false)}>Hủy</Button>
-              <Button type="submit" size="sm" disabled={action.pending}>Lưu đội tuyển</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-    <FormMessage notice={notice} />
+    <SearchInput label="Tìm đội tuyển hoặc thành viên" placeholder="Tìm kiếm đội tuyển hoặc thành viên..." value={keyword} onChange={setKeyword} />
+    <Dialog open={Boolean(selected)} onOpenChange={open => { if (!open && !action.pending) setSelected(null); }}>
+      {selected && <DialogContent>
+        <DialogTitle className="pr-6 text-xl font-semibold">Thu hồi suất thi đấu?</DialogTitle>
+        <DialogDescription className="mt-2 text-sm text-dp-read">Đội {selected.name} sẽ mất suất thi đấu tại giải {entry.name}.</DialogDescription>
+        <FormMessage error={action.error || reason(selected)} />
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" size="sm" disabled={action.pending} onClick={() => setSelected(null)}>Hủy</Button>
+          <Button variant="destructive" size="sm" disabled={action.pending || Boolean(reason(selected))} onClick={confirmRemoval}>Xác nhận thu hồi</Button>
+        </div>
+      </DialogContent>}
+    </Dialog>
+    <FormMessage notice={action.notice} />
     {filtered.length ? <div className="overflow-hidden rounded-panel border border-dp-hairline">
       <table className="w-full table-fixed text-left text-sm" aria-label="Đội tuyển trong giải">
-        <thead className="bg-dp-ground text-xs text-dp-meta"><tr><th scope="col" className="w-2/5 px-3 py-4 font-medium sm:px-5">Đội tuyển</th><th scope="col" className="px-3 py-4 font-medium sm:px-5">Thành viên</th></tr></thead>
+        <thead className="bg-dp-ground text-xs text-dp-meta"><tr><th scope="col" className="w-2/5 px-3 py-4 font-medium sm:px-5">Đội tuyển</th><th scope="col" className="px-3 py-4 font-medium sm:px-5">Thành viên</th><th scope="col" className="px-3 py-4 font-medium">Suất thi đấu</th></tr></thead>
         <tbody>{filtered.map((team) => <tr key={team.id} className="border-t border-dp-hairline">
           <td className="px-3 py-4 align-top sm:px-5"><div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-panel border border-dp-hairline-2 bg-dp-ground font-mono text-xs">{(team.name.trim().charAt(0) || "T").toUpperCase()}</span>
             <span className="min-w-0 break-words text-xs font-medium sm:text-sm">{team.name}</span>
           </div></td>
           <td className="px-3 py-4 align-top sm:px-5"><div className="flex items-start gap-2"><Users aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-dp-meta" /><span className="min-w-0 break-words text-xs leading-6 text-dp-read">{team.members.join(" / ")}</span></div></td>
+          <td className="px-2 py-4 align-top">
+            <Button size="sm" variant="outline" className="px-2" aria-label={`Thu hồi suất của đội ${team.name}`} disabled={Boolean(reason(team))}
+              onClick={() => { action.setError(""); action.setNotice(""); setSelected(team); }}>Thu hồi suất</Button>
+            {reason(team) && <p className="mt-1 text-xs text-dp-meta">{reason(team)}</p>}
+          </td>
         </tr>)}</tbody>
       </table>
     </div> : <EmptyState title={teams.length ? "Không tìm thấy đội tuyển phù hợp." : "Chưa có đội tuyển nào"} />}

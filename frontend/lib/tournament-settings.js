@@ -58,19 +58,3 @@ export function normalizeParticipants(value) {
   return value.filter((team) => team && typeof team.name === "string" && Array.isArray(team.members))
     .map((team, index) => ({ ...team, id: team.id ?? "legacy-team-" + index, members: team.members.filter((member) => typeof member === "string") }));
 }
-export function makeParticipant(values, game) {
-  const name = values.name.trim();
-  const raw = values.members.trim();
-  if (!name || !raw) throw new Error("Vui lòng nhập đầy đủ tên đội tuyển và danh sách thành viên.");
-  const members = raw.split(/[\/,]+/).map((member) => member.trim()).filter(Boolean);
-  if (!members.length) throw new Error("Vui lòng nhập ít nhất 1 thành viên.");
-  if (!game) throw new Error("Vui lòng chọn bộ môn của giải trước khi thêm đội.");
-  if (members.length < game.minPlayers || members.length > game.maxPlayers) {
-    const size = game.minPlayers === game.maxPlayers ? game.minPlayers : `${game.minPlayers} đến ${game.maxPlayers}`;
-    throw new Error(`Đội ${game.name} cần có ${size} thành viên.`);
-  }
-  if (new Set(members.map((member) => member.toLocaleLowerCase("vi"))).size !== members.length) {
-    throw new Error("Tên thành viên trong cùng một đội phải khác nhau.");
-  }
-  return { id: "participant_" + crypto.randomUUID(), name, members };
-}

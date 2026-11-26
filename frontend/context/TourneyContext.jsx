@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { gameApi, request, tournamentApi } from "@/lib/api";
-import { makeParticipant } from "@/lib/tournament-settings";
 import { tournamentKey } from "@/lib/public-tournament";
 import { userCodeFor } from "@/lib/profile";
 
@@ -100,10 +99,8 @@ export function TourneyProvider({ children }) {
   async function updateTournament(id,patch) {
     return upsert(await request(path(id),{method:"PATCH",body:patch}));
   }
-  async function addTournamentTeam(id,values,game) {
-    const participant = makeParticipant(values, game);
-    const t = upsert(await request(path(id)+"/participants",{method:"POST",body:participant}));
-    return t.tournamentTeams.find((team) => team.id === t.addedTeamId);
+  async function revokeTournamentTeam(id, entrantId) {
+    return upsert(await request(path(id) + "/participants/" + entrantId, { method: "DELETE" }));
   }
   async function register(entry, teamId) {
     return upsert(await request(path(entry.id) + "/registration", { method: "PUT", body: { teamId } }));
@@ -129,7 +126,7 @@ export function TourneyProvider({ children }) {
     activeTournament:tournaments.find(t=>String(t.id)===String(activeTournamentId)),
     registeredTournaments:tournaments.filter(t=>currentUser && t.registrantId===currentUser.id),
     refreshTournaments,initializeCommunity,updateProfile,setProfile,clearProfile,selectTournament,setPublicTournament,
-    createTournament,updateTournament,addTournamentTeam,saveTournamentBracket,
+    createTournament,updateTournament,revokeTournamentTeam,saveTournamentBracket,
     registerTournament: register, cancelTournamentRegistration: cancelRegistration,
     openTournamentManager:entry=>{ selectTournament(entry.id); return entry; },
     performTeamAction:async action=>setTeams(await request("/api/website/teams",{method:"POST",body:action})),

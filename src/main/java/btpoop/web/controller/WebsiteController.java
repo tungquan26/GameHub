@@ -164,35 +164,15 @@ public class WebsiteController {
         em.persist(t);
         return view(t,session);
     }
-    public record Participant(String name,List<String> members) {}
-    @PostMapping("/tournaments/{id}/participants")
+    @DeleteMapping("/tournaments/{id}/participants/{entrantId}")
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Map<String,Object> participant(@PathVariable long id,@RequestBody Participant body,HttpSession session) {
-        var t = get(id,true);
-        SessionUser.require(session,t.getOrganizer().getUserId());
-        if (body == null || body.name() == null || body.name().isBlank() || body.members() == null
-                || body.members().stream().anyMatch(name -> name == null || name.isBlank())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vui lòng nhập tên đội và danh sách thành viên.");
-        }
-        var members = body.members().stream().map(String::strip).toList();
-        registrations.validateRoster(t, members.size());
-        var uniqueNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        uniqueNames.addAll(members);
-        if (uniqueNames.size() != members.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên thành viên trong cùng một đội phải khác nhau.");
-        }
-        registrations.requireSlot(registrations.entries(t));
-        var team = new btpoop.team.model.Team();
-        team.setTournamentScope(id);
-        team.setTeamName(UUID.randomUUID().toString());
-        team.setParticipantName(body.name().strip());
-        team.setParticipantMembers(new ArrayList<>(members));
-        team.setGame(t.getGame());
-        em.persist(team);
-        var response = view(t,session);
-        response.put("addedTeamId", team.getTeamId());
-        return response;
+    public Map<String,Object> revokeParticipant(@PathVariable long id, @PathVariable long entrantId, HttpSession session) {
+        var tournament = get(id, true);
+        SessionUser.require(session, tournament.getOrganizer().getUserId());
+        registrations.revoke(tournament, entrantId);
+        return view(tournament, session);
     }
+
     @PatchMapping("/tournaments/{id}")
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Map<String,Object> update(@PathVariable long id,@RequestBody Map<String,Object> patch,HttpSession session) {
