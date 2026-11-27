@@ -4,7 +4,7 @@ import { pastDateError } from "./dates";
 export const allMatches = (bracket) => bracket?.rounds?.flatMap((round) => round.matches) || [];
 export const findMatch = (bracket, id) => allMatches(bracket).find((match) => String(match.matchId) === String(id));
 function teamsForBracket(teams, size) {
-  return (Array.isArray(teams) ? teams : []).filter((team) => team && typeof team.name === "string" && team.name.trim())
+  return (Array.isArray(teams) ? teams : []).filter((team) => team && team.bracketEligible !== false && typeof team.name === "string" && team.name.trim())
     .slice(0, size).map((team, index) => ({ id: team.id ?? "team-" + index, name: team.name.trim() }));
 }
 function scheduledTime(start, dayOffset, hourOffset) {

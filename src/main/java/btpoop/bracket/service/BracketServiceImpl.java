@@ -3,6 +3,9 @@ package btpoop.bracket.service;
 import btpoop.bracket.model.Bracket;
 import btpoop.bracket.repository.BracketRepository;
 import btpoop.enums.MatchStatus;
+import btpoop.match.model.MatchScheduledEvent;
+import btpoop.registration.service.RegistrationModule;
+import org.springframework.context.ApplicationEventPublisher;
 import btpoop.enums.RegistrationStatus;
 import btpoop.enums.TournamentFormat;
 import btpoop.registration.model.Registration;
@@ -26,6 +29,7 @@ public class BracketServiceImpl implements BracketService {
     private final TournamentRepository tournamentRepository;
     private final RegistrationRepository registrationRepository;
     private final BracketGeneratorFactory generatorFactory;
+    private final ApplicationEventPublisher events;
 
     @Override
     public List<Bracket> getAllBrackets() {
@@ -49,7 +53,7 @@ public class BracketServiceImpl implements BracketService {
     @Override
     @Transactional
     public Bracket generateBracket(Long tournamentId) {
-        Tournament tournament = tournamentRepository.findById(tournamentId)
+        Tournament tournament = tournamentRepository.findByIdForUpdate(tournamentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giải đấu với ID: " + tournamentId));
 
         // 1. Kiểm tra xem giải đấu đã có Bracket trước đó chưa
@@ -69,6 +73,7 @@ public class BracketServiceImpl implements BracketService {
         // 2. Lấy danh sách đội đã duyệt (APPROVED) từ Registration
         List<Registration> approvedRegs = registrationRepository.findByTournament_TournamentIdAndStatus(tournamentId, RegistrationStatus.APPROVED);
         List<Team> teams = approvedRegs.stream()
+                .filter(row -> RegistrationModule.ready(tournament, row))
                 .map(Registration::getTeam)
                 .filter(t -> t != null)
                 .distinct()
@@ -88,7 +93,11 @@ public class BracketServiceImpl implements BracketService {
         BracketGenerator generator = generatorFactory.getGenerator(format);
         generator.generateBracket(bracket, teams);
 
-        return bracketRepository.save(bracket);
+        var saved = bracketRepository.saveAndFlush(bracket);
+        saved.getRounds().forEach(round -> round.getMatches().stream()
+                .filter(match -> match.getTeamA() != null || match.getTeamB() != null)
+                .forEach(match -> events.publishEvent(new MatchScheduledEvent(match.getMatchId()))));
+        return saved;
     }
 
     @Override

@@ -60,7 +60,9 @@ function TeamsEditor({ entry }) {
             <span className="flex size-9 shrink-0 items-center justify-center rounded-panel border border-dp-hairline-2 bg-dp-ground font-mono text-xs">{(team.name.trim().charAt(0) || "T").toUpperCase()}</span>
             <span className="min-w-0 break-words text-xs font-medium sm:text-sm">{team.name}</span>
           </div></td>
-          <td className="px-3 py-4 align-top sm:px-5"><div className="flex items-start gap-2"><Users aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-dp-meta" /><span className="min-w-0 break-words text-xs leading-6 text-dp-read">{team.members.join(" / ")}</span></div></td>
+          <td className="px-3 py-4 align-top sm:px-5"><div className="flex items-start gap-2"><Users aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-dp-meta" /><span className="min-w-0 break-words text-xs leading-6 text-dp-read">{team.members.join(" / ")}</span></div>
+            {team.bracketEligible === false && <p className="mt-1 text-xs text-dp-meta">Đã đăng ký {team.members.length}/{entry.teamMinPlayers} người để được xếp nhánh.</p>}
+          </td>
           <td className="px-2 py-4 align-top">
             <Button size="sm" variant="outline" className="px-2" aria-label={`Thu hồi suất của đội ${team.name}`} disabled={Boolean(reason(team))}
               onClick={() => { action.setError(""); action.setNotice(""); setSelected(team); }}>Thu hồi suất</Button>

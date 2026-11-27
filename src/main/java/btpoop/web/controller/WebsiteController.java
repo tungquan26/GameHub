@@ -1,6 +1,6 @@
 package btpoop.web.controller;
 
-import btpoop.enums.RegistrationStatus;
+import btpoop.registration.model.Registration;
 import btpoop.enums.TournamentFormat;
 import btpoop.enums.TournamentStatus;
 import btpoop.game.repository.GameRepository;
@@ -106,23 +106,31 @@ public class WebsiteController {
         Long viewer = session != null && session.getAttribute("userId") instanceof Long id ? id : null;
         Set<Long> viewerTeamIds = new HashSet<>();
         Set<Long> attendees = new HashSet<>();
+        var activeTeams = new HashMap<Long, Registration>();
+        var registeredSizes = new HashMap<Long, Integer>();
         for (var row : entries.registrations()) {
-            if (row.getStatus() != RegistrationStatus.APPROVED) continue;
+            if (!RegistrationModule.isActive(row)) continue;
             var roster = RegistrationModule.memberIds(row);
             attendees.addAll(roster);
-            if (viewer != null && roster.contains(viewer)) viewerTeamIds.add(row.getTeam().getTeamId());
+            long entrantId = row.getTeam().getTeamId();
+            activeTeams.put(entrantId, row);
+            registeredSizes.put(RegistrationModule.sourceId(row), roster.size());
+            if (viewer != null && roster.contains(viewer)) viewerTeamIds.add(entrantId);
         }
+        data.put("registeredTeamSizes", registeredSizes);
         data.put("tournamentTeams", entries.teams().stream().map(team -> {
             var members = team.getParticipantMembers().isEmpty() ? team.getMembers().stream()
                     .map(member -> member.getPlayer().getUsername()).toList() : team.getParticipantMembers();
-            return Map.of("id", team.getTeamId(), "name", Objects.requireNonNullElse(team.getParticipantName(), team.getTeamName()),
+            var row = activeTeams.get(team.getTeamId());
+            if (row != null && team.getTournamentScope() == null) members = registrations.rosterNames(row);
+            return Map.of("bracketEligible", row == null || RegistrationModule.ready(t, row), "id", team.getTeamId(), "name", Objects.requireNonNullElse(team.getParticipantName(), team.getTeamName()),
                     "members", members, "viewerMember", viewerTeamIds.contains(team.getTeamId()));
         }).toList());
         data.put("maxTeams", Tournament.MAX_TEAMS);
         data.put("teamCount", entries.occupied());
         if (viewer != null) {
             data.put("myTeamRegistrations", entries.registrations().stream().filter(RegistrationModule::isActive)
-                    .filter(row -> RegistrationModule.isCaptain(row, viewer))
+                    .filter(row -> RegistrationModule.memberIds(row).contains(viewer))
                     .map(row -> Map.of("teamId", RegistrationModule.sourceId(row), "entrantId", row.getTeam().getTeamId(),
                             "name", Objects.requireNonNullElse(row.getTeam().getParticipantName(), row.getTeam().getTeamName()),
                             "status", row.getStatus())).distinct().toList());

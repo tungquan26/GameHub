@@ -1,6 +1,8 @@
 package btpoop.notification.service;
 
 import btpoop.match.model.Match;
+import btpoop.team.model.Team;
+import java.util.Objects;
 import java.time.format.DateTimeFormatter;
 
 public class NotificationTemplateBuilder {
@@ -10,8 +12,8 @@ public class NotificationTemplateBuilder {
     public static String buildMatchReminderMessage(Match match) {
         String tournamentName = (match.getTournament() != null) ? match.getTournament().getName() : "N/A";
         String roundName = (match.getRound() != null) ? match.getRound().getName() : "N/A";
-        String teamAName = (match.getTeamA() != null) ? match.getTeamA().getTeamName() : "Chưa xác định";
-        String teamBName = (match.getTeamB() != null) ? match.getTeamB().getTeamName() : "Chưa xác định";
+        String teamAName = teamName(match.getTeamA());
+        String teamBName = teamName(match.getTeamB());
         String timeStr = (match.getScheduledTime() != null) ? match.getScheduledTime().format(FORMATTER) : "Chưa cập nhật";
         String locationStr = (match.getLocation() != null && !match.getLocation().isBlank()) ? match.getLocation() : "Chưa cập nhật";
 
@@ -24,5 +26,8 @@ public class NotificationTemplateBuilder {
                 "- Địa điểm: %s\n",
                 tournamentName, roundName, teamAName, teamBName, timeStr, locationStr
         );
+    }
+    private static String teamName(Team team) {
+        return team == null ? "Chưa xác định" : Objects.requireNonNullElse(team.getParticipantName(), team.getTeamName());
     }
 }

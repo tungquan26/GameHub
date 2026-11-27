@@ -4,6 +4,8 @@ import btpoop.bracket.model.*;
 import btpoop.bracket.repository.BracketRepository;
 import btpoop.enums.*;
 import btpoop.match.model.Match;
+import btpoop.match.model.MatchScheduledEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import btpoop.match.model.MatchResult;
 import btpoop.ranking.service.RankingService;
 import btpoop.ranking.service.TournamentStandings;
@@ -33,6 +35,7 @@ public class WebsiteBracket {
     private final TournamentRepository tournaments;
     private final RankingService rankings;
     private final RegistrationModule registrations;
+    private final ApplicationEventPublisher events;
     record Side(long id) {}
     record Scores(int scoreA,int scoreB) {}
     record Game(Side teamA,Side teamB,String scheduledTime,Scores result) {}
@@ -92,7 +95,11 @@ public class WebsiteBracket {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         SessionUser.require(session,t.getOrganizer().getUserId());
         var eligibleTeams = new HashMap<Long, Team>();
-        for (var team : registrations.entries(t).teams()) eligibleTeams.put(team.getTeamId(), team);
+        var entries = registrations.entries(t);
+        for (var team : entries.teams()) eligibleTeams.put(team.getTeamId(), team);
+        for (var row : entries.registrations()) {
+            if (RegistrationModule.isActive(row) && !RegistrationModule.ready(t, row)) eligibleTeams.remove(row.getTeam().getTeamId());
+        }
         int size=draw.bracketSize();
         if ((size!=4 && size!=8) || draw.rounds()==null || draw.rounds().size()!=Integer.numberOfTrailingZeros(size)) throw invalid();
         var old=brackets.findByTournament_TournamentId(id).orElse(null);
@@ -121,6 +128,7 @@ public class WebsiteBracket {
             if (!reuse) { em.persist(r); b.getRounds().add(r); }
             for (int j=0;j<games.size();j++) {
                 var game=games.get(j); var m=reuse ? r.getMatches().get(j) : new Match(); m.setRound(r); m.setTournament(t); m.setMatchOrder(j);
+                var before = MatchScheduledEvent.Schedule.of(m);
                 if (i==0) {
                     m.setTeamA(participant(game.teamA(),eligibleTeams)); m.setTeamB(participant(game.teamB(),eligibleTeams));
                     for (Team team:Arrays.asList(m.getTeamA(),m.getTeamB())) if (team!=null && !seen.add(team.getTeamId())) throw invalid();
@@ -140,6 +148,10 @@ public class WebsiteBracket {
                     m.setStatus(MatchStatus.COMPLETED);
                 }
                 if (!reuse) { em.persist(m); r.getMatches().add(m); }
+                if (m.getStatus() == MatchStatus.SCHEDULED && m.getScheduledTime() != null
+                        && !before.equals(MatchScheduledEvent.Schedule.of(m))) {
+                    events.publishEvent(new MatchScheduledEvent(m.getMatchId()));
+                }
             }
             previous=r.getMatches();
         }

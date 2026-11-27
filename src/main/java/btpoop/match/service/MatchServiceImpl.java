@@ -33,13 +33,16 @@ public class MatchServiceImpl implements MatchService {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
         
+        var before = MatchScheduledEvent.Schedule.of(match);
         match.setTeamA(teamA);
         match.setTeamB(teamB);
         match.setScheduledTime(time);
         match.setStatus(MatchStatus.SCHEDULED);
         
         Match savedMatch = matchRepository.save(match);
-        eventPublisher.publishEvent(new MatchScheduledEvent(savedMatch.getMatchId()));
+        if (!before.equals(MatchScheduledEvent.Schedule.of(savedMatch))) {
+            eventPublisher.publishEvent(new MatchScheduledEvent(savedMatch.getMatchId()));
+        }
         return savedMatch;
     }
 
@@ -49,6 +52,7 @@ public class MatchServiceImpl implements MatchService {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy trận đấu với ID: " + matchId));
 
+        var before = MatchScheduledEvent.Schedule.of(match);
         if (time != null) {
             match.setScheduledTime(time);
         }
@@ -58,7 +62,9 @@ public class MatchServiceImpl implements MatchService {
         match.setStatus(MatchStatus.SCHEDULED);
 
         Match savedMatch = matchRepository.save(match);
-        eventPublisher.publishEvent(new MatchScheduledEvent(savedMatch.getMatchId()));
+        if (!before.equals(MatchScheduledEvent.Schedule.of(savedMatch))) {
+            eventPublisher.publishEvent(new MatchScheduledEvent(savedMatch.getMatchId()));
+        }
         return savedMatch;
     }
 
@@ -108,6 +114,7 @@ public class MatchServiceImpl implements MatchService {
         else next.setTeamB(winner);
         next.setResult(null);
         next.setStatus(MatchStatus.SCHEDULED);
+        if (next.getScheduledTime() != null) eventPublisher.publishEvent(new MatchScheduledEvent(next.getMatchId()));
         advanceWinner(next, null);
     }
 

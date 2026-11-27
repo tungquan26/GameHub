@@ -1,6 +1,7 @@
 package btpoop.notification.service;
 
 import btpoop.match.model.Match;
+import btpoop.tournament.model.Tournament;
 import btpoop.match.repository.MatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,7 +22,7 @@ public class NotificationScheduler {
     @Scheduled(cron = "0 0 * * * *")
     @Transactional
     public void scheduleMatchNotifications() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(Tournament.TIME_ZONE);
 
         // 1 week notification
         LocalDateTime oneWeekStart = now.plusDays(7);

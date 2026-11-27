@@ -7,7 +7,6 @@ import btpoop.enums.TournamentStatus;
 import btpoop.registration.model.Registration;
 import btpoop.registration.repository.RegistrationRepository;
 import btpoop.team.model.Team;
-import btpoop.team.model.TeamMember;
 import btpoop.team.repository.TeamRepository;
 import btpoop.tournament.model.Tournament;
 import jakarta.persistence.EntityManager;
@@ -22,7 +21,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -65,13 +63,29 @@ public class RegistrationModule {
         return row.getSourceTeamId() == null ? row.getTeam().getTeamId() : row.getSourceTeamId();
     }
 
-    public static boolean isCaptain(Registration row, long viewer) {
-        return row.getCaptainUserId() != null ? row.getCaptainUserId() == viewer : isCaptain(row.getTeam(), viewer);
+    public static java.util.Collection<Long> memberIds(Registration row) {
+        return row.getSourceTeamId() != null || row.getCaptainUserId() != null ? row.getRosterUserIds()
+                : row.getTeam().getMembers().stream().map(member -> member.getPlayer().getUserId()).toList();
     }
 
-    public static java.util.Collection<Long> memberIds(Registration row) {
-        return row.getCaptainUserId() != null ? row.getRosterUserIds()
-                : row.getTeam().getMembers().stream().map(member -> member.getPlayer().getUserId()).toList();
+    public static boolean ready(Tournament tournament, Registration row) {
+        return row.getStatus() == RegistrationStatus.APPROVED && tournament.getGame() != null
+                && memberIds(row).size() >= tournament.getGame().getMinPlayers();
+    }
+
+    private void snapshotLegacyRoster(Registration row) {
+        if (row.getSourceTeamId() == null) {
+            var ids = List.copyOf(memberIds(row));
+            row.setSourceTeamId(row.getTeam().getTeamId());
+            row.getRosterUserIds().addAll(ids);
+        }
+    }
+
+    public List<String> rosterNames(Registration row) {
+        var ids = memberIds(row);
+        if (ids.isEmpty()) return List.of();
+        return em.createQuery("select u.username from User u where u.userId in :ids order by u.userId", String.class)
+                .setParameter("ids", ids).getResultList();
     }
 
     public void requireSlot(Entries entries) {
@@ -80,24 +94,13 @@ public class RegistrationModule {
         }
     }
 
-    public void validateRoster(Tournament tournament, int size) {
-        var game = tournament.getGame();
-        if (game == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ban tổ chức chưa chọn bộ môn thi đấu.");
-        }
-        int max = game.getMaxPlayers();
+    private int maximumSize(Tournament tournament) {
+        int max = tournament.getGame().getMaxPlayers();
         if (tournament.getSettingsJson() != null) {
             var configured = json.readTree(tournament.getSettingsJson()).path("regSettings").path("maxTeamSize");
             max = Math.min(max, configured.asInt(max));
         }
-        int min = game.getMinPlayers();
-        if (max < min) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giới hạn quân số của giải thấp hơn yêu cầu của bộ môn.");
-        }
-        if (!game.acceptsTeamSize(size) || size > max) {
-            String range = min == max ? Integer.toString(min) : min + " đến " + max;
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Đội cần có " + range + " thành viên.");
-        }
+        return max;
     }
 
     public void register(long tournamentId, long sourceTeamId, long actor) {
@@ -106,42 +109,68 @@ public class RegistrationModule {
         if (source == null || source.getTournamentScope() != null || source.getStatus() != TeamStatus.ACTIVE) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đội cộng đồng đang hoạt động.");
         }
-        if (!isCaptain(source, actor)) throw captainRequired();
+        boolean member = source.getMembers().stream().anyMatch(m -> m.getPlayer().getUserId() == actor);
+        if (!member && (source.getCaptain() == null || source.getCaptain().getUserId() != actor)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn cần là thành viên của đội đã chọn.");
+        }
         var entries = entries(tournament);
-        var matching = entries.registrations().stream().filter(row -> sourceId(row) == sourceTeamId).toList();
-        if (matching.stream().anyMatch(RegistrationModule::isActive)) return;
+        var active = entries.registrations().stream().filter(RegistrationModule::isActive).toList();
+        var current = active.stream().filter(row -> sourceId(row) == sourceTeamId).findFirst().orElse(null);
+        if (current != null && memberIds(current).contains(actor)) return;
+        for (var row : active) {
+            if (memberIds(row).contains(actor)) {
+                var team = row.getTeam();
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Bạn đang thi đấu cho đội "
+                        + Objects.requireNonNullElse(team.getParticipantName(), team.getTeamName()) + ".");
+            }
+        }
         requireOpen(tournament, actor);
         if (tournament.getGame() == null || source.getGame() == null
                 || source.getGame().getGameId() != tournament.getGame().getGameId()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bộ môn của đội phải khớp với bộ môn của giải.");
         }
-        var members = new LinkedHashMap<Long, TeamMember>();
-        for (var member : source.getMembers()) members.putIfAbsent(member.getPlayer().getUserId(), member);
-        validateRoster(tournament, members.size());
-        requireSlot(entries);
+        int max = maximumSize(tournament);
+        if (max < tournament.getGame().getMinPlayers() || (current != null && memberIds(current).size() >= max)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Đội không còn chỗ đăng ký.");
+        }
+        Registration registration = current;
+        if (registration == null) {
+            requireSlot(entries);
+            registration = reserveTeam(tournament, source, entries);
+        } else {
+            snapshotLegacyRoster(registration);
+        }
+        registration.getRosterUserIds().add(actor);
+        updateParticipantNames(registration);
+        registrations.save(registration);
+    }
 
-        var registration = matching.stream().filter(row -> row.getStatus() == RegistrationStatus.CANCELLED
-                && row.getSourceTeamId() != null).findFirst().orElseGet(Registration::new);
+    private Registration reserveTeam(Tournament tournament, Team source, Entries entries) {
+        var registration = entries.registrations().stream().filter(row -> sourceId(row) == source.getTeamId()
+                && row.getStatus() == RegistrationStatus.CANCELLED && row.getTeam().getTournamentScope() != null)
+                .findFirst().orElseGet(Registration::new);
         var team = registration.getTeam();
         if (team == null) {
             team = new Team();
             team.setTeamName(UUID.randomUUID().toString());
-            team.setTournamentScope(tournamentId);
+            team.setTournamentScope(tournament.getTournamentId());
+            em.persist(team);
         }
         team.setGame(source.getGame());
         team.setParticipantName(source.getTeamName());
-        team.setParticipantMembers(new ArrayList<>(members.values().stream().map(member -> member.getPlayer().getUsername()).toList()));
-        em.persist(team);
         registration.setTeam(team);
-        registration.setSourceTeamId(sourceTeamId);
-        registration.setCaptainUserId(actor);
+        registration.setSourceTeamId(source.getTeamId());
+        registration.setCaptainUserId(source.getCaptain() == null ? null : source.getCaptain().getUserId());
         registration.getRosterUserIds().clear();
-        registration.getRosterUserIds().addAll(members.keySet());
         registration.setTournament(tournament);
         registration.setRegistrationDate(LocalDateTime.now(Tournament.TIME_ZONE));
         registration.setCheckInStatus(CheckInStatus.NOT_CHECKED_IN);
         registration.setStatus(RegistrationStatus.APPROVED);
-        registrations.save(registration);
+        return registration;
+    }
+
+    private void updateParticipantNames(Registration row) {
+        if (row.getTeam().getTournamentScope() != null) row.getTeam().setParticipantMembers(rosterNames(row));
     }
 
     public void cancel(long tournamentId, long sourceTeamId, long actor) {
@@ -149,14 +178,16 @@ public class RegistrationModule {
         var entries = registrations.findByTournamentOrderByRegistrationIdAsc(tournament).stream()
                 .filter(row -> sourceId(row) == sourceTeamId).toList();
         var active = entries.stream().filter(RegistrationModule::isActive).toList();
-        var registration = (active.isEmpty() ? entries : active).stream().findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Đội chưa đăng ký giải này."));
-        if (!isCaptain(registration, actor)) throw captainRequired();
         if (active.isEmpty()) return;
         requireOpen(tournament, actor);
-        var teams = active.stream().map(Registration::getTeam).toList();
-        requireOutsideBracket(tournament, teams);
-        active.forEach(row -> row.setStatus(RegistrationStatus.CANCELLED));
+        for (var row : active) {
+            if (!memberIds(row).contains(actor)) continue;
+            requireOutsideBracket(tournament, List.of(row.getTeam()));
+            snapshotLegacyRoster(row);
+            row.getRosterUserIds().remove(actor);
+            updateParticipantNames(row);
+            if (row.getRosterUserIds().isEmpty()) row.setStatus(RegistrationStatus.CANCELLED);
+        }
     }
 
     public void revoke(Tournament tournament, long entrantId) {
@@ -195,14 +226,6 @@ public class RegistrationModule {
     private Tournament lockedTournament(long id) {
         return tournaments.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
-
-    private static boolean isCaptain(Team team, long actor) {
-        return team.getCaptain() != null && team.getCaptain().getUserId() == actor;
-    }
-
-    private static ResponseStatusException captainRequired() {
-        return new ResponseStatusException(HttpStatus.FORBIDDEN, "Chỉ đội trưởng có thể đăng ký hoặc hủy đăng ký.");
     }
 
     private void requireOpen(Tournament tournament, long actor) {
